@@ -1,0 +1,158 @@
+openapi: 3.0.0
+info:
+  title: GetAccept API
+  version: '1.6'
+  contact:
+    name: GetAccept API
+    email: integrations@getaccept.com
+    url: 'https://app.getaccept.com/api'
+  termsOfService: 'https://www.getaccept.com/terms.html'
+  description: |-
+    Welcome to GetAccept API! You can use this API to access all our API endpoints.
+
+    The API is organized around REST. All requests should be made over SSL to the servers. All request and response bodies, including errors, are encoded in JSON.
+
+    To authenticate to the API you need to have a valid and active GetAccept account.
+
+    We welcome the study and testing of our API to all GetAccept users but commercial usage is subject to the purchase of a GetAccept API package
+
+    If you need help during the integration or want to learn more about pricing, please don't hesitate to reach out to us using the built-in support-chat on this page at the lower-right corner.
+paths:
+  /auth:
+    post:
+      summary: Authentication by token
+      tags:
+        - Authentication
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    description: Token to be used in consequtive requests using bearer header
+                  expires_in:
+                    description: Seconds until the access token expires
+                    minimum: 0
+                    format: int64
+                    type: integer
+      operationId: post-auth
+      description: |-
+        Token based authentication is recommended for server-based access or access from clients where OAuth is not suitable. Access tokens has to be requested using an administrators login credentials.
+        Requests should include the header Content-Type with value application/json
+      parameters: []
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              x-examples:
+                Example:
+                  email: user@example.com
+                  password: mysecret
+              description: Authentication model
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: This is the email of the user in GetAccept
+                password:
+                  type: string
+                  format: password
+                  description: This is the password of the user in GetAccept
+                entity_id:
+                  type: string
+                  description: This specifies what entity to select if multiple entities are available for a user. If no value is specified the default entity will be selected.
+                  default: null
+                client_id:
+                  description: The client id of your app if you received one from our API team
+                  type: string
+              required:
+                - email
+                - password
+        description: ''
+        required: true
+  /refresh:
+    get:
+      summary: Refresh an access token
+      tags:
+        - Authentication
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  expires_in:
+                    type: integer
+      operationId: get-refresh
+      description: You can request a refreshed of the access token before the original token has expired.
+  /documents:
+    get:
+      summary: Your GET endpoint
+      responses: {}
+      operationId: get-documents
+      description: |-
+        You must create a document to be able to send it to a recipient. When creating a document you can refer to previously uploaded files with file_id or you can choose to create a document and upload the files in on API post. You can only upload ONE file when including a file in the create document POST.
+
+        Use either file_ids parameter to use existing uploaded file(s), file_content to send the document as base64 encoded string or do a multipart post with file parameter.
+
+        All recipients must have either a valid e-mail or a mobile number.
+
+        All events are recorded using requestor IP address. You can override this using header CLIENT_IP containing the end-users public IP address.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: string
+                  description: Name of the document
+                type:
+                  type: string
+                  enum:
+                    - sales
+                    - hr
+                    - introduction
+                    - other
+                    - template
+                  description: Type of document
+                value:
+                  type: string
+                  description: Monetary value of document in entity currency
+      tags:
+        - Documents
+components:
+  schemas: null
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Enter your bearer token in the format **bearer &lt;token>**'
+      bearerFormat: JWT
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: 'https://app.getaccept.com/oauth2/authorize'
+          tokenUrl: 'https://app.getaccept.com/oauth2/token'
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            basic: Grants basic access to operations
+          refreshUrl: 'https://app.getaccept.com/oauth2/refresh'
+      description: ''
+security:
+  - BearerAuth: []
+  - OAuth2:
+      - basic
+tags: []
+servers:
+  - url: 'https://api.getaccept.com/v1'
