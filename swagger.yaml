@@ -129,6 +129,123 @@ paths:
                   description: Monetary value of document in entity currency
       tags:
         - Documents
+  /users:
+    get:
+      summary: List users
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    users:
+                      type: string
+                    name:
+                      type: string
+                    first_name:
+                      type: string
+                    last_name:
+                      type: string
+                    email:
+                      type: string
+                    status:
+                      type: string
+                    role:
+                      type: string
+                    team_name:
+                      type: string
+                    last_login:
+                      type: string
+              examples:
+                Example: {}
+      operationId: get-users
+      description: Fetch a list of active users for the current authenticated entity
+  '/users/{userId}':
+    parameters:
+      - schema:
+          type: string
+        name: userId
+        in: path
+        required: true
+    get:
+      summary: Get user details
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    first_name:
+                      type: string
+                    last_name:
+                      type: string
+                    email:
+                      type: string
+                    phone:
+                      type: string
+                    mobile:
+                      type: string
+                    title:
+                      type: string
+                    note:
+                      type: string
+                    thumb_url:
+                      type: string
+                    entity_id:
+                      type: string
+                    entity_name:
+                      type: string
+                    language:
+                      type: string
+                    timezone:
+                      type: string
+                    app_mode:
+                      type: string
+                    role:
+                      type: string
+                    disallow_create:
+                      type: boolean
+                    status:
+                      type: string
+                    team_id:
+                      type: string
+              examples:
+                Example:
+                  value:
+                    user:
+                      id: abc456de
+                      first_name: John
+                      last_name: Doe
+                      email: john.doe@company.com
+                      phone: ''
+                      mobile: ''
+                      title: ''
+                      note: ''
+                      thumb_url: ''
+                      entity_id: def345ab
+                      entity_name: Demo Company Inc
+                      language: en
+                      timezone: '+01:00'
+                      app_mode: sales
+                      role: user
+                      disallow_create: false
+                      status: active
+                      team_id: ''
+      operationId: get-users-userId
 components:
   schemas: null
   securitySchemes:
@@ -156,3 +273,4 @@ security:
 tags: []
 servers:
   - url: 'https://api.getaccept.com/v1'
+    description: List documents
