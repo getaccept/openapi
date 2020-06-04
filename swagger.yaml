@@ -909,7 +909,7 @@ paths:
                 global:
                   type: boolean
                   description: If the webhook should catch events for all entity users.
-                  example: 'true'
+                  example: true
                 notification_email:
                   type: string
                   example: hostmaster@example.com
@@ -917,6 +917,106 @@ paths:
               required:
                 - event
                 - target_url
+      callbacks:
+        event:
+          '{$request.body#/target_url}':
+            post:
+              requestBody:
+                required: true
+                content:
+                  application/json:
+                    schema:
+                      type: object
+                      properties:
+                        subscription_id:
+                          type: string
+                        document:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            is_selfsign:
+                              type: boolean
+                            sign_date:
+                              type: string
+                            email_send_subject:
+                              type: string
+                            email_send_message:
+                              type: string
+                            is_signing:
+                              type: boolean
+                            is_signing_order:
+                              type: boolean
+                            is_private:
+                              type: boolean
+                            is_scheduled_sending:
+                              type: boolean
+                            is_reminder_sending:
+                              type: boolean
+                            value:
+                              type: integer
+                            type:
+                              type: string
+                            tags:
+                              type: string
+                            is_signing_initials:
+                              type: boolean
+                            status:
+                              type: string
+                            user_id:
+                              type: string
+                            email_send_template_id:
+                              type: string
+                            preview_url:
+                              type: string
+                            download_url:
+                              type: string
+                            expiration_date:
+                              type: string
+                            id:
+                              type: string
+                            company_id:
+                              type: string
+                            is_signing_biometric:
+                              type: boolean
+                            scheduled_sending_time:
+                              type: string
+                            is_video:
+                              type: boolean
+                            external_id:
+                              type: string
+                            company_name:
+                              type: string
+                            send_date:
+                              type: string
+                            video_id:
+                              type: integer
+                        entity:
+                          type: object
+                          properties:
+                            email_send_subject:
+                              type: string
+                            email_send_message:
+                              type: string
+                        payload:
+                          type: string
+                        custom_fields:
+                          type: object
+                          properties:
+                            speaker_name:
+                              type: string
+                            shoe_size:
+                              type: string
+                        event:
+                          type: string
+                        event_type:
+                          type: string
+                        event_action:
+                          type: string
+              responses:
+                '200':
+                  description: Your server returns this code if it accepts the callback
+
       tags:
         - Subscriptions
   '/subscriptions/{subscriptionId}':
