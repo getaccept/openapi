@@ -96,9 +96,159 @@ paths:
       description: You can request a refreshed of the access token before the original token has expired.
   /documents:
     get:
-      summary: Your GET endpoint
-      responses: {}
+      summary: List documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                    value:
+                      type: integer
+                    sender_thumb:
+                      type: string
+                    sender_name:
+                      type: string
+                    recipients:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          recipient_status:
+                            type: string
+                          first_name:
+                            type: string
+                          role:
+                            type: string
+                          company_name:
+                            type: string
+                          note:
+                            type: string
+                          status:
+                            type: string
+                          company_number:
+                            type: string
+                          last_name:
+                            type: string
+                          email:
+                            type: string
+                          thumb_url:
+                            type: string
+                          gender:
+                            type: string
+                    name:
+                      type: string
+                    is_signing:
+                      type: boolean
+                    created_at:
+                      type: string
+                    id:
+                      type: string
+                    tags:
+                      type: string
+                    company_name:
+                      type: string
+                    expiration_date:
+                      type: string
+                    type:
+                      type: string
+                    is_private:
+                      type: boolean
       operationId: get-documents
+      description: Get a list of available documents
+      tags:
+        - Documents
+      parameters:
+        - schema:
+            type: string
+            enum:
+              - draft
+              - sent
+              - viewed
+              - reviewed
+              - signed
+              - rejected
+              - recalled
+            example: signed
+          in: query
+          name: filter
+          description: Filter list on status
+          explode: false
+        - schema:
+            type: string
+            enum:
+              - name
+              - value
+              - created
+              - recipient
+              - status
+              - owner
+            example: created
+          in: query
+          name: sort_by
+          description: "How to sort results\t"
+        - schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            example: desc
+          in: query
+          name: sort_order
+          description: "Sort order of results\t"
+        - schema:
+            type: boolean
+            enum:
+              - 'true'
+              - 'false'
+            example: 'true'
+          in: query
+          name: showteam
+          description: "Include documents from team members\t"
+        - schema:
+            type: boolean
+            enum:
+              - 'true'
+              - 'false'
+            example: 'true'
+          in: query
+          name: showall
+          description: Include all documents from entity
+        - schema:
+            type: string
+          in: query
+          name: external_id
+          description: An external ID is a custom field which can contain a unique record identifier from a system outside of GetAccept
+        - schema:
+            type: number
+            example: 0
+            default: 0
+          in: query
+          name: offset
+          description: Start list from record x until limit
+        - schema:
+            type: number
+            example: 100
+            default: 100
+          in: query
+          name: limit
+          description: "Number of records to list\t"
+    post:
+      summary: Create document
+      operationId: post-documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
       description: |-
         You must create a document to be able to send it to a recipient. When creating a document you can refer to previously uploaded files with file_id or you can choose to create a document and upload the files in on API post. You can only upload ONE file when including a file in the create document POST.
 
@@ -111,24 +261,99 @@ paths:
         content:
           application/json:
             schema:
+              type: object
               properties:
-                name:
-                  type: string
-                  description: Name of the document
+                is_signing_initials:
+                  type: boolean
+                is_reminder_sending:
+                  type: boolean
+                is_automatic_sending:
+                  type: boolean
+                attachments:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      id:
+                        type: string
+                      require_view:
+                        type: boolean
                 type:
                   type: string
-                  enum:
-                    - sales
-                    - hr
-                    - introduction
-                    - other
-                    - template
-                  description: Type of document
-                value:
+                is_signing:
+                  type: boolean
+                is_sms_sending:
+                  type: boolean
+                file_ids:
                   type: string
-                  description: Monetary value of document in entity currency
-      tags:
-        - Documents
+                is_signing_forward:
+                  type: boolean
+                recipients:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      verify_qna_sign:
+                        type: boolean
+                      verify_qna_question:
+                        type: string
+                      verify_qna:
+                        type: boolean
+                      company_name:
+                        type: string
+                      company_number:
+                        type: string
+                      verify_qna_open:
+                        type: boolean
+                      verify_qna_answer:
+                        type: string
+                      verify_sms_sign:
+                        type: boolean
+                      verify_eid_type:
+                        type: string
+                      note:
+                        type: string
+                      email:
+                        type: string
+                      mobile:
+                        type: string
+                      verify_sms:
+                        type: boolean
+                      verify_sms_open:
+                        type: boolean
+                      last_name:
+                        type: string
+                      role:
+                        type: string
+                      order_num:
+                        type: integer
+                      verify_eid:
+                        type: boolean
+                      first_name:
+                        type: string
+                is_signing_biometric:
+                  type: boolean
+                expiration_date:
+                  type: string
+                custom_fields:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      value:
+                        type: string
+                value:
+                  type: integer
+                external_id:
+                  type: string
+                name:
+                  type: string
+            examples: {}
+        description: ''
   /users:
     get:
       summary: List users
@@ -140,28 +365,31 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    users:
-                      type: string
-                    name:
-                      type: string
-                    first_name:
-                      type: string
-                    last_name:
-                      type: string
-                    email:
-                      type: string
-                    status:
-                      type: string
-                    role:
-                      type: string
-                    team_name:
-                      type: string
-                    last_login:
-                      type: string
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        users:
+                          type: string
+                        name:
+                          type: string
+                        first_name:
+                          type: string
+                        last_name:
+                          type: string
+                        email:
+                          type: string
+                        status:
+                          type: string
+                        role:
+                          type: string
+                        team_name:
+                          type: string
+                        last_login:
+                          type: string
               examples:
                 Example: {}
       operationId: get-users
@@ -183,46 +411,49 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    first_name:
-                      type: string
-                    last_name:
-                      type: string
-                    email:
-                      type: string
-                    phone:
-                      type: string
-                    mobile:
-                      type: string
-                    title:
-                      type: string
-                    note:
-                      type: string
-                    thumb_url:
-                      type: string
-                    entity_id:
-                      type: string
-                    entity_name:
-                      type: string
-                    language:
-                      type: string
-                    timezone:
-                      type: string
-                    app_mode:
-                      type: string
-                    role:
-                      type: string
-                    disallow_create:
-                      type: boolean
-                    status:
-                      type: string
-                    team_id:
-                      type: string
+                type: object
+                properties:
+                  user:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        first_name:
+                          type: string
+                        last_name:
+                          type: string
+                        email:
+                          type: string
+                        phone:
+                          type: string
+                        mobile:
+                          type: string
+                        title:
+                          type: string
+                        note:
+                          type: string
+                        thumb_url:
+                          type: string
+                        entity_id:
+                          type: string
+                        entity_name:
+                          type: string
+                        language:
+                          type: string
+                        timezone:
+                          type: string
+                        app_mode:
+                          type: string
+                        role:
+                          type: string
+                        disallow_create:
+                          type: boolean
+                        status:
+                          type: string
+                        team_id:
+                          type: string
               examples:
                 Example:
                   value:
@@ -246,8 +477,663 @@ paths:
                       status: active
                       team_id: ''
       operationId: get-users-userId
+  /templates:
+    get:
+      summary: List templates
+      tags:
+        - Templates
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  templates:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        is_private:
+                          type: boolean
+                        role_count:
+                          type: integer
+                        thumb_url:
+                          type: string
+                        video_id:
+                          type: string
+                        video_thumb_url:
+                          type: string
+                        user_id:
+                          type: string
+                        created_at:
+                          type: string
+                        name:
+                          type: string
+                        external_editor_type:
+                          type: string
+                        is_editable:
+                          type: boolean
+                        tags:
+                          type: string
+                        id:
+                          type: string
+                        type:
+                          type: string
+                        page_count:
+                          type: integer
+                        field_count:
+                          type: integer
+                        sender_name:
+                          type: string
+                        sender_thumb_url:
+                          type: string
+      operationId: get-templates
+      description: Receive a list of available document templates. You can add new templates under the Templates-section in GetAccept.
+  '/documents/{documentId}':
+    parameters:
+      - schema:
+          type: string
+        name: documentId
+        in: path
+        required: true
+    get:
+      summary: Get document details
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+      operationId: get-documents-documentId
+  '/documents/{documentId}/send':
+    parameters:
+      - schema:
+          type: string
+        name: documentId
+        in: path
+        required: true
+    post:
+      summary: Send document
+      operationId: post-documents-documentId-send
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+      description: |-
+        When you send a document via GetAccept, we deliver an email to all recipients, each containing a unique, secured link. This API call triggers the document send action and can only be performed on documents with document_status = draft. The document will be sent to recipients you provided when it was created.
+
+        If document was created using self-sign option it will also be self-signed by the authenticated or specified user before sending.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sender_id:
+                  type: string
+                  description: Use this to specify the sender user/owner by id to be used for self-signing the document.
+                sender_email:
+                  type: string
+                  format: email
+                  description: Use this to specify the sender user/owner by email address to be used for self-signing the document.
+      tags:
+        - Documents
+  '/documents/{documentId}/seal':
+    parameters:
+      - schema:
+          type: string
+        name: documentId
+        in: path
+        required: true
+    post:
+      summary: Seal document
+      operationId: post-documents-documentId-seal
+      responses:
+        '200':
+          description: OK
+      description: |-
+        If you prefer to send the document manually you can use this method to seal the document. Do not use this method if you send the document automatically or if you use the send document method above.
+
+        This API call triggers the document seal action and can only be performed on documents with document_status = draft. The method will return individual access/signing links for each recipient.
+
+        If document was created using self-sign option it will also be self-signed by the authenticated or specified user before sealing.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sender_id:
+                  type: string
+                  description: Use this to specify the sender user/owner by id to be used for self-signing the document.
+                sender_email:
+                  type: string
+                  description: Use this to specify the sender user/owner by email address to be used for self-signing the document.
+      tags:
+        - Documents
+  '/documents/{documentId}/recipients':
+    parameters:
+      - schema:
+          type: string
+        name: documentId
+        in: path
+        required: true
+    get:
+      summary: Get document recipients
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    fullname:
+                      type: string
+                    email:
+                      type: string
+                    thumb_url:
+                      type: string
+                    order_num:
+                      type: string
+                    last_name:
+                      type: string
+                    status:
+                      type: string
+                    mobile:
+                      type: string
+                    id:
+                      type: string
+                    role:
+                      type: string
+                    title:
+                      type: string
+                    gender:
+                      type: string
+                    document_url:
+                      type: string
+                    first_name:
+                      type: string
+                    company_name:
+                      type: string
+                    company_number:
+                      type: string
+                    note:
+                      type: string
+      operationId: get-documents-documentId-recipients
+      description: Get a list of recipients for a specific document.
+  '/templates/{templateId}/roles':
+    parameters:
+      - schema:
+          type: string
+        name: templateId
+        in: path
+        required: true
+    get:
+      summary: Get template roles
+      tags:
+        - Templates
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  roles:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        role:
+                          type: string
+                        role_name:
+                          type: string
+                        first_name:
+                          type: string
+                        last_name:
+                          type: string
+                        email:
+                          type: string
+                        mobile:
+                          type: string
+                        role_id:
+                          type: string
+      operationId: get-templates-templateId-roles
+      description: Receive a list of roles for a specific template.
+  '/templates/{templateId}/fields':
+    parameters:
+      - schema:
+          type: string
+        name: templateId
+        in: path
+        required: true
+    get:
+      summary: Get template fields
+      tags:
+        - Templates
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fields:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field_id:
+                          type: string
+                        field_type:
+                          type: string
+                        is_editable:
+                          type: boolean
+                        company_name:
+                          type: string
+                        field_left:
+                          type: integer
+                        field_label:
+                          type: string
+                        field_value:
+                          type: string
+                        is_collectable:
+                          type: boolean
+                        recipient_id:
+                          type: integer
+                        recipient_name:
+                          type: string
+                        role_name:
+                          type: string
+                        field_width:
+                          type: integer
+                        field_height:
+                          type: integer
+                        validation_regex:
+                          type: string
+                        is_required:
+                          type: boolean
+                        company_number:
+                          type: string
+                        page_id:
+                          type: string
+                        field_top:
+                          type: integer
+                        validation_warning:
+                          type: string
+      operationId: get-templates-templateId-fields
+      description: Receive a list of fields for a specific template.
+  /subscriptions:
+    get:
+      summary: List subscriptions
+      tags:
+        - Subscriptions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    subscription_id:
+                      type: string
+                    status:
+                      type: integer
+                    event:
+                      type: string
+                    host:
+                      type: string
+                    target_url:
+                      type: string
+                    notification_email:
+                      type: string
+                    created_at:
+                      type: string
+                    id:
+                      type: string
+                    payload:
+                      type: string
+                    global:
+                      type: boolean
+      operationId: get-subscriptions
+      description: This call will return a list of active subscriptions
+    post:
+      summary: Create subscription
+      operationId: post-subscriptions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+      description: |-
+        This call will create a new subscription.
+        The response will be wrapped in an array even for single object according to REST hook standards.
+        Multiple subscriptions can be posted as an array in one request.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event:
+                  type: string
+                  description: The event to subscribe to
+                  enum:
+                    - document.created
+                    - document.sent
+                    - document.viewed
+                    - document.signed
+                    - document.approved
+                    - document.expired
+                    - document.rejected
+                    - document.downloaded
+                    - document.printed
+                    - document.forwarded
+                    - document.partially_signed
+                    - document.commented
+                    - document.hardbounced
+                    - document.imported
+                  example: document.signed
+                target_url:
+                  type: string
+                  description: The URL to post payload to on event
+                  example: 'https://abc.x.pipedream.net/'
+                host:
+                  type: string
+                  description: The host name to send the post to
+                payload:
+                  type: string
+                  description: Additional payload data to post
+                global:
+                  type: boolean
+                  description: If the webhook should catch events for all entity users.
+                  example: 'true'
+                notification_email:
+                  type: string
+                  example: hostmaster@example.com
+                  description: 'If the webhook fails, send a notification to this email instead of the sender'
+              required:
+                - event
+                - target_url
+      tags:
+        - Subscriptions
+  '/subscriptions/{subscriptionId}':
+    parameters:
+      - schema:
+          type: string
+        name: subscriptionId
+        in: path
+        required: true
+    get:
+      summary: Get subscription
+      tags:
+        - Subscriptions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+      operationId: get-subscriptions-subscriptionId
+      description: This call will return details of a single subscription
+    delete:
+      summary: Delete subscription
+      operationId: delete-subscriptions-subscriptionId
+      responses:
+        '204':
+          description: No Content
+      description: Delete a single subscription.
+      tags:
+        - Subscriptions
+  /users/me:
+    get:
+      summary: Get current user
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      first_name:
+                        type: string
+                      last_name:
+                        type: string
+                      email:
+                        type: string
+                      entity_name:
+                        type: string
+                      app_mode:
+                        type: string
+                      role:
+                        type: string
+                      id:
+                        type: string
+                      mobile:
+                        type: string
+                      language:
+                        type: string
+                      timezone:
+                        type: string
+                      phone:
+                        type: string
+                      note:
+                        type: string
+                      thumb_url:
+                        type: string
+                      entity_id:
+                        type: string
+                      title:
+                        type: string
+                      status:
+                        type: string
+                      team_id:
+                        type: string
+                      disallow_create:
+                        type: boolean
+                  entities:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        role:
+                          type: string
+                        plan:
+                          type: string
+                        plan_title:
+                          type: string
+      operationId: get-users-me
+      description: Receive details and available entities of the current authenticated user
 components:
-  schemas: null
+  schemas:
+    Document:
+      title: Document
+      type: object
+      properties:
+        expiration_date:
+          type: string
+        scheduled_sending_time:
+          type: string
+        is_video:
+          type: boolean
+        external_editor_type:
+          type: string
+        is_identify_recipient:
+          type: boolean
+        send_date:
+          type: string
+        sender_name:
+          type: string
+        email_send_template_id:
+          type: string
+        download_url:
+          type: string
+        auto_comment_text:
+          type: string
+        entity_auto_comment_text:
+          type: string
+        field_count:
+          type: integer
+        value:
+          type: integer
+        type:
+          type: string
+        is_selfsign:
+          type: boolean
+        is_signing:
+          type: boolean
+        is_signed:
+          type: boolean
+        company_name:
+          type: string
+        thumb_url:
+          type: string
+        preview_url:
+          type: string
+        unique_id:
+          type: integer
+        status:
+          type: string
+        sender_thumb_url:
+          type: string
+        email_send_message:
+          type: string
+        is_scheduled_sending:
+          type: boolean
+        auto_comment_email:
+          type: string
+        external_client_id:
+          type: string
+        external_editor_id:
+          type: string
+        company_id:
+          type: string
+        is_signing_initials:
+          type: boolean
+        email_send_subject:
+          type: string
+        recipients:
+          type: array
+          items:
+            type: object
+            properties:
+              last_name:
+                type: string
+              note:
+                type: string
+              company_number:
+                type: string
+              title:
+                type: string
+              role:
+                type: string
+              first_name:
+                type: string
+              gender:
+                type: string
+              thumb_url:
+                type: string
+              order_num:
+                type: string
+              fullname:
+                type: string
+              email:
+                type: string
+              mobile:
+                type: string
+              company_name:
+                type: string
+              status:
+                type: string
+        is_private:
+          type: boolean
+        user_id:
+          type: string
+        parent_id:
+          type: string
+        id:
+          type: string
+        tags:
+          type: string
+        external_id:
+          type: string
+        company_number:
+          type: string
+        company_logo_url:
+          type: string
+        is_reminder_sending:
+          type: boolean
+        is_signing_order:
+          type: boolean
+        is_auto_comment:
+          type: boolean
+        is_auto_comment_email:
+          type: boolean
+        name:
+          type: string
+        is_signing_biometric:
+          type: boolean
+        is_signing_forward:
+          type: boolean
+        sign_date:
+          type: string
+        sender_email:
+          type: string
+    Subscription:
+      title: Subscription
+      type: object
+      properties:
+        status:
+          type: integer
+        host:
+          type: string
+        target_url:
+          type: string
+        payload:
+          type: string
+        global:
+          type: boolean
+        notification_email:
+          type: string
+        id:
+          type: string
+        subscription_id:
+          type: string
+        event:
+          type: string
+        created_at:
+          type: string
   securitySchemes:
     BearerAuth:
       type: http
