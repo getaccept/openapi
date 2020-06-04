@@ -17,6 +17,44 @@ info:
     We welcome the study and testing of our API to all GetAccept users but commercial usage is subject to the purchase of a GetAccept API package
 
     If you need help during the integration or want to learn more about pricing, please don't hesitate to reach out to us using the built-in support-chat on this page at the lower-right corner.
+
+    # Basics
+    GetAccept consists of a few concepts that you should know about before starting to use the API.
+
+    ## Entity
+    An entity is the top node and all users and corresponding documents are connected to an entity. An entity is often the same as a company, a country or a department in a large organization.
+
+    ## User
+    A user is defined by it´s e-mail address and is connected to one or many entities.
+
+    ### User Roles
+
+    #### Administrator:
+    - View all documents
+    - Edit all documents
+    - Change entity settings, info and billing
+    - Add new users to the entity
+    - Assign entity roles
+
+    #### Manager:
+    - View team documents
+    - Edit all documents
+    - Add new users to the entity
+
+    #### User:
+    - View, edit and send any/own documents
+
+    #### Team:
+    - Teams consists of users and has no policies connected
+
+    ## Document
+    A document is one or multiple uploaded file(s) that is to be sent to one or many recipients created by an user.
+
+    ## Recipients
+    Every unique e-mail address (or mobile number) that is connected to a document is a recipient.
+
+    ## Contacts
+    All contacts added as a recipient are saved as a contact and is available for later use on that entity.
 paths:
   /auth:
     post:
