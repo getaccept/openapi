@@ -392,6 +392,8 @@ paths:
                   type: string
             examples: {}
         description: ''
+      tags:
+        - Documents
   /users:
     get:
       summary: List users
@@ -430,6 +432,8 @@ paths:
                           type: string
               examples:
                 Example: {}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
       operationId: get-users
       description: Fetch a list of active users for the current authenticated entity
   '/users/{userId}':
@@ -1014,7 +1018,28 @@ paths:
       operationId: get-users-me
       description: Receive details and available entities of the current authenticated user
 components:
+  responses:
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
   schemas:
+    Error:
+      type: object
+      properties:
+        status:
+          type: number
+        error:
+          type: string
+        description:
+          type: string
+      required:
+        - code
+        - message
     Document:
       title: Document
       type: object
@@ -1189,7 +1214,7 @@ components:
             write: Grants write access
             basic: Grants basic access to operations
           refreshUrl: 'https://app.getaccept.com/oauth2/refresh'
-      description: ''
+      description: 'For testing purpose, use client_id **api** and client_secret **app**'
 security:
   - BearerAuth: []
   - OAuth2:
@@ -1197,4 +1222,4 @@ security:
 tags: []
 servers:
   - url: 'https://api.getaccept.com/v1'
-    description: List documents
+    description: Production endpoint
