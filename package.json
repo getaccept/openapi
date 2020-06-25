@@ -1,0 +1,26 @@
+{
+  "name": "getaccept-openapi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "convert.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "dependencies": {
+    "api-spec-converter": "^2.11.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "convert": "node convert.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getaccept/openapi.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/getaccept/openapi/issues"
+  },
+  "homepage": "https://github.com/getaccept/openapi#readme"
+}
