@@ -243,18 +243,18 @@ paths:
         - schema:
             type: boolean
             enum:
-              - 'true'
-              - 'false'
-            example: 'true'
+              - true
+              - false
+            example: true
           in: query
           name: showteam
           description: "Include documents from team members\t"
         - schema:
             type: boolean
             enum:
-              - 'true'
-              - 'false'
-            example: 'true'
+              - true
+              - false
+            example: true
           in: query
           name: showall
           description: Include all documents from entity
@@ -390,6 +390,13 @@ paths:
                   type: string
                 name:
                   type: string
+                template_id:
+                  type: string
+                  x-ms-dynamic-values:
+                    operationId: get-templates,
+                    value-path: id,
+                    value-collection: templates,
+                    value-title: name
             examples: {}
         description: ''
       tags:
@@ -430,8 +437,6 @@ paths:
                           type: string
                         last_login:
                           type: string
-              examples:
-                Example: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
       operationId: get-users
@@ -519,9 +524,11 @@ paths:
                       status: active
                       team_id: ''
       operationId: get-users-userId
+      description: 'This call will return details of a single user'
   /templates:
     get:
       summary: List templates
+      x-ms-visibility: important
       tags:
         - Templates
       responses:
@@ -572,7 +579,7 @@ paths:
                         sender_thumb_url:
                           type: string
       operationId: get-templates
-      description: Receive a list of available document templates. You can add new templates under the Templates-section in GetAccept.
+      description: 'Receive a list of available document templates. You can add new templates under the Templates-section in GetAccept.'
   '/documents/{documentId}':
     parameters:
       - schema:
@@ -592,6 +599,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Document'
       operationId: get-documents-documentId
+      description: 'Get document details by specifying a document id.'
   '/documents/{documentId}/send':
     parameters:
       - schema:
@@ -602,6 +610,7 @@ paths:
     post:
       summary: Send document
       operationId: post-documents-documentId-send
+      x-ms-visibility: important
       responses:
         '200':
           description: OK
@@ -860,6 +869,8 @@ paths:
     post:
       summary: Create subscription
       operationId: post-subscriptions
+      x-ms-visibility: important,
+      x-ms-trigger: single,
       responses:
         '200':
           description: OK
@@ -880,6 +891,7 @@ paths:
                 event:
                   type: string
                   description: The event to subscribe to
+                  x-ms-visibility: internal
                   enum:
                     - document.created
                     - document.sent
@@ -899,6 +911,8 @@ paths:
                 target_url:
                   type: string
                   description: The URL to post payload to on event
+                  x-ms-notification-url: true,
+                  x-ms-visibility: internal,
                   example: 'https://abc.x.pipedream.net/'
                 host:
                   type: string
@@ -1137,9 +1151,9 @@ components:
           type: string
         description:
           type: string
-      required:
-        - code
-        - message
+      # required:
+      #   - code
+      #   - message
     Document:
       title: Document
       type: object
@@ -1298,12 +1312,7 @@ components:
         created_at:
           type: string
   securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      description: 'Enter your bearer token in the format **bearer &lt;token>**'
-      bearerFormat: JWT
-    OAuth2:
+    oauth2_auth:
       type: oauth2
       flows:
         authorizationCode:
@@ -1315,11 +1324,36 @@ components:
             basic: Grants basic access to operations
           refreshUrl: 'https://app.getaccept.com/oauth2/refresh'
       description: 'For testing purpose, use client_id **api** and client_secret **app**'
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Enter your bearer token in the format **bearer &lt;token>**'
+      bearerFormat: JWT
 security:
-  - BearerAuth: []
-  - OAuth2:
+  - oauth2_auth:
       - basic
-tags: []
+  - BearerAuth: []
+tags: 
+  - name: Authentication
+    description: 'Authentication with the GetAccept API can be made using JWT tokens (JSON Web Tokens) or OAuth 2.0 Authorization Framework http://oauth.net/2/  All requests must be made via HTTPS. All configuration URLs (webhooks, etc) should begin with https:// as well.'
+    externalDocs:
+      url: https://app.getaccept.com/api/#authentication
+  - name: Documents
+    description: Everything related to documents
+    externalDocs:
+      url: https://app.getaccept.com/api/#documents
+  - name: Subscriptions
+    description: 'To simplify the process of checking a documents status and make it more efficient in an integrated application, you can enable API Webhooks. Enable webhooks as a user with administrator privileges in the Settings | Integration | Webhooks. We support multiple webhooks for one application. Events will be POSTed to your webhook URLs and should be handled by you. A POST must be answered and your endpoint will need to return a 2xx HTTP. Otherwise, the callback will be considered a failure and will be retried later. Retries will be made after 1, 12, 24, and 48 hours. The sender (or notification_email) will receive an email notification after a failed attempt.'
+    externalDocs:
+      url: https://app.getaccept.com/api/#subscriptions
+  - name: Templates
+    description: 'GetAccept has extensive support for creating templates in different formats. You can use form fields to receive input data from a recipient or word files to merge custom data into a document.'
+    externalDocs:
+      url: https://app.getaccept.com/api/#templates
+  - name: Users
+    description: 'General user methods for creating, listing of users, single user details and statistics and managing existing users.'
+    externalDocs:
+      url: https://app.getaccept.com/api/#users
 servers:
   - url: 'https://api.getaccept.com/v1'
     description: Production endpoint

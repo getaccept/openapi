@@ -144,8 +144,8 @@
           {
             "description": "Include documents from team members\t",
             "enum": [
-              "true",
-              "false"
+              true,
+              false
             ],
             "in": "query",
             "name": "showteam",
@@ -154,8 +154,8 @@
           {
             "description": "Include all documents from entity",
             "enum": [
-              "true",
-              "false"
+              true,
+              false
             ],
             "in": "query",
             "name": "showall",
@@ -425,6 +425,15 @@
                   },
                   "type": "array"
                 },
+                "template_id": {
+                  "type": "string",
+                  "x-ms-dynamic-values": {
+                    "operationId": "get-templates,",
+                    "value-collection": "templates,",
+                    "value-path": "id,",
+                    "value-title": "name"
+                  }
+                },
                 "type": {
                   "type": "string"
                 },
@@ -477,6 +486,7 @@
         "tags": [
           "Documents"
         ],
+        "description": "Get document details by specifying a document id.",
         "operationId": "get-documents-documentId",
         "summary": "Get document details"
       }
@@ -658,7 +668,8 @@
         ],
         "description": "When you send a document via GetAccept, we deliver an email to all recipients, each containing a unique, secured link. This API call triggers the document send action and can only be performed on documents with document_status = draft. The document will be sent to recipients you provided when it was created.\n\nIf document was created using self-sign option it will also be self-signed by the authenticated or specified user before sending.",
         "operationId": "post-documents-documentId-send",
-        "summary": "Send document"
+        "summary": "Send document",
+        "x-ms-visibility": "important"
       }
     },
     "/refresh": {
@@ -783,7 +794,8 @@
                     "document.imported"
                   ],
                   "example": "document.signed",
-                  "type": "string"
+                  "type": "string",
+                  "x-ms-visibility": "internal"
                 },
                 "global": {
                   "description": "If the webhook should catch events for all entity users.",
@@ -802,7 +814,9 @@
                 "target_url": {
                   "description": "The URL to post payload to on event",
                   "example": "https://abc.x.pipedream.net/",
-                  "type": "string"
+                  "type": "string",
+                  "x-ms-notification-url": "true,",
+                  "x-ms-visibility": "internal,"
                 }
               },
               "required": [
@@ -826,7 +840,9 @@
         ],
         "description": "This call will create a new subscription.\nThe response will be wrapped in an array even for single object according to REST hook standards.\nMultiple subscriptions can be posted as an array in one request.",
         "operationId": "post-subscriptions",
-        "summary": "Create subscription"
+        "summary": "Create subscription",
+        "x-ms-trigger": "single,",
+        "x-ms-visibility": "important,"
       }
     },
     "/subscriptions/{subscriptionId}": {
@@ -953,7 +969,8 @@
         ],
         "description": "Receive a list of available document templates. You can add new templates under the Templates-section in GetAccept.",
         "operationId": "get-templates",
-        "summary": "List templates"
+        "summary": "List templates",
+        "x-ms-visibility": "important"
       }
     },
     "/templates/{templateId}/fields": {
@@ -1371,6 +1388,7 @@
         "tags": [
           "Users"
         ],
+        "description": "This call will return details of a single user",
         "operationId": "get-users-userId",
         "summary": "Get user details"
       }
@@ -1589,10 +1607,6 @@
           "type": "number"
         }
       },
-      "required": [
-        "code",
-        "message"
-      ],
       "type": "object"
     },
     "Subscription": {
@@ -1639,7 +1653,7 @@
       "name": "Authorization",
       "type": "apiKey"
     },
-    "OAuth2": {
+    "oauth2_auth": {
       "authorizationUrl": "https://app.getaccept.com/oauth2/authorize",
       "description": "For testing purpose, use client_id **api** and client_secret **app**",
       "flow": "accessCode",
@@ -1652,15 +1666,51 @@
   },
   "security": [
     {
-      "BearerAuth": []
-    },
-    {
-      "OAuth2": [
+      "oauth2_auth": [
         "basic"
       ]
+    },
+    {
+      "BearerAuth": []
     }
   ],
-  "tags": [],
+  "tags": [
+    {
+      "externalDocs": {
+        "url": "https://app.getaccept.com/api/#authentication"
+      },
+      "description": "Authentication with the GetAccept API can be made using JWT tokens (JSON Web Tokens) or OAuth 2.0 Authorization Framework http://oauth.net/2/  All requests must be made via HTTPS. All configuration URLs (webhooks, etc) should begin with https:// as well.",
+      "name": "Authentication"
+    },
+    {
+      "externalDocs": {
+        "url": "https://app.getaccept.com/api/#documents"
+      },
+      "description": "Everything related to documents",
+      "name": "Documents"
+    },
+    {
+      "externalDocs": {
+        "url": "https://app.getaccept.com/api/#subscriptions"
+      },
+      "description": "To simplify the process of checking a documents status and make it more efficient in an integrated application, you can enable API Webhooks. Enable webhooks as a user with administrator privileges in the Settings | Integration | Webhooks. We support multiple webhooks for one application. Events will be POSTed to your webhook URLs and should be handled by you. A POST must be answered and your endpoint will need to return a 2xx HTTP. Otherwise, the callback will be considered a failure and will be retried later. Retries will be made after 1, 12, 24, and 48 hours. The sender (or notification_email) will receive an email notification after a failed attempt.",
+      "name": "Subscriptions"
+    },
+    {
+      "externalDocs": {
+        "url": "https://app.getaccept.com/api/#templates"
+      },
+      "description": "GetAccept has extensive support for creating templates in different formats. You can use form fields to receive input data from a recipient or word files to merge custom data into a document.",
+      "name": "Templates"
+    },
+    {
+      "externalDocs": {
+        "url": "https://app.getaccept.com/api/#users"
+      },
+      "description": "General user methods for creating, listing of users, single user details and statistics and managing existing users.",
+      "name": "Users"
+    }
+  ],
   "x-components": {
     "responses": {
       "NotFound": {
