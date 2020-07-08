@@ -3,12 +3,12 @@
   "info": {
     "contact": {
       "email": "integrations@getaccept.com",
-      "name": "GetAccept API",
+      "name": "GetAccept API Team",
       "url": "https://app.getaccept.com/api"
     },
     "description": "Welcome to GetAccept API! You can use this API to access all our API endpoints.\n\nThe API is organized around REST. All requests should be made over SSL to the servers. All request and response bodies, including errors, are encoded in JSON.\n\nTo authenticate to the API you need to have a valid and active GetAccept account.\n\nWe welcome the study and testing of our API to all GetAccept users but commercial usage is subject to the purchase of a GetAccept API package\n\nIf you need help during the integration or want to learn more about pricing, please don't hesitate to reach out to us using the built-in support-chat on this page at the lower-right corner.\n\n# Basics\nGetAccept consists of a few concepts that you should know about before starting to use the API.\n\n## Entity\nAn entity is the top node and all users and corresponding documents are connected to an entity. An entity is often the same as a company, a country or a department in a large organization.\n\n## User\nA user is defined by it´s e-mail address and is connected to one or many entities.\n\n### User Roles\n\n#### Administrator:\n- View all documents\n- Edit all documents\n- Change entity settings, info and billing\n- Add new users to the entity\n- Assign entity roles\n\n#### Manager:\n- View team documents\n- Edit all documents\n- Add new users to the entity\n\n#### User:\n- View, edit and send any/own documents\n\n#### Team:\n- Teams consists of users and has no policies connected\n\n## Document\nA document is one or multiple uploaded file(s) that is to be sent to one or many recipients created by an user.\n\n## Recipients\nEvery unique e-mail address (or mobile number) that is connected to a document is a recipient.\n\n## Contacts\nAll contacts added as a recipient are saved as a contact and is available for later use on that entity.",
     "termsOfService": "https://www.getaccept.com/terms.html",
-    "title": "GetAccept API",
+    "title": "GetAccept",
     "version": "1.6"
   },
   "servers": [
@@ -18,6 +18,59 @@
     }
   ],
   "paths": {
+    "/attachments": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "attachments": {
+                      "items": {
+                        "properties": {
+                          "attachment_id": {
+                            "type": "string"
+                          },
+                          "attachment_title": {
+                            "type": "string"
+                          },
+                          "attachment_type": {
+                            "type": "string"
+                          },
+                          "attachment_url": {
+                            "type": "string"
+                          },
+                          "library": {
+                            "type": "boolean"
+                          },
+                          "published": {
+                            "type": "boolean"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Attachments"
+        ],
+        "description": "Receive a list of available attachments. You can add new attachments in GetAccept using a new document.",
+        "operationId": "ListAttachments",
+        "summary": "List attachments"
+      }
+    },
     "/auth": {
       "post": {
         "parameters": [],
@@ -43,6 +96,9 @@
               }
             },
             "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
           }
         },
         "security": [],
@@ -50,7 +106,7 @@
           "Authentication"
         ],
         "description": "Token based authentication is recommended for server-based access or access from clients where OAuth is not suitable. Access tokens has to be requested using an administrators login credentials.\nRequests should include the header Content-Type with value application/json",
-        "operationId": "post-auth",
+        "operationId": "Authenticate",
         "requestBody": {
           "content": {
             "application/json": {
@@ -58,6 +114,7 @@
                 "description": "Authentication model",
                 "properties": {
                   "client_id": {
+                    "default": "",
                     "description": "The client id of your app if you received one from our API team",
                     "type": "string"
                   },
@@ -81,6 +138,7 @@
                   "email",
                   "password"
                 ],
+                "type": "object",
                 "x-examples": {
                   "Example": {
                     "email": "user@example.com",
@@ -90,10 +148,138 @@
               }
             }
           },
-          "description": "",
+          "description": "A JSON object containing authentication credentials",
           "required": true
         },
         "summary": "Authentication by token"
+      }
+    },
+    "/contacts": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {},
+                "schema": {
+                  "properties": {},
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Contacts"
+        ],
+        "description": "Receive a list of available contact for the current entity",
+        "operationId": "ListContacts",
+        "summary": "List contacts"
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "contact_id": {
+                      "example": "abc58129f",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Contacts"
+        ],
+        "description": "This will create a new contact in the database for the current entity",
+        "operationId": "CreateContact",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "company_name": "Doe Inc.",
+                    "company_number": "5678901",
+                    "email": "jane@doe.com",
+                    "first_name": "Jane",
+                    "last_name": "Doe",
+                    "mobile": "+12345678901",
+                    "note": "Just a random contact",
+                    "phone": "+46401234567",
+                    "title": "CEO"
+                  }
+                }
+              },
+              "schema": {
+                "properties": {
+                  "company_name": {
+                    "description": "Associated company name",
+                    "type": "string"
+                  },
+                  "company_number": {
+                    "description": "Associated company number",
+                    "type": "string"
+                  },
+                  "email": {
+                    "description": "Email address of the contact",
+                    "type": "string"
+                  },
+                  "first_name": {
+                    "description": "First name of the contact",
+                    "type": "string"
+                  },
+                  "fullname": {
+                    "description": "Use to specify full name instead of first/last name",
+                    "type": "string"
+                  },
+                  "last_name": {
+                    "description": "Last name of the contact",
+                    "type": "string"
+                  },
+                  "mobile": {
+                    "description": "Mobile number in international format",
+                    "type": "string"
+                  },
+                  "note": {
+                    "description": "Optional internal note for contact",
+                    "type": "string"
+                  },
+                  "phone": {
+                    "description": "Phone number in international format",
+                    "type": "string"
+                  },
+                  "title": {
+                    "description": "The title of the contact, ex. CEO, Sales manager",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "description": "A JSON object containing contact information",
+          "required": true
+        },
+        "summary": "Create contact",
+        "x-ms-visibility": "important"
       }
     },
     "/documents": {
@@ -116,10 +302,11 @@
               ],
               "example": "signed",
               "type": "string"
-            }
+            },
+            "x-ms-summary": "Filter list on status"
           },
           {
-            "description": "How to sort results\t",
+            "description": "How to sort results",
             "in": "query",
             "name": "sort_by",
             "schema": {
@@ -133,10 +320,11 @@
               ],
               "example": "created",
               "type": "string"
-            }
+            },
+            "x-ms-summary": "How to sort results"
           },
           {
-            "description": "Sort order of results\t",
+            "description": "Sort order of results",
             "in": "query",
             "name": "sort_order",
             "schema": {
@@ -146,10 +334,11 @@
               ],
               "example": "desc",
               "type": "string"
-            }
+            },
+            "x-ms-summary": "Sort order of results"
           },
           {
-            "description": "Include documents from team members\t",
+            "description": "Include documents from team members",
             "in": "query",
             "name": "showteam",
             "schema": {
@@ -159,7 +348,8 @@
               ],
               "example": true,
               "type": "boolean"
-            }
+            },
+            "x-ms-summary": "Include documents from team members"
           },
           {
             "description": "Include all documents from entity",
@@ -172,7 +362,8 @@
               ],
               "example": true,
               "type": "boolean"
-            }
+            },
+            "x-ms-summary": "Include all documents from entity"
           },
           {
             "description": "An external ID is a custom field which can contain a unique record identifier from a system outside of GetAccept",
@@ -180,33 +371,35 @@
             "name": "external_id",
             "schema": {
               "type": "string"
-            }
+            },
+            "x-ms-summary": "External ID"
           },
           {
             "description": "Start list from record x until limit",
             "in": "query",
             "name": "offset",
             "schema": {
-              "default": 0,
-              "example": 0,
+              "example": 50,
               "type": "number"
-            }
+            },
+            "x-ms-summary": "Offset"
           },
           {
-            "description": "Number of records to list\t",
+            "description": "Number of records to list",
             "in": "query",
             "name": "limit",
             "schema": {
-              "default": 100,
               "example": 100,
               "type": "number"
-            }
+            },
+            "x-ms-summary": "Limit"
           }
         ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
+                "examples": {},
                 "schema": {
                   "items": {
                     "properties": {
@@ -234,47 +427,6 @@
                       "name": {
                         "type": "string"
                       },
-                      "recipients": {
-                        "items": {
-                          "properties": {
-                            "company_name": {
-                              "type": "string"
-                            },
-                            "company_number": {
-                              "type": "string"
-                            },
-                            "email": {
-                              "type": "string"
-                            },
-                            "first_name": {
-                              "type": "string"
-                            },
-                            "gender": {
-                              "type": "string"
-                            },
-                            "last_name": {
-                              "type": "string"
-                            },
-                            "note": {
-                              "type": "string"
-                            },
-                            "recipient_status": {
-                              "type": "string"
-                            },
-                            "role": {
-                              "type": "string"
-                            },
-                            "status": {
-                              "type": "string"
-                            },
-                            "thumb_url": {
-                              "type": "string"
-                            }
-                          },
-                          "type": "object"
-                        },
-                        "type": "array"
-                      },
                       "sender_name": {
                         "type": "string"
                       },
@@ -298,13 +450,16 @@
               }
             },
             "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         },
         "tags": [
           "Documents"
         ],
         "description": "Get a list of available documents",
-        "operationId": "get-documents",
+        "operationId": "ListDocuments",
         "summary": "List documents"
       },
       "post": {
@@ -318,13 +473,19 @@
               }
             },
             "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         },
         "tags": [
           "Documents"
         ],
         "description": "You must create a document to be able to send it to a recipient. When creating a document you can refer to previously uploaded files with file_id or you can choose to create a document and upload the files in on API post. You can only upload ONE file when including a file in the create document POST.\n\nUse either file_ids parameter to use existing uploaded file(s), file_content to send the document as base64 encoded string or do a multipart post with file parameter.\n\nAll recipients must have either a valid e-mail or a mobile number.\n\nAll events are recorded using requestor IP address. You can override this using header CLIENT_IP containing the end-users public IP address.",
-        "operationId": "post-documents",
+        "operationId": "CreateDocument",
         "requestBody": {
           "content": {
             "application/json": {
@@ -332,171 +493,477 @@
               "schema": {
                 "properties": {
                   "attachments": {
+                    "description": "Attachments",
                     "items": {
                       "properties": {
                         "id": {
-                          "type": "string"
+                          "description": "Attachment ID received from list or after upload",
+                          "type": "string",
+                          "x-ms-dynamic-values": {
+                            "operationId": "ListAttachments",
+                            "value-collection": "attachments",
+                            "value-path": "attachment_id",
+                            "value-title": "attachment_title"
+                          },
+                          "x-ms-summary": "ID"
                         },
                         "require_view": {
-                          "type": "boolean"
+                          "description": "Require that recipient view the attachment",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "example": true,
+                          "nullable": true,
+                          "type": "boolean",
+                          "x-ms-summary": "Require view"
                         },
                         "type": {
-                          "type": "string"
+                          "description": "file or external where file is an uploaded file and external is a link to an external file",
+                          "enum": [
+                            "file",
+                            "external"
+                          ],
+                          "type": "string",
+                          "x-ms-summary": "Type"
                         }
                       },
                       "type": "object"
                     },
-                    "type": "array"
+                    "type": "array",
+                    "x-ms-summary": "Attachment"
                   },
                   "custom_fields": {
+                    "description": "Custom field",
                     "items": {
                       "properties": {
                         "id": {
-                          "type": "string"
+                          "description": "ID of custom template field",
+                          "type": "string",
+                          "x-ms-summary": "Field ID"
+                        },
+                        "name": {
+                          "description": "Name of custom template field",
+                          "type": "string",
+                          "x-ms-summary": "Field Name"
                         },
                         "value": {
-                          "type": "string"
+                          "description": "Value of custom template field",
+                          "type": "string",
+                          "x-ms-summary": "Field Value"
                         }
                       },
                       "type": "object"
                     },
-                    "type": "array"
+                    "type": "array",
+                    "x-ms-summary": "Custom"
                   },
                   "expiration_date": {
-                    "type": "string"
+                    "description": "Date and time when the document should expire",
+                    "format": "date-time",
+                    "type": "string",
+                    "x-ms-summary": "Expiration date"
                   },
                   "external_id": {
-                    "type": "string"
+                    "description": "External system ID for identification",
+                    "type": "string",
+                    "x-ms-summary": "External ID"
+                  },
+                  "file_content": {
+                    "description": "Base64 encoded file content",
+                    "type": "string",
+                    "x-ms-summary": "File content"
                   },
                   "file_ids": {
-                    "type": "string"
+                    "description": "Comma-separated, unique file-ids received when uploading files",
+                    "type": "string",
+                    "x-ms-summary": "File IDs"
+                  },
+                  "file_url": {
+                    "description": "Url to document file. Documents must be public available for download",
+                    "type": "string",
+                    "x-ms-summary": "File URL"
                   },
                   "is_automatic_sending": {
-                    "type": "boolean"
+                    "description": "If the document should be sent after creation",
+                    "enum": [
+                      true,
+                      false
+                    ],
+                    "example": true,
+                    "nullable": true,
+                    "type": "boolean",
+                    "x-ms-summary": "Send automatically",
+                    "x-ms-visibility": "important"
                   },
                   "is_reminder_sending": {
-                    "type": "boolean"
+                    "description": "Should automatic reminders be sent",
+                    "enum": [
+                      true,
+                      false
+                    ],
+                    "example": true,
+                    "nullable": true,
+                    "type": "boolean",
+                    "x-ms-summary": "Send reminders",
+                    "x-ms-visibility": "advanced"
+                  },
+                  "is_scheduled_sending": {
+                    "description": "Should the sending be scheduled for sending in the future",
+                    "enum": [
+                      true,
+                      false
+                    ],
+                    "example": true,
+                    "nullable": true,
+                    "type": "boolean",
+                    "x-ms-summary": "Schedule sending"
                   },
                   "is_signing": {
-                    "type": "boolean"
+                    "description": "Should the document be sent for signing",
+                    "enum": [
+                      true,
+                      false
+                    ],
+                    "example": true,
+                    "nullable": true,
+                    "type": "boolean",
+                    "x-ms-summary": "Sign document"
                   },
                   "is_signing_biometric": {
-                    "type": "boolean"
+                    "description": "Use handwritten signature",
+                    "enum": [
+                      true,
+                      false
+                    ],
+                    "example": true,
+                    "nullable": true,
+                    "type": "boolean",
+                    "x-ms-summary": "Handwritten signature"
                   },
                   "is_signing_forward": {
-                    "type": "boolean"
+                    "description": "Should recipients be able to transfer signature rights",
+                    "enum": [
+                      true,
+                      false
+                    ],
+                    "example": true,
+                    "nullable": true,
+                    "type": "boolean",
+                    "x-ms-summary": "Allow signature transfer"
                   },
                   "is_signing_initials": {
-                    "type": "boolean"
+                    "description": "Sign document using recipient initials",
+                    "enum": [
+                      true,
+                      false
+                    ],
+                    "example": true,
+                    "nullable": true,
+                    "type": "boolean",
+                    "x-ms-summary": "Sign with initials",
+                    "x-ms-visibility": "advanced"
                   },
                   "is_sms_sending": {
-                    "type": "boolean"
+                    "description": "Should the document be sent to recipient mobile by text",
+                    "enum": [
+                      true,
+                      false
+                    ],
+                    "example": true,
+                    "nullable": true,
+                    "type": "boolean",
+                    "x-ms-summary": "Send SMS"
                   },
                   "name": {
-                    "type": "string"
+                    "description": "Enter a name of the document",
+                    "type": "string",
+                    "x-ms-summary": "Document name",
+                    "x-ms-visibility": "important"
                   },
                   "recipients": {
                     "items": {
                       "properties": {
                         "company_name": {
-                          "type": "string"
+                          "description": "Company name of the recipient",
+                          "type": "string",
+                          "x-ms-summary": "Company name",
+                          "x-ms-visibility": "important"
                         },
                         "company_number": {
-                          "type": "string"
+                          "description": "Company number of the recipient",
+                          "type": "string",
+                          "x-ms-summary": "Company number",
+                          "x-ms-visibility": "important"
                         },
                         "email": {
-                          "type": "string"
+                          "description": "Email address of the recipient",
+                          "type": "string",
+                          "x-ms-summary": "Email",
+                          "x-ms-visibility": "important"
                         },
                         "first_name": {
-                          "type": "string"
+                          "description": "Recipient first name",
+                          "type": "string",
+                          "x-ms-summary": "First name",
+                          "x-ms-visibility": "important"
                         },
                         "last_name": {
-                          "type": "string"
+                          "description": "Last name of recipient",
+                          "type": "string",
+                          "x-ms-summary": "Last name",
+                          "x-ms-visibility": "important"
                         },
                         "mobile": {
-                          "type": "string"
+                          "description": "Mobile phone in international format",
+                          "type": "string",
+                          "x-ms-summary": "Mobile"
                         },
                         "note": {
-                          "type": "string"
+                          "description": "Additional note for a recipient",
+                          "type": "string",
+                          "x-ms-summary": "Note",
+                          "x-ms-visibility": "internal"
                         },
                         "order_num": {
-                          "type": "integer"
+                          "description": "If signing order is enabled",
+                          "example": 1,
+                          "nullable": true,
+                          "type": "integer",
+                          "x-ms-summary": "Signing order",
+                          "x-ms-visibility": "internal"
                         },
                         "role": {
-                          "type": "string"
+                          "description": "The kind of recipient in the document",
+                          "enum": [
+                            "signer",
+                            "approver",
+                            "cc"
+                          ],
+                          "type": "string",
+                          "x-ms-summary": "Recipient type",
+                          "x-ms-visibility": "important"
+                        },
+                        "role_name": {
+                          "description": "The name of the role in a template",
+                          "type": "string",
+                          "x-ms-summary": "Template role",
+                          "x-ms-visibility": "important"
                         },
                         "verify_eid": {
-                          "type": "boolean"
+                          "description": "Verify using EID",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "example": true,
+                          "nullable": true,
+                          "type": "boolean",
+                          "x-ms-summary": "Verify EID",
+                          "x-ms-visibility": "internal"
                         },
                         "verify_eid_type": {
-                          "type": "string"
+                          "description": "EID type to be used for personal verification",
+                          "type": "string",
+                          "x-ms-summary": "EID type",
+                          "x-ms-visibility": "internal"
                         },
                         "verify_qna": {
-                          "type": "boolean"
+                          "description": "Should a question be asked",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "example": true,
+                          "nullable": true,
+                          "type": "boolean",
+                          "x-ms-summary": "Enable question",
+                          "x-ms-visibility": "internal"
                         },
                         "verify_qna_answer": {
-                          "type": "string"
+                          "description": "The answer to question",
+                          "example": "123456789",
+                          "type": "string",
+                          "x-ms-summary": "Verification answer",
+                          "x-ms-visibility": "advanced"
                         },
                         "verify_qna_open": {
-                          "type": "boolean"
+                          "description": "Should question be asked before opening document",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "example": true,
+                          "nullable": true,
+                          "type": "boolean",
+                          "x-ms-summary": "Question on open",
+                          "x-ms-visibility": "internal"
                         },
                         "verify_qna_question": {
-                          "type": "string"
+                          "description": "Question to ask for verification",
+                          "example": "Enter your SSN",
+                          "type": "string",
+                          "x-ms-summary": "Verification question",
+                          "x-ms-visibility": "internal"
                         },
                         "verify_qna_sign": {
-                          "type": "boolean"
+                          "description": "Should a question be asked before signing",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "example": true,
+                          "nullable": true,
+                          "type": "boolean",
+                          "x-ms-summary": "Sign question",
+                          "x-ms-visibility": "internal"
                         },
                         "verify_sms": {
-                          "type": "boolean"
+                          "description": "Verify recipient by SMS",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "example": true,
+                          "nullable": true,
+                          "type": "boolean",
+                          "x-ms-summary": "Verify SMS",
+                          "x-ms-visibility": "internal"
                         },
                         "verify_sms_open": {
-                          "type": "boolean"
+                          "description": "Verify SMS on open",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "example": true,
+                          "type": "boolean",
+                          "x-ms-summary": "Verify SMS on open",
+                          "x-ms-visibility": "internal"
                         },
                         "verify_sms_sign": {
-                          "type": "boolean"
+                          "description": "Should a SMS verify the recipient before signing",
+                          "enum": [
+                            true,
+                            false
+                          ],
+                          "example": true,
+                          "nullable": true,
+                          "type": "boolean",
+                          "x-ms-summary": "Verify by SMS",
+                          "x-ms-visibility": "internal"
                         }
                       },
                       "type": "object"
                     },
-                    "type": "array"
+                    "type": "array",
+                    "x-ms-summary": "Recipient",
+                    "x-ms-visibility": "important"
                   },
-                  "template_id": {
+                  "scheduled_sending_time": {
+                    "description": "Date and time when the document should be sent out",
+                    "format": "date-time",
+                    "type": "string",
+                    "x-ms-summary": "Schedule send date"
+                  },
+                  "sender_email": {
+                    "description": "Send from other email than authenticated user",
+                    "type": "string",
+                    "x-ms-summary": "Sender email override",
+                    "x-ms-visibility": "advanced"
+                  },
+                  "sender_id": {
+                    "description": "Send from other user than authenticated",
                     "type": "string",
                     "x-ms-dynamic-values": {
-                      "operationId": "get-templates,",
-                      "value-collection": "templates,",
-                      "value-path": "id,",
+                      "operationId": "ListUsers",
+                      "value-collection": "users",
+                      "value-path": "user_id",
+                      "value-title": "email"
+                    },
+                    "x-ms-summary": "Sender user override",
+                    "x-ms-visibility": "advanced"
+                  },
+                  "template_id": {
+                    "description": "Select a template to use for the sending",
+                    "type": "string",
+                    "x-ms-dynamic-values": {
+                      "operationId": "ListTemplates",
+                      "value-collection": "templates",
+                      "value-path": "id",
                       "value-title": "name"
-                    }
+                    },
+                    "x-ms-summary": "Template ID",
+                    "x-ms-visibility": "important"
                   },
                   "type": {
-                    "type": "string"
+                    "default": "sales",
+                    "description": "Set the type/category of the document",
+                    "enum": [
+                      "sales",
+                      "introduction",
+                      "hr",
+                      "other"
+                    ],
+                    "example": "sales",
+                    "type": "string",
+                    "x-ms-summary": "Document type",
+                    "x-ms-visibility": "important"
                   },
                   "value": {
-                    "type": "integer"
+                    "description": "Value of deal or document",
+                    "nullable": true,
+                    "type": "integer",
+                    "x-ms-summary": "Document value",
+                    "x-ms-visibility": "important"
+                  },
+                  "video_id": {
+                    "description": "Select a video to use for the sending",
+                    "type": "string",
+                    "x-ms-dynamic-values": {
+                      "operationId": "ListVideos",
+                      "value-collection": "videos",
+                      "value-path": "video_id",
+                      "value-title": "video_title"
+                    },
+                    "x-ms-summary": "Video ID",
+                    "x-ms-visibility": "advanced"
                   }
                 },
+                "required": [
+                  "name"
+                ],
                 "type": "object"
               }
             }
           },
-          "description": ""
+          "description": "A JSON object containing document information",
+          "required": true
         },
-        "summary": "Create document"
+        "summary": "Create and send document or template",
+        "x-ms-visibility": "important"
       }
     },
     "/documents/{documentId}": {
-      "parameters": [
-        {
-          "in": "path",
-          "name": "documentId",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
       "get": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-dynamic-values": {
+              "operationId": "ListDocuments",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Document ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -507,28 +974,214 @@
               }
             },
             "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AccessDenied"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           }
         },
         "tags": [
           "Documents"
         ],
         "description": "Get document details by specifying a document id.",
-        "operationId": "get-documents-documentId",
+        "operationId": "GetDocumentDetails",
         "summary": "Get document details"
       }
     },
-    "/documents/{documentId}/recipients": {
-      "parameters": [
-        {
-          "in": "path",
-          "name": "documentId",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
+    "/documents/{documentId}/download": {
       "get": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-summary": "Document ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "description": "Return the binary file directly",
+            "in": "query",
+            "name": "direct",
+            "schema": {
+              "default": "true",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "example": "true",
+              "nullable": true,
+              "type": "string"
+            },
+            "x-ms-summary": "Return the binary file directly"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "document_url": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "application/pdf": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-ms-visibility": "important"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Document file can always be downloaded but most likely you want to download it when it has status Signed. \n\nYou can select to receive a download-url or get the binary file.\n\nThe download URL is accessable 10 minutes after a request has been made.",
+        "operationId": "DownloadDocument",
+        "summary": "Download document",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/documents/{documentId}/fields": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-summary": "Document ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "fields": {
+                      "items": {
+                        "properties": {
+                          "field_height": {
+                            "type": "integer"
+                          },
+                          "field_id": {
+                            "type": "string"
+                          },
+                          "field_label": {
+                            "type": "string"
+                          },
+                          "field_left": {
+                            "type": "integer"
+                          },
+                          "field_top": {
+                            "type": "integer"
+                          },
+                          "field_type": {
+                            "type": "string"
+                          },
+                          "field_value": {
+                            "type": "string"
+                          },
+                          "field_width": {
+                            "type": "integer"
+                          },
+                          "is_collectable": {
+                            "type": "boolean"
+                          },
+                          "is_editable": {
+                            "type": "boolean"
+                          },
+                          "is_required": {
+                            "type": "boolean"
+                          },
+                          "page_id": {
+                            "type": "string"
+                          },
+                          "recipient_id": {
+                            "type": "string"
+                          },
+                          "recipient_name": {
+                            "type": "string"
+                          },
+                          "validation_regex": {
+                            "type": "string"
+                          },
+                          "validation_warning": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Get a list of fields for a document or template. Can be used both before and after a document has been signed.",
+        "operationId": "ListDocumentFields",
+        "summary": "Get document recipients"
+      }
+    },
+    "/documents/{documentId}/recipients": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-dynamic-values": {
+              "operationId": "ListDocuments",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Document ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -592,38 +1245,61 @@
               }
             },
             "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           }
         },
         "tags": [
           "Documents"
         ],
         "description": "Get a list of recipients for a specific document.",
-        "operationId": "get-documents-documentId-recipients",
+        "operationId": "ListRecipients",
         "summary": "Get document recipients"
       }
     },
     "/documents/{documentId}/seal": {
-      "parameters": [
-        {
-          "in": "path",
-          "name": "documentId",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
       "post": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-dynamic-values": {
+              "operationId": "ListDocuments",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Document ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           }
         },
         "tags": [
           "Documents"
         ],
         "description": "If you prefer to send the document manually you can use this method to seal the document. Do not use this method if you send the document automatically or if you use the send document method above.\n\nThis API call triggers the document seal action and can only be performed on documents with document_status = draft. The method will return individual access/signing links for each recipient.\n\nIf document was created using self-sign option it will also be self-signed by the authenticated or specified user before sealing.",
-        "operationId": "post-documents-documentId-seal",
+        "operationId": "SealDocument",
         "requestBody": {
           "content": {
             "application/json": {
@@ -635,29 +1311,44 @@
                   },
                   "sender_id": {
                     "description": "Use this to specify the sender user/owner by id to be used for self-signing the document.",
-                    "type": "string"
+                    "type": "string",
+                    "x-ms-dynamic-values": {
+                      "operationId": "ListUsers",
+                      "value-collection": "users",
+                      "value-path": "user_id",
+                      "value-title": "name"
+                    }
                   }
                 },
                 "type": "object"
               }
             }
-          }
+          },
+          "description": "An optional JSON object containing sender information"
         },
         "summary": "Seal document"
       }
     },
     "/documents/{documentId}/send": {
-      "parameters": [
-        {
-          "in": "path",
-          "name": "documentId",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
       "post": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-dynamic-values": {
+              "operationId": "ListDocuments",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Document ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -668,13 +1359,22 @@
               }
             },
             "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           }
         },
         "tags": [
           "Documents"
         ],
         "description": "When you send a document via GetAccept, we deliver an email to all recipients, each containing a unique, secured link. This API call triggers the document send action and can only be performed on documents with document_status = draft. The document will be sent to recipients you provided when it was created.\n\nIf document was created using self-sign option it will also be self-signed by the authenticated or specified user before sending.",
-        "operationId": "post-documents-documentId-send",
+        "operationId": "SendDocument",
         "requestBody": {
           "content": {
             "application/json": {
@@ -687,16 +1387,23 @@
                   },
                   "sender_id": {
                     "description": "Use this to specify the sender user/owner by id to be used for self-signing the document.",
-                    "type": "string"
+                    "type": "string",
+                    "x-ms-dynamic-values": {
+                      "operationId": "ListUsers",
+                      "value-collection": "users",
+                      "value-path": "user_id",
+                      "value-title": "name"
+                    }
                   }
                 },
                 "type": "object"
               }
             }
-          }
+          },
+          "description": "An optional JSON object containing sending information"
         },
-        "summary": "Send document",
-        "x-ms-visibility": "important"
+        "summary": "Send existing document",
+        "x-ms-visibility": "advanced"
       }
     },
     "/refresh": {
@@ -725,66 +1432,11 @@
           "Authentication"
         ],
         "description": "You can request a refreshed of the access token before the original token has expired.",
-        "operationId": "get-refresh",
+        "operationId": "RefreshToken",
         "summary": "Refresh an access token"
       }
     },
     "/subscriptions": {
-      "get": {
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "properties": {
-                      "host": {
-                        "type": "string"
-                      },
-                      "created_at": {
-                        "type": "string"
-                      },
-                      "event": {
-                        "type": "string"
-                      },
-                      "global": {
-                        "type": "boolean"
-                      },
-                      "id": {
-                        "type": "string"
-                      },
-                      "notification_email": {
-                        "type": "string"
-                      },
-                      "payload": {
-                        "type": "string"
-                      },
-                      "status": {
-                        "type": "integer"
-                      },
-                      "subscription_id": {
-                        "type": "string"
-                      },
-                      "target_url": {
-                        "type": "string"
-                      }
-                    },
-                    "type": "object"
-                  },
-                  "type": "array"
-                }
-              }
-            },
-            "description": "OK"
-          }
-        },
-        "tags": [
-          "Subscriptions"
-        ],
-        "description": "This call will return a list of active subscriptions",
-        "operationId": "get-subscriptions",
-        "summary": "List subscriptions"
-      },
       "post": {
         "responses": {
           "200": {
@@ -796,13 +1448,19 @@
               }
             },
             "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         },
         "tags": [
           "Subscriptions"
         ],
-        "description": "This call will create a new subscription.\nThe response will be wrapped in an array even for single object according to REST hook standards.\nMultiple subscriptions can be posted as an array in one request.",
-        "operationId": "post-subscriptions",
+        "description": "This call will create a new subscription.\nThe response will be wrapped in an array even for single object according to REST hook standards.\n\n>Events\n  * `document.created` - Document is created\n  * `document.sent` - Document is sent\n  * `document.viewed` - Document is sent\n  * `document.signed` - Document is signed\n  * `document.approved` - Document is approved\n  * `document.expired` - Document has expired\n  * `document.rejected` - Document is rejected\n  * `document.downloaded` - Document is downloaded\n  * `document.printed` - Document is printed\n  * `document.forwarded` - Document is forwarded\n  * `document.partially_signed` - Document has been partially signed\n  * `document.commented` - Document is commented\n  * `document.hardbounced` - Document is hardbounced\n  * `document.imported` - Document is imported",
+        "operationId": "CreateSubscription",
         "requestBody": {
           "content": {
             "application/json": {
@@ -810,10 +1468,11 @@
                 "properties": {
                   "host": {
                     "description": "The host name to send the post to",
-                    "type": "string"
+                    "type": "string",
+                    "x-ms-visibility": "internal"
                   },
                   "event": {
-                    "description": "The event to subscribe to",
+                    "description": "Event trigger",
                     "enum": [
                       "document.created",
                       "document.sent",
@@ -832,28 +1491,38 @@
                     ],
                     "example": "document.signed",
                     "type": "string",
-                    "x-ms-visibility": "internal"
+                    "x-ms-summary": "Event trigger",
+                    "x-ms-visibility": "important"
                   },
                   "global": {
+                    "default": true,
                     "description": "If the webhook should catch events for all entity users.",
+                    "enum": [
+                      true,
+                      false
+                    ],
                     "example": true,
-                    "type": "boolean"
+                    "nullable": true,
+                    "type": "boolean",
+                    "x-ms-summary": "All entity users"
                   },
                   "notification_email": {
                     "description": "If the webhook fails, send a notification to this email instead of the sender",
                     "example": "hostmaster@example.com",
-                    "type": "string"
+                    "type": "string",
+                    "x-ms-summary": "Error email"
                   },
                   "payload": {
                     "description": "Additional payload data to post",
-                    "type": "string"
+                    "type": "string",
+                    "x-ms-visibility": "advanced"
                   },
                   "target_url": {
                     "description": "The URL to post payload to on event",
                     "example": "https://abc.x.pipedream.net/",
                     "type": "string",
-                    "x-ms-notification-url": "true,",
-                    "x-ms-visibility": "internal,"
+                    "x-ms-notification-url": true,
+                    "x-ms-visibility": "internal"
                   }
                 },
                 "required": [
@@ -863,25 +1532,37 @@
                 "type": "object"
               }
             }
-          }
+          },
+          "description": "A JSON object containing subscription information",
+          "required": true
         },
-        "summary": "Create subscription",
-        "x-ms-trigger": "single,",
-        "x-ms-visibility": "important,"
+        "summary": "Subscribe to event",
+        "x-ms-summary": "Subscribe to event",
+        "x-ms-trigger": "single",
+        "x-ms-trigger-hint": "Trigger a webhook by activating the subscribed event. Example opening a document to trigger document.viewed",
+        "x-ms-visibility": "important"
+      },
+      "x-ms-notification-content": {
+        "schema": {
+          "$ref": "#/components/schemas/Webhook"
+        }
       }
     },
     "/subscriptions/{subscriptionId}": {
-      "parameters": [
-        {
-          "in": "path",
-          "name": "subscriptionId",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
       "delete": {
+        "parameters": [
+          {
+            "description": "Subscription ID",
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-summary": "Subscription ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
         "responses": {
           "204": {
             "description": "No Content"
@@ -891,10 +1572,23 @@
           "Subscriptions"
         ],
         "description": "Delete a single subscription.",
-        "operationId": "delete-subscriptions-subscriptionId",
+        "operationId": "DeleteSubscription",
         "summary": "Delete subscription"
       },
       "get": {
+        "parameters": [
+          {
+            "description": "Subscription ID",
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-summary": "Subscription ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -905,18 +1599,43 @@
               }
             },
             "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           }
         },
         "tags": [
           "Subscriptions"
         ],
         "description": "This call will return details of a single subscription",
-        "operationId": "get-subscriptions-subscriptionId",
-        "summary": "Get subscription"
+        "operationId": "GetSubscriptionDetails",
+        "summary": "Get subscription details"
       }
     },
     "/templates": {
       "get": {
+        "parameters": [
+          {
+            "description": "Show all templates for entity",
+            "in": "query",
+            "name": "showall",
+            "schema": {
+              "default": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Show templates in a specific folder",
+            "in": "query",
+            "name": "folder_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -988,29 +1707,41 @@
               }
             },
             "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         },
         "tags": [
           "Templates"
         ],
         "description": "Receive a list of available document templates. You can add new templates under the Templates-section in GetAccept.",
-        "operationId": "get-templates",
+        "operationId": "ListTemplates",
         "summary": "List templates",
         "x-ms-visibility": "important"
       }
     },
     "/templates/{templateId}/fields": {
-      "parameters": [
-        {
-          "in": "path",
-          "name": "templateId",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
       "get": {
+        "parameters": [
+          {
+            "description": "Template ID",
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-dynamic-values": {
+              "operationId": "ListTemplates",
+              "value-collection": "templates",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Template ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1063,7 +1794,7 @@
                             "type": "string"
                           },
                           "recipient_id": {
-                            "type": "integer"
+                            "type": "string"
                           },
                           "recipient_name": {
                             "type": "string"
@@ -1088,28 +1819,43 @@
               }
             },
             "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           }
         },
         "tags": [
           "Templates"
         ],
         "description": "Receive a list of fields for a specific template.",
-        "operationId": "get-templates-templateId-fields",
+        "operationId": "ListFields",
         "summary": "Get template fields"
       }
     },
     "/templates/{templateId}/roles": {
-      "parameters": [
-        {
-          "in": "path",
-          "name": "templateId",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
       "get": {
+        "parameters": [
+          {
+            "description": "Template ID",
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-dynamic-values": {
+              "operationId": "ListTemplates",
+              "value-collection": "templates",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Template ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1151,14 +1897,275 @@
               }
             },
             "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           }
         },
         "tags": [
           "Templates"
         ],
         "description": "Receive a list of roles for a specific template.",
-        "operationId": "get-templates-templateId-roles",
+        "operationId": "ListRoles",
         "summary": "Get template roles"
+      }
+    },
+    "/upload": {
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "file_id": {
+                      "description": "ID of the uploaded file to be used in file_ids when creating a document",
+                      "type": "string"
+                    },
+                    "file_status": {
+                      "description": "Status of the uploaded file",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "You can upload one file at a time and get a file id. The file id is used to connect a file with a GetAccept document which is sent to recipients. If you want to upload mutliple files you run multiple POST. We only accept files up to 10 MB as default. Uploaded file need to be imported/added to a document within 48 hours after uploading.\n\nWe recommended you to upload PDF files in order to guarantee the same look when sent. Other file types can be converted, such as:\n\nMirosoft Office: doc, docx, xl, xls, xlsx, ppt, pptx\nMac: numbers, key\nImages: jpg, jpeg, png\nOther: html, tex, csv",
+        "operationId": "UploadDocument",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "file_content": {
+                    "description": "Send the file as base64 encoded. Note that base64 encoding files will increase the file size with about 30%",
+                    "format": "base64",
+                    "type": "string",
+                    "x-ms-summary": "File content"
+                  },
+                  "file_name": {
+                    "description": "Filename of the document, with the extension. This will be helpful for converting different file-types.",
+                    "type": "string",
+                    "x-ms-summary": "File name"
+                  },
+                  "file_url": {
+                    "description": "Url to document file. File must be available for download without any authorization",
+                    "type": "string",
+                    "x-ms-summary": "File URL"
+                  }
+                },
+                "type": "object",
+                "x-ms-visibility": "internal"
+              }
+            },
+            "application/pdf": {
+              "schema": {
+                "format": "binary",
+                "type": "string"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "description": "Binary File",
+                    "format": "binary",
+                    "type": "string",
+                    "x-ms-summary": "Binary File",
+                    "x-ms-visibility": "important"
+                  },
+                  "file_name": {
+                    "description": "Filename of the document, with the extension. This will be helpful for converting different file-types.",
+                    "type": "string",
+                    "x-ms-summary": "File name"
+                  }
+                },
+                "type": "object",
+                "x-ms-visibility": "internal"
+              }
+            }
+          }
+        },
+        "summary": "Upload a document file",
+        "x-ms-visibility": "important"
+      }
+    },
+    "/upload/attachment": {
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "filename": {
+                      "description": "File name of the attachment",
+                      "type": "string",
+                      "x-ms-summary": "File name"
+                    },
+                    "id": {
+                      "description": "ID of the uploaded attachment to be used in attachment_id when creating a document",
+                      "type": "string",
+                      "x-ms-summary": "Attachment ID"
+                    },
+                    "title": {
+                      "description": "Title of the attachment",
+                      "type": "string",
+                      "x-ms-summary": "Attachment title"
+                    },
+                    "type": {
+                      "description": "Type of the attachment",
+                      "type": "string",
+                      "x-ms-summary": "Attachment type"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Attachments"
+        ],
+        "description": "You can upload attachment files to include with documents you send.\nSuccessful request will return the attachment_id. Use attachment_id to assign an attachment to a document.",
+        "operationId": "UploadAttachment",
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "format": "binary",
+                "type": "string"
+              }
+            },
+            "application/pdf": {
+              "schema": {
+                "format": "binary",
+                "type": "string"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "description": "Binary File",
+                    "format": "binary",
+                    "type": "string",
+                    "x-ms-summary": "Binary File"
+                  },
+                  "file_name": {
+                    "description": "Filename of the document, with the extension. This will be helpful for converting different file-types.",
+                    "type": "string",
+                    "x-ms-summary": "File name"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "summary": "Upload an attachment"
+      }
+    },
+    "/upload/video": {
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "file_status": {
+                      "description": "Status of the video",
+                      "type": "string",
+                      "x-ms-summary": "File status"
+                    },
+                    "filename": {
+                      "description": "File name of the video",
+                      "type": "string",
+                      "x-ms-summary": "File name"
+                    },
+                    "job_id": {
+                      "description": "Id of the processing job converting and compressing the video. Poll for job status updates using /video/job/<ID>.",
+                      "type": "string",
+                      "x-ms-summary": "Job ID"
+                    },
+                    "video_id": {
+                      "description": "ID of the uploaded video to be used in video_id when creating a document",
+                      "type": "string",
+                      "x-ms-summary": "Video ID"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Videos"
+        ],
+        "description": "You can upload attachment files to include with documents you send.\nSuccessful request will return the attachment_id. Use attachment_id to assign an attachment to a document.",
+        "operationId": "UploadVideo",
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "format": "binary",
+                "type": "string"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "description": "Binary File",
+                    "format": "binary",
+                    "type": "string",
+                    "x-ms-summary": "Binary File"
+                  },
+                  "file_name": {
+                    "description": "Filename of the video, with the extension. This will be helpful for converting different file-types.",
+                    "type": "string",
+                    "x-ms-summary": "File name"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "summary": "Upload a video"
       }
     },
     "/users": {
@@ -1196,7 +2203,7 @@
                           "team_name": {
                             "type": "string"
                           },
-                          "users": {
+                          "user_id": {
                             "type": "string"
                           }
                         },
@@ -1219,99 +2226,64 @@
           "Users"
         ],
         "description": "Fetch a list of active users for the current authenticated entity",
-        "operationId": "get-users",
+        "operationId": "ListUsers",
         "summary": "List users"
-      }
-    },
-    "/users/me": {
-      "get": {
+      },
+      "post": {
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
                   "properties": {
-                    "entities": {
-                      "items": {
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "plan": {
-                            "type": "string"
-                          },
-                          "plan_title": {
-                            "type": "string"
-                          },
-                          "role": {
-                            "type": "string"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "type": "array"
+                    "email": {
+                      "description": "Email address of the user",
+                      "type": "string"
                     },
-                    "user": {
-                      "properties": {
-                        "app_mode": {
-                          "type": "string"
-                        },
-                        "disallow_create": {
-                          "type": "boolean"
-                        },
-                        "email": {
-                          "type": "string"
-                        },
-                        "entity_id": {
-                          "type": "string"
-                        },
-                        "entity_name": {
-                          "type": "string"
-                        },
-                        "first_name": {
-                          "type": "string"
-                        },
-                        "id": {
-                          "type": "string"
-                        },
-                        "language": {
-                          "type": "string"
-                        },
-                        "last_name": {
-                          "type": "string"
-                        },
-                        "mobile": {
-                          "type": "string"
-                        },
-                        "note": {
-                          "type": "string"
-                        },
-                        "phone": {
-                          "type": "string"
-                        },
-                        "role": {
-                          "type": "string"
-                        },
-                        "status": {
-                          "type": "string"
-                        },
-                        "team_id": {
-                          "type": "string"
-                        },
-                        "thumb_url": {
-                          "type": "string"
-                        },
-                        "timezone": {
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        }
-                      },
-                      "type": "object"
+                    "first_name": {
+                      "description": "First name of the user",
+                      "type": "string"
+                    },
+                    "last_name": {
+                      "description": "Last name of the user",
+                      "type": "string"
+                    },
+                    "mobile": {
+                      "description": "Mobile number in international format",
+                      "type": "string"
+                    },
+                    "note": {
+                      "description": "Optional internal note for user",
+                      "type": "string"
+                    },
+                    "phone": {
+                      "description": "Phone number in international format",
+                      "type": "string"
+                    },
+                    "role": {
+                      "enum": [
+                        "user",
+                        "manager",
+                        "admin"
+                      ],
+                      "example": "user",
+                      "type": "string"
+                    },
+                    "skip_invitation": {
+                      "enum": [
+                        true,
+                        false
+                      ],
+                      "example": false,
+                      "nullable": true,
+                      "type": "boolean"
+                    },
+                    "team_id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "description": "The title of the user, ex. CEO, Sales manager",
+                      "type": "string"
                     }
                   },
                   "type": "object"
@@ -1319,28 +2291,112 @@
               }
             },
             "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         },
         "tags": [
           "Users"
         ],
-        "description": "Receive details and available entities of the current authenticated user",
-        "operationId": "get-users-me",
-        "summary": "Get current user"
+        "description": "This will create a new contact in the database for the current entity",
+        "operationId": "CreateUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "examples": {
+                "Example": {
+                  "value": {
+                    "company_name": "Doe Inc.",
+                    "company_number": "5678901",
+                    "email": "jane@doe.com",
+                    "first_name": "Jane",
+                    "last_name": "Doe",
+                    "mobile": "+12345678901",
+                    "note": "Just a random contact",
+                    "phone": "+46401234567",
+                    "title": "CEO"
+                  }
+                }
+              },
+              "schema": {
+                "properties": {
+                  "company_name": {
+                    "description": "Associated company name",
+                    "type": "string"
+                  },
+                  "company_number": {
+                    "description": "Associated company number",
+                    "type": "string"
+                  },
+                  "email": {
+                    "description": "Email address of the contact",
+                    "type": "string"
+                  },
+                  "first_name": {
+                    "description": "First name of the contact",
+                    "type": "string"
+                  },
+                  "fullname": {
+                    "description": "Use to specify full name instead of first/last name",
+                    "type": "string"
+                  },
+                  "last_name": {
+                    "description": "Last name of the contact",
+                    "type": "string"
+                  },
+                  "mobile": {
+                    "description": "Mobile number in international format",
+                    "type": "string"
+                  },
+                  "note": {
+                    "description": "Optional internal note for contact",
+                    "type": "string"
+                  },
+                  "phone": {
+                    "description": "Phone number in international format",
+                    "type": "string"
+                  },
+                  "title": {
+                    "description": "The title of the contact, ex. CEO, Sales manager",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "description": "A JSON object containing contact information",
+          "required": true
+        },
+        "summary": "Create user",
+        "x-ms-visibility": "important"
       }
     },
     "/users/{userId}": {
-      "parameters": [
-        {
-          "in": "path",
-          "name": "userId",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
       "get": {
+        "parameters": [
+          {
+            "description": "User ID",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-dynamic-values": {
+              "operationId": "ListUsers",
+              "value-collection": "users",
+              "value-path": "user_id",
+              "value-title": "name"
+            },
+            "x-ms-summary": "User ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1372,62 +2428,60 @@
                   }
                 },
                 "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Users"
+        ],
+        "description": "This call will return details of a single user.\nReceive details and available entities of the current authenticated user using user-id *me*",
+        "operationId": "GetUserDetails",
+        "summary": "Get user details"
+      }
+    },
+    "/videos": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
                   "properties": {
-                    "user": {
+                    "videos": {
                       "items": {
                         "properties": {
-                          "app_mode": {
-                            "type": "string"
-                          },
-                          "disallow_create": {
+                          "editable": {
                             "type": "boolean"
                           },
-                          "email": {
-                            "type": "string"
+                          "published": {
+                            "type": "boolean"
                           },
-                          "entity_id": {
-                            "type": "string"
-                          },
-                          "entity_name": {
-                            "type": "string"
-                          },
-                          "first_name": {
-                            "type": "string"
-                          },
-                          "id": {
-                            "type": "string"
-                          },
-                          "language": {
-                            "type": "string"
-                          },
-                          "last_name": {
-                            "type": "string"
-                          },
-                          "mobile": {
-                            "type": "string"
-                          },
-                          "note": {
-                            "type": "string"
-                          },
-                          "phone": {
-                            "type": "string"
-                          },
-                          "role": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string"
-                          },
-                          "team_id": {
-                            "type": "string"
+                          "saved": {
+                            "type": "boolean"
                           },
                           "thumb_url": {
                             "type": "string"
                           },
-                          "timezone": {
+                          "video_id": {
                             "type": "string"
                           },
-                          "title": {
+                          "video_title": {
+                            "type": "string"
+                          },
+                          "video_type": {
+                            "type": "string"
+                          },
+                          "video_url": {
                             "type": "string"
                           }
                         },
@@ -1441,19 +2495,42 @@
               }
             },
             "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
           }
         },
         "tags": [
-          "Users"
+          "Videos"
         ],
-        "description": "This call will return details of a single user",
-        "operationId": "get-users-userId",
-        "summary": "Get user details"
+        "description": "Receive a list of available videos on the entity. You can add new videos in the mobile app or inside GetAccept.",
+        "operationId": "ListVideos",
+        "summary": "List videos"
       }
     }
   },
   "components": {
     "responses": {
+      "AccessDenied": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        },
+        "description": "Access denied"
+      },
+      "Invalid": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        },
+        "description": "Invalid data"
+      },
       "NotFound": {
         "content": {
           "application/json": {
@@ -1465,7 +2542,37 @@
         "description": "The specified resource was not found"
       },
       "Unauthorized": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        },
         "description": "Unauthorized"
+      }
+    },
+    "headers": {
+      "X-Rate-Limit-Limit": {
+        "description": "The number of allowed requests in the current period",
+        "schema": {
+          "format": "int32",
+          "type": "integer"
+        }
+      },
+      "X-Rate-Limit-Remaining": {
+        "description": "The number of remaining requests in the current period",
+        "schema": {
+          "format": "int32",
+          "type": "integer"
+        }
+      },
+      "X-Rate-Limit-Reset": {
+        "description": "The number of seconds left in the current period",
+        "schema": {
+          "format": "int32",
+          "type": "integer"
+        }
       }
     },
     "schemas": {
@@ -1666,7 +2773,7 @@
             "type": "integer"
           }
         },
-        "title": "Document",
+        "title": "Document response",
         "type": "object"
       },
       "Error": {
@@ -1707,6 +2814,7 @@
             "type": "string"
           },
           "status": {
+            "nullable": true,
             "type": "integer"
           },
           "subscription_id": {
@@ -1716,23 +2824,396 @@
             "type": "string"
           }
         },
-        "title": "Subscription",
+        "title": "Subscription request",
+        "type": "object"
+      },
+      "User": {
+        "properties": {
+          "app_mode": {
+            "type": "string"
+          },
+          "disallow_create": {
+            "type": "boolean"
+          },
+          "email": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_name": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "mobile": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "team_id": {
+            "type": "string"
+          },
+          "thumb_url": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "title": "User response",
+        "type": "object"
+      },
+      "Webhook": {
+        "properties": {
+          "custom_fields": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "document": {
+            "properties": {
+              "tags": {
+                "type": "string",
+                "x-ms-summary": "Document tags"
+              },
+              "auto_comment_email": {
+                "type": "string",
+                "x-ms-visibility": "advanced"
+              },
+              "auto_comment_text": {
+                "type": "string",
+                "x-ms-summary": "Automatic chat text",
+                "x-ms-visibility": "advanced"
+              },
+              "company_id": {
+                "type": "string",
+                "x-ms-visibility": "advanced"
+              },
+              "company_logo_url": {
+                "type": "string",
+                "x-ms-visibility": "advanced"
+              },
+              "company_name": {
+                "type": "string",
+                "x-ms-visibility": "advanced"
+              },
+              "company_number": {
+                "type": "string",
+                "x-ms-visibility": "advanced"
+              },
+              "download_url": {
+                "type": "string",
+                "x-ms-summary": "Download URL"
+              },
+              "email_send_message": {
+                "type": "string",
+                "x-ms-summary": "Email message"
+              },
+              "email_send_subject": {
+                "type": "string",
+                "x-ms-summary": "Email Subject"
+              },
+              "email_send_template_id": {
+                "type": "string",
+                "x-ms-visibility": "advanced"
+              },
+              "entity_auto_comment_text": {
+                "type": "string",
+                "x-ms-visibility": "advanced"
+              },
+              "expiration_date": {
+                "type": "string",
+                "x-ms-summary": "Expiration date"
+              },
+              "external_client_id": {
+                "type": "string",
+                "x-ms-visibility": "advanced"
+              },
+              "external_editor_id": {
+                "type": "string",
+                "x-ms-visibility": "advanced"
+              },
+              "external_editor_type": {
+                "type": "string",
+                "x-ms-visibility": "advanced"
+              },
+              "external_id": {
+                "type": "string",
+                "x-ms-summary": "External ID"
+              },
+              "field_count": {
+                "type": "integer",
+                "x-ms-visibility": "advanced"
+              },
+              "id": {
+                "type": "string",
+                "x-ms-summary": "Document ID",
+                "x-ms-visibility": "important"
+              },
+              "is_auto_comment": {
+                "type": "boolean",
+                "x-ms-visibility": "advanced"
+              },
+              "is_auto_comment_email": {
+                "type": "boolean",
+                "x-ms-visibility": "advanced"
+              },
+              "is_identify_recipient": {
+                "type": "boolean",
+                "x-ms-visibility": "advanced"
+              },
+              "is_private": {
+                "type": "boolean",
+                "x-ms-visibility": "advanced"
+              },
+              "is_reminder_sending": {
+                "type": "boolean",
+                "x-ms-visibility": "advanced"
+              },
+              "is_scheduled_sending": {
+                "type": "boolean",
+                "x-ms-visibility": "advanced"
+              },
+              "is_selfsign": {
+                "type": "boolean",
+                "x-ms-visibility": "advanced"
+              },
+              "is_signed": {
+                "type": "boolean",
+                "x-ms-visibility": "advanced"
+              },
+              "is_signing": {
+                "type": "boolean",
+                "x-ms-visibility": "advanced"
+              },
+              "is_signing_biometric": {
+                "type": "boolean",
+                "x-ms-visibility": "advanced"
+              },
+              "is_signing_forward": {
+                "type": "boolean",
+                "x-ms-visibility": "advanced"
+              },
+              "is_signing_initials": {
+                "type": "boolean",
+                "x-ms-visibility": "advanced"
+              },
+              "is_signing_order": {
+                "type": "boolean",
+                "x-ms-visibility": "advanced"
+              },
+              "is_video": {
+                "type": "boolean",
+                "x-ms-visibility": "advanced"
+              },
+              "name": {
+                "type": "string",
+                "x-ms-summary": "Document name",
+                "x-ms-visibility": "important"
+              },
+              "parent_id": {
+                "type": "string",
+                "x-ms-summary": "Parent ID"
+              },
+              "preview_url": {
+                "type": "string",
+                "x-ms-summary": "Preview URL",
+                "x-ms-visibility": "advanced"
+              },
+              "scheduled_sending_time": {
+                "type": "string",
+                "x-ms-visibility": "advanced"
+              },
+              "send_date": {
+                "type": "string",
+                "x-ms-summary": "Send date"
+              },
+              "sender_email": {
+                "type": "string",
+                "x-ms-summary": "Sender email"
+              },
+              "sender_name": {
+                "type": "string",
+                "x-ms-summary": "Sender name"
+              },
+              "sender_thumb_url": {
+                "type": "string",
+                "x-ms-visibility": "advanced"
+              },
+              "status": {
+                "type": "string",
+                "x-ms-summary": "Document status",
+                "x-ms-visibility": "important"
+              },
+              "thumb_url": {
+                "type": "string",
+                "x-ms-summary": "Document thumb URL"
+              },
+              "type": {
+                "type": "string",
+                "x-ms-summary": "Document type"
+              },
+              "unique_id": {
+                "type": "integer",
+                "x-ms-summary": "Unique ID"
+              },
+              "user_id": {
+                "type": "string",
+                "x-ms-summary": "User ID"
+              },
+              "value": {
+                "type": "integer",
+                "x-ms-summary": "Document value"
+              }
+            },
+            "type": "object"
+          },
+          "entity": {
+            "properties": {
+              "custom_domain": {
+                "type": "string",
+                "x-ms-summary": "Entity custom domain",
+                "x-ms-visibility": "advanced"
+              },
+              "email_send_message": {
+                "type": "string",
+                "x-ms-summary": "Default email message",
+                "x-ms-visibility": "advanced"
+              },
+              "email_send_subject": {
+                "type": "string",
+                "x-ms-summary": "Default email subject",
+                "x-ms-visibility": "advanced"
+              },
+              "sub_domain": {
+                "type": "string",
+                "x-ms-summary": "Entity sub-domain",
+                "x-ms-visibility": "advanced"
+              }
+            },
+            "type": "object"
+          },
+          "event": {
+            "type": "string",
+            "x-ms-summary": "Event name"
+          },
+          "event_action": {
+            "type": "string",
+            "x-ms-summary": "Event action"
+          },
+          "event_type": {
+            "type": "string",
+            "x-ms-summary": "Event type"
+          },
+          "recipient": {
+            "properties": {
+              "company_name": {
+                "type": "string",
+                "x-ms-summary": "Company name",
+                "x-ms-visibility": "important"
+              },
+              "company_number": {
+                "type": "string",
+                "x-ms-summary": "Company number",
+                "x-ms-visibility": "important"
+              },
+              "email": {
+                "type": "string",
+                "x-ms-summary": "Recipient email",
+                "x-ms-visibility": "important"
+              },
+              "first_name": {
+                "type": "string",
+                "x-ms-summary": "Recipient first name"
+              },
+              "fullname": {
+                "type": "string",
+                "x-ms-summary": "Recipient name",
+                "x-ms-visibility": "important"
+              },
+              "gender": {
+                "type": "string",
+                "x-ms-summary": "Recipient gender",
+                "x-ms-visibility": "advanced"
+              },
+              "last_name": {
+                "type": "string",
+                "x-ms-summary": "Recipient last name"
+              },
+              "mobile": {
+                "type": "string",
+                "x-ms-summary": "Recipient mobile"
+              },
+              "note": {
+                "type": "string",
+                "x-ms-summary": "Recipient note"
+              },
+              "order_num": {
+                "type": "string",
+                "x-ms-summary": "Signing order",
+                "x-ms-visibility": "advanced"
+              },
+              "role": {
+                "type": "string",
+                "x-ms-summary": "Template role",
+                "x-ms-visibility": "advanced"
+              },
+              "status": {
+                "type": "string",
+                "x-ms-summary": "Recipient status"
+              },
+              "thumb_url": {
+                "type": "string",
+                "x-ms-summary": "Recipient thumb URL"
+              },
+              "title": {
+                "type": "string",
+                "x-ms-summary": "Recipient title"
+              }
+            },
+            "type": "object"
+          },
+          "subscription_id": {
+            "type": "string",
+            "x-ms-summary": "Subscription ID"
+          }
+        },
+        "title": "Subscription response",
         "type": "object"
       }
     },
     "securitySchemes": {
-      "BearerAuth": {
-        "bearerFormat": "JWT",
-        "description": "Enter your bearer token in the format **bearer &lt;token>**",
-        "scheme": "bearer",
-        "type": "http"
-      },
-      "oauth2_auth": {
+      "Oauth2": {
         "description": "For testing purpose, use client_id **api** and client_secret **app**",
         "flows": {
           "authorizationCode": {
             "authorizationUrl": "https://app.getaccept.com/oauth2/authorize",
-            "refreshUrl": "https://app.getaccept.com/oauth2/refresh",
+            "refreshUrl": "https://app.getaccept.com/oauth2/token",
             "scopes": {
               "basic": "Grants basic access to operations"
             },
@@ -1740,17 +3221,23 @@
           }
         },
         "type": "oauth2"
+      },
+      "Token": {
+        "bearerFormat": "JWT",
+        "description": "Enter your bearer token in the format **bearer &lt;token>**",
+        "scheme": "bearer",
+        "type": "http"
       }
     }
   },
   "security": [
     {
-      "oauth2_auth": [
+      "Oauth2": [
         "basic"
       ]
     },
     {
-      "BearerAuth": []
+      "Token": []
     }
   ],
   "tags": [
@@ -1760,6 +3247,13 @@
       },
       "description": "Authentication with the GetAccept API can be made using JWT tokens (JSON Web Tokens) or OAuth 2.0 Authorization Framework http://oauth.net/2/  All requests must be made via HTTPS. All configuration URLs (webhooks, etc) should begin with https:// as well.",
       "name": "Authentication"
+    },
+    {
+      "externalDocs": {
+        "url": "https://app.getaccept.com/api/#contacts"
+      },
+      "description": "Everything related to contacts",
+      "name": "Contacts"
     },
     {
       "externalDocs": {
@@ -1788,6 +3282,34 @@
       },
       "description": "General user methods for creating, listing of users, single user details and statistics and managing existing users.",
       "name": "Users"
+    },
+    {
+      "externalDocs": {
+        "url": "https://app.getaccept.com/api/#attachments"
+      },
+      "description": "You can upload an attachment and reuse it in many documents.",
+      "name": "Attachments"
+    },
+    {
+      "externalDocs": {
+        "url": "https://app.getaccept.com/api/#video"
+      },
+      "description": "You can upload videos and reuse it in many documents.",
+      "name": "Videos"
+    }
+  ],
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://www.getaccept.com"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://www.getaccept.com/privacy-policy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "Sales and CRM,Productivity"
     }
   ]
 }

@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
-  title: GetAccept API
+  title: GetAccept
   version: '1.6'
   contact:
-    name: GetAccept API
+    name: GetAccept API Team
     email: integrations@getaccept.com
     url: 'https://app.getaccept.com/api'
   termsOfService: 'https://www.getaccept.com/terms.html'
@@ -77,16 +77,21 @@ paths:
                     minimum: 0
                     format: int64
                     type: integer
-      operationId: post-auth
+        '400':
+          $ref: '#/components/responses/Invalid'
+      operationId: Authenticate
       description: |-
         Token based authentication is recommended for server-based access or access from clients where OAuth is not suitable. Access tokens has to be requested using an administrators login credentials.
         Requests should include the header Content-Type with value application/json
       parameters: []
       security: []
       requestBody:
+        required: true
+        description: A JSON object containing authentication credentials
         content:
           application/json:
             schema:
+              type: object
               x-examples:
                 Example:
                   email: user@example.com
@@ -108,11 +113,10 @@ paths:
                 client_id:
                   description: The client id of your app if you received one from our API team
                   type: string
+                  default: ''
               required:
                 - email
                 - password
-        description: ''
-        required: true
   /refresh:
     get:
       summary: Refresh an access token
@@ -130,7 +134,7 @@ paths:
                     type: string
                   expires_in:
                     type: integer
-      operationId: get-refresh
+      operationId: RefreshToken
       description: You can request a refreshed of the access token before the original token has expired.
   /documents:
     get:
@@ -153,33 +157,6 @@ paths:
                       type: string
                     sender_name:
                       type: string
-                    recipients:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          recipient_status:
-                            type: string
-                          first_name:
-                            type: string
-                          role:
-                            type: string
-                          company_name:
-                            type: string
-                          note:
-                            type: string
-                          status:
-                            type: string
-                          company_number:
-                            type: string
-                          last_name:
-                            type: string
-                          email:
-                            type: string
-                          thumb_url:
-                            type: string
-                          gender:
-                            type: string
                     name:
                       type: string
                     is_signing:
@@ -198,7 +175,10 @@ paths:
                       type: string
                     is_private:
                       type: boolean
-      operationId: get-documents
+              examples: {}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: ListDocuments
       description: Get a list of available documents
       tags:
         - Documents
@@ -217,6 +197,7 @@ paths:
           in: query
           name: filter
           description: Filter list on status
+          x-ms-summary: Filter list on status
           explode: false
         - schema:
             type: string
@@ -230,7 +211,8 @@ paths:
             example: created
           in: query
           name: sort_by
-          description: "How to sort results\t"
+          description: How to sort results
+          x-ms-summary: How to sort results
         - schema:
             type: string
             enum:
@@ -239,7 +221,8 @@ paths:
             example: desc
           in: query
           name: sort_order
-          description: "Sort order of results\t"
+          description: Sort order of results
+          x-ms-summary: Sort order of results
         - schema:
             type: boolean
             enum:
@@ -248,7 +231,8 @@ paths:
             example: true
           in: query
           name: showteam
-          description: "Include documents from team members\t"
+          description: Include documents from team members
+          x-ms-summary: Include documents from team members
         - schema:
             type: boolean
             enum:
@@ -258,28 +242,31 @@ paths:
           in: query
           name: showall
           description: Include all documents from entity
+          x-ms-summary: Include all documents from entity
         - schema:
             type: string
           in: query
           name: external_id
           description: An external ID is a custom field which can contain a unique record identifier from a system outside of GetAccept
+          x-ms-summary: External ID
         - schema:
             type: number
-            example: 0
-            default: 0
+            example: 50
           in: query
           name: offset
           description: Start list from record x until limit
+          x-ms-summary: Offset
         - schema:
             type: number
             example: 100
-            default: 100
           in: query
           name: limit
-          description: "Number of records to list\t"
+          description: Number of records to list
+          x-ms-summary: Limit
     post:
-      summary: Create document
-      operationId: post-documents
+      summary: Create and send document or template
+      x-ms-visibility: important
+      operationId: CreateDocument
       responses:
         '200':
           description: OK
@@ -287,6 +274,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Document'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
       description: |-
         You must create a document to be able to send it to a recipient. When creating a document you can refer to previously uploaded files with file_id or you can choose to create a document and upload the files in on API post. You can only upload ONE file when including a file in the create document POST.
 
@@ -296,109 +287,382 @@ paths:
 
         All events are recorded using requestor IP address. You can override this using header CLIENT_IP containing the end-users public IP address.
       requestBody:
+        required: true
+        description: A JSON object containing document information
         content:
           application/json:
             schema:
               type: object
+              required:
+                - name
               properties:
+                name:
+                  type: string
+                  description: Enter a name of the document
+                  x-ms-summary: Document name
+                  x-ms-visibility: important
+                template_id:
+                  type: string
+                  description: Select a template to use for the sending
+                  x-ms-summary: Template ID
+                  x-ms-visibility: important
+                  x-ms-dynamic-values:
+                    operationId: ListTemplates
+                    value-path: id
+                    value-collection: templates
+                    value-title: name
+                type:
+                  type: string
+                  description: Set the type/category of the document
+                  x-ms-summary: Document type
+                  x-ms-visibility: important
+                  enum:
+                    - sales
+                    - introduction
+                    - hr
+                    - other
+                  example: sales
+                  default: sales
+                value:
+                  type: integer
+                  description: Value of deal or document
+                  x-ms-summary: Document value
+                  x-ms-visibility: important
+                  nullable: true
+                sender_id:
+                  type: string
+                  description: Send from other user than authenticated
+                  x-ms-summary: Sender user override
+                  x-ms-visibility: advanced
+                  x-ms-dynamic-values:
+                    operationId: ListUsers
+                    value-path: user_id
+                    value-collection: users
+                    value-title: email
+                sender_email:
+                  type: string
+                  description: Send from other email than authenticated user
+                  x-ms-summary: Sender email override
+                  x-ms-visibility: advanced
                 is_signing_initials:
                   type: boolean
+                  description: Sign document using recipient initials
+                  x-ms-summary: Sign with initials
+                  x-ms-visibility: advanced
+                  nullable: true
+                  enum:
+                    - true
+                    - false
+                  example: true
                 is_reminder_sending:
                   type: boolean
+                  description: Should automatic reminders be sent
+                  x-ms-summary: Send reminders
+                  x-ms-visibility: advanced
+                  nullable: true
+                  enum:
+                    - true
+                    - false
+                  example: true
                 is_automatic_sending:
                   type: boolean
+                  description: If the document should be sent after creation
+                  x-ms-summary: Send automatically
+                  x-ms-visibility: important
+                  nullable: true
+                  enum:
+                    - true
+                    - false
+                  example: true
+                video_id:
+                  type: string
+                  description: Select a video to use for the sending
+                  x-ms-summary: Video ID
+                  x-ms-visibility: advanced
+                  x-ms-dynamic-values:
+                    operationId: ListVideos
+                    value-path: video_id
+                    value-collection: videos
+                    value-title: video_title
                 attachments:
                   type: array
+                  description: Attachments
+                  x-ms-summary: Attachment
                   items:
                     type: object
                     properties:
                       type:
                         type: string
+                        description: file or external where file is an uploaded file and external is a link to an external file
+                        x-ms-summary: Type
+                        enum:
+                          - file
+                          - external
                       id:
                         type: string
+                        description: Attachment ID received from list or after upload
+                        x-ms-summary: ID
+                        x-ms-dynamic-values:
+                          operationId: ListAttachments
+                          value-path: attachment_id
+                          value-collection: attachments
+                          value-title: attachment_title
                       require_view:
                         type: boolean
-                type:
-                  type: string
+                        description: Require that recipient view the attachment
+                        x-ms-summary: Require view
+                        nullable: true
+                        enum:
+                          - true
+                          - false
+                        example: true
                 is_signing:
                   type: boolean
+                  description: Should the document be sent for signing
+                  x-ms-summary: Sign document
+                  nullable: true
+                  enum:
+                    - true
+                    - false
+                  example: true
                 is_sms_sending:
                   type: boolean
+                  description: Should the document be sent to recipient mobile by text
+                  x-ms-summary: Send SMS
+                  nullable: true
+                  enum:
+                    - true
+                    - false
+                  example: true
                 file_ids:
                   type: string
+                  description: 'Comma-separated, unique file-ids received when uploading files'
+                  x-ms-summary: File IDs
+                file_content:
+                  type: string
+                  description: Base64 encoded file content
+                  x-ms-summary: File content
+                file_url:
+                  type: string
+                  description: Url to document file. Documents must be public available for download
+                  x-ms-summary: File URL
                 is_signing_forward:
                   type: boolean
+                  description: Should recipients be able to transfer signature rights
+                  x-ms-summary: Allow signature transfer
+                  nullable: true
+                  enum:
+                    - true
+                    - false
+                  example: true
                 recipients:
                   type: array
+                  x-ms-summary: Recipient
+                  x-ms-visibility: important
                   items:
                     type: object
                     properties:
-                      verify_qna_sign:
-                        type: boolean
-                      verify_qna_question:
-                        type: string
-                      verify_qna:
-                        type: boolean
-                      company_name:
-                        type: string
-                      company_number:
-                        type: string
-                      verify_qna_open:
-                        type: boolean
-                      verify_qna_answer:
-                        type: string
-                      verify_sms_sign:
-                        type: boolean
-                      verify_eid_type:
-                        type: string
-                      note:
-                        type: string
-                      email:
-                        type: string
-                      mobile:
-                        type: string
-                      verify_sms:
-                        type: boolean
-                      verify_sms_open:
-                        type: boolean
-                      last_name:
-                        type: string
-                      role:
-                        type: string
-                      order_num:
-                        type: integer
-                      verify_eid:
-                        type: boolean
                       first_name:
                         type: string
+                        description: Recipient first name
+                        x-ms-summary: First name
+                        x-ms-visibility: important
+                      last_name:
+                        type: string
+                        description: Last name of recipient
+                        x-ms-summary: Last name
+                        x-ms-visibility: important
+                      role:
+                        type: string
+                        description: The kind of recipient in the document
+                        x-ms-summary: Recipient type
+                        x-ms-visibility: important
+                        enum:
+                          - signer
+                          - approver
+                          - cc
+                      role_name:
+                        type: string
+                        description: The name of the role in a template
+                        x-ms-summary: Template role
+                        x-ms-visibility: important
+                      verify_qna_sign:
+                        type: boolean
+                        description: Should a question be asked before signing
+                        x-ms-summary: Sign question
+                        x-ms-visibility: internal
+                        nullable: true
+                        enum:
+                          - true
+                          - false
+                        example: true
+                      verify_qna_question:
+                        type: string
+                        description: Question to ask for verification
+                        x-ms-summary: Verification question
+                        x-ms-visibility: internal
+                        example: Enter your SSN
+                      verify_qna:
+                        type: boolean
+                        description: Should a question be asked
+                        x-ms-summary: Enable question
+                        x-ms-visibility: internal
+                        nullable: true
+                        enum:
+                          - true
+                          - false
+                        example: true
+                      company_name:
+                        type: string
+                        description: Company name of the recipient
+                        x-ms-summary: Company name
+                        x-ms-visibility: important
+                      company_number:
+                        type: string
+                        description: Company number of the recipient
+                        x-ms-summary: Company number
+                        x-ms-visibility: important
+                      verify_qna_open:
+                        type: boolean
+                        description: Should question be asked before opening document
+                        x-ms-summary: Question on open
+                        x-ms-visibility: internal
+                        nullable: true
+                        enum:
+                          - true
+                          - false
+                        example: true
+                      verify_qna_answer:
+                        type: string
+                        description: The answer to question
+                        x-ms-summary: Verification answer
+                        x-ms-visibility: advanced
+                        example: '123456789'
+                      verify_sms_sign:
+                        type: boolean
+                        description: Should a SMS verify the recipient before signing
+                        x-ms-summary: Verify by SMS
+                        x-ms-visibility: internal
+                        nullable: true
+                        enum:
+                          - true
+                          - false
+                        example: true
+                      verify_eid_type:
+                        type: string
+                        description: EID type to be used for personal verification
+                        x-ms-summary: EID type
+                        x-ms-visibility: internal
+                      note:
+                        type: string
+                        description: Additional note for a recipient
+                        x-ms-summary: Note
+                        x-ms-visibility: internal
+                      email:
+                        type: string
+                        description: Email address of the recipient
+                        x-ms-summary: Email
+                        x-ms-visibility: important
+                      mobile:
+                        type: string
+                        description: Mobile phone in international format
+                        x-ms-summary: Mobile
+                      verify_sms:
+                        type: boolean
+                        description: Verify recipient by SMS
+                        x-ms-summary: Verify SMS
+                        x-ms-visibility: internal
+                        nullable: true
+                        enum:
+                          - true
+                          - false
+                        example: true
+                      verify_sms_open:
+                        type: boolean
+                        description: Verify SMS on open
+                        x-ms-summary: Verify SMS on open
+                        x-ms-visibility: internal
+                        enum:
+                          - true
+                          - false
+                        example: true
+                      order_num:
+                        type: integer
+                        description: If signing order is enabled
+                        x-ms-summary: Signing order
+                        x-ms-visibility: internal
+                        nullable: true
+                        example: 1
+                      verify_eid:
+                        type: boolean
+                        description: Verify using EID
+                        x-ms-summary: Verify EID
+                        x-ms-visibility: internal
+                        nullable: true
+                        enum:
+                          - true
+                          - false
+                        example: true
                 is_signing_biometric:
                   type: boolean
+                  description: Use handwritten signature
+                  x-ms-summary: Handwritten signature
+                  nullable: true
+                  enum:
+                    - true
+                    - false
+                  example: true
                 expiration_date:
                   type: string
+                  description: Date and time when the document should expire
+                  x-ms-summary: Expiration date
+                  format: date-time
+                is_scheduled_sending:
+                  type: boolean
+                  description: Should the sending be scheduled for sending in the future
+                  x-ms-summary: Schedule sending
+                  nullable: true
+                  enum:
+                    - true
+                    - false
+                  example: true
+                scheduled_sending_time:
+                  type: string
+                  description: Date and time when the document should be sent out
+                  x-ms-summary: Schedule send date
+                  format: date-time
                 custom_fields:
                   type: array
+                  description: Custom field
+                  x-ms-summary: Custom
                   items:
                     type: object
                     properties:
                       id:
                         type: string
+                        description: ID of custom template field
+                        x-ms-summary: Field ID
+                        # x-ms-dynamic-values:
+                        #   operationId: ListDocumentFields
+                        #   value-collection: fields
+                        #   value-path: field_id
+                        #   value-title: field_label
+                        #   parameters:
+                        #     documentId:
+                        #       parameterReference: requestBody/template_id
+                      name:
+                        type: string
+                        description: Name of custom template field
+                        x-ms-summary: Field Name
                       value:
                         type: string
-                value:
-                  type: integer
+                        description: Value of custom template field
+                        x-ms-summary: Field Value
                 external_id:
                   type: string
-                name:
-                  type: string
-                template_id:
-                  type: string
-                  x-ms-dynamic-values:
-                    operationId: get-templates,
-                    value-path: id,
-                    value-collection: templates,
-                    value-title: name
+                  description: External system ID for identification
+                  x-ms-summary: External ID
             examples: {}
-        description: ''
       tags:
         - Documents
   /users:
@@ -419,7 +683,7 @@ paths:
                     items:
                       type: object
                       properties:
-                        users:
+                        user_id:
                           type: string
                         name:
                           type: string
@@ -439,15 +703,115 @@ paths:
                           type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
-      operationId: get-users
+      operationId: ListUsers
       description: Fetch a list of active users for the current authenticated entity
-  '/users/{userId}':
-    parameters:
-      - schema:
-          type: string
-        name: userId
-        in: path
+    post:
+      summary: Create user
+      tags:
+        - Users
+      operationId: CreateUser
+      x-ms-visibility: important
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  first_name:
+                    type: string
+                    description: First name of the user
+                  last_name:
+                    type: string
+                    description: Last name of the user
+                  email:
+                    type: string
+                    description: Email address of the user
+                  title:
+                    type: string
+                    description: 'The title of the user, ex. CEO, Sales manager'
+                  phone:
+                    type: string
+                    description: Phone number in international format
+                  mobile:
+                    type: string
+                    description: Mobile number in international format
+                  note:
+                    type: string
+                    description: Optional internal note for user
+                  role:
+                    type: string
+                    enum:
+                      - user
+                      - manager
+                      - admin
+                    example: user
+                  team_id:
+                    type: string
+                  skip_invitation:
+                    type: boolean
+                    nullable: true
+                    enum:
+                      - true
+                      - false
+                    example: false
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      description: This will create a new contact in the database for the current entity
+      requestBody:
         required: true
+        description: A JSON object containing contact information
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullname:
+                  type: string
+                  description: Use to specify full name instead of first/last name
+                first_name:
+                  type: string
+                  description: First name of the contact
+                last_name:
+                  type: string
+                  description: Last name of the contact
+                email:
+                  type: string
+                  description: Email address of the contact
+                title:
+                  type: string
+                  description: 'The title of the contact, ex. CEO, Sales manager'
+                phone:
+                  type: string
+                  description: Phone number in international format
+                mobile:
+                  type: string
+                  description: Mobile number in international format
+                note:
+                  type: string
+                  description: Optional internal note for contact
+                company_name:
+                  type: string
+                  description: Associated company name
+                company_number:
+                  type: string
+                  description: Associated company number
+            examples:
+              Example:
+                value:
+                  first_name: Jane
+                  last_name: Doe
+                  email: jane@doe.com
+                  title: CEO
+                  phone: '+46401234567'
+                  mobile: '+12345678901'
+                  note: Just a random contact
+                  company_name: Doe Inc.
+                  company_number: '5678901'
+  '/users/{userId}':
     get:
       summary: Get user details
       tags:
@@ -458,49 +822,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  user:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                        first_name:
-                          type: string
-                        last_name:
-                          type: string
-                        email:
-                          type: string
-                        phone:
-                          type: string
-                        mobile:
-                          type: string
-                        title:
-                          type: string
-                        note:
-                          type: string
-                        thumb_url:
-                          type: string
-                        entity_id:
-                          type: string
-                        entity_name:
-                          type: string
-                        language:
-                          type: string
-                        timezone:
-                          type: string
-                        app_mode:
-                          type: string
-                        role:
-                          type: string
-                        disallow_create:
-                          type: boolean
-                        status:
-                          type: string
-                        team_id:
-                          type: string
+                $ref: '#/components/schemas/User'
               examples:
                 Example:
                   value:
@@ -523,12 +845,31 @@ paths:
                       disallow_create: false
                       status: active
                       team_id: ''
-      operationId: get-users-userId
-      description: 'This call will return details of a single user'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetUserDetails
+      description: |-
+        This call will return details of a single user.
+        Receive details and available entities of the current authenticated user using user-id *me*
+      parameters:
+        - schema:
+            type: string
+          name: userId
+          description: User ID
+          x-ms-summary: User ID
+          x-ms-url-encoding: single
+          in: path
+          required: true
+          x-ms-dynamic-values:
+            operationId: ListUsers
+            value-path: user_id
+            value-collection: users
+            value-title: name
   /templates:
     get:
       summary: List templates
-      x-ms-visibility: important
       tags:
         - Templates
       responses:
@@ -578,15 +919,62 @@ paths:
                           type: string
                         sender_thumb_url:
                           type: string
-      operationId: get-templates
-      description: 'Receive a list of available document templates. You can add new templates under the Templates-section in GetAccept.'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: ListTemplates
+      x-ms-visibility: important
+      description: Receive a list of available document templates. You can add new templates under the Templates-section in GetAccept.
+      parameters:
+        - schema:
+            type: string
+            default: 'true'
+          in: query
+          name: showall
+          description: Show all templates for entity
+        - schema:
+            type: string
+          in: query
+          name: folder_id
+          description: Show templates in a specific folder
+  /videos:
+    get:
+      summary: List videos
+      tags:
+        - Videos
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  videos:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        video_id:
+                          type: string
+                        video_type:
+                          type: string
+                        video_title:
+                          type: string
+                        video_url:
+                          type: string
+                        thumb_url:
+                          type: string
+                        saved:
+                          type: boolean
+                        published:
+                          type: boolean
+                        editable:
+                          type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: ListVideos
+      description: Receive a list of available videos on the entity. You can add new videos in the mobile app or inside GetAccept.
   '/documents/{documentId}':
-    parameters:
-      - schema:
-          type: string
-        name: documentId
-        in: path
-        required: true
     get:
       summary: Get document details
       tags:
@@ -598,19 +986,80 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Document'
-      operationId: get-documents-documentId
-      description: 'Get document details by specifying a document id.'
-  '/documents/{documentId}/send':
-    parameters:
-      - schema:
-          type: string
-        name: documentId
-        in: path
-        required: true
-    post:
-      summary: Send document
-      operationId: post-documents-documentId-send
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetDocumentDetails
+      description: Get document details by specifying a document id.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          x-ms-summary: Document ID
+          x-ms-url-encoding: single
+          required: true
+          x-ms-dynamic-values:
+            operationId: ListDocuments
+            value-path: id
+            value-title: name
+  '/documents/{documentId}/download':
+    get:
+      summary: Download document
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  document_url:
+                    type: string
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+                x-ms-visibility: important
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: DownloadDocument
       x-ms-visibility: important
+      description: "Document file can always be downloaded but most likely you want to download it when it has status Signed. \n\nYou can select to receive a download-url or get the binary file.\n\nThe download URL is accessable 10 minutes after a request has been made."
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          x-ms-summary: Document ID
+          x-ms-url-encoding: single
+          required: true
+        - schema:
+            type: string
+            nullable: true
+            enum:
+              - 'true'
+              - 'false'
+            example: 'true'
+            default: 'true'
+          in: query
+          name: direct
+          description: Return the binary file directly
+          x-ms-summary: Return the binary file directly
+  '/documents/{documentId}/send':
+    post:
+      summary: Send existing document
+      operationId: SendDocument
+      x-ms-visibility: advanced
       responses:
         '200':
           description: OK
@@ -618,11 +1067,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Document'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
       description: |-
         When you send a document via GetAccept, we deliver an email to all recipients, each containing a unique, secured link. This API call triggers the document send action and can only be performed on documents with document_status = draft. The document will be sent to recipients you provided when it was created.
 
         If document was created using self-sign option it will also be self-signed by the authenticated or specified user before sending.
       requestBody:
+        description: An optional JSON object containing sending information
         content:
           application/json:
             schema:
@@ -631,25 +1087,43 @@ paths:
                 sender_id:
                   type: string
                   description: Use this to specify the sender user/owner by id to be used for self-signing the document.
+                  x-ms-dynamic-values:
+                    operationId: ListUsers
+                    value-path: user_id
+                    value-collection: users
+                    value-title: name
                 sender_email:
                   type: string
                   format: email
                   description: Use this to specify the sender user/owner by email address to be used for self-signing the document.
       tags:
         - Documents
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          x-ms-summary: Document ID
+          x-ms-url-encoding: single
+          required: true
+          x-ms-dynamic-values:
+            operationId: ListDocuments
+            value-path: id
+            value-title: name
   '/documents/{documentId}/seal':
-    parameters:
-      - schema:
-          type: string
-        name: documentId
-        in: path
-        required: true
     post:
       summary: Seal document
-      operationId: post-documents-documentId-seal
+      operationId: SealDocument
       responses:
         '200':
           description: OK
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
       description: |-
         If you prefer to send the document manually you can use this method to seal the document. Do not use this method if you send the document automatically or if you use the send document method above.
 
@@ -657,6 +1131,7 @@ paths:
 
         If document was created using self-sign option it will also be self-signed by the authenticated or specified user before sealing.
       requestBody:
+        description: An optional JSON object containing sender information
         content:
           application/json:
             schema:
@@ -665,18 +1140,30 @@ paths:
                 sender_id:
                   type: string
                   description: Use this to specify the sender user/owner by id to be used for self-signing the document.
+                  x-ms-dynamic-values:
+                    operationId: ListUsers
+                    value-path: user_id
+                    value-collection: users
+                    value-title: name
                 sender_email:
                   type: string
                   description: Use this to specify the sender user/owner by email address to be used for self-signing the document.
       tags:
         - Documents
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          x-ms-summary: Document ID
+          x-ms-url-encoding: single
+          required: true
+          x-ms-dynamic-values:
+            operationId: ListDocuments
+            value-path: id
+            value-title: name
   '/documents/{documentId}/recipients':
-    parameters:
-      - schema:
-          type: string
-        name: documentId
-        in: path
-        required: true
     get:
       summary: Get document recipients
       tags:
@@ -723,15 +1210,91 @@ paths:
                       type: string
                     note:
                       type: string
-      operationId: get-documents-documentId-recipients
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: ListRecipients
       description: Get a list of recipients for a specific document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          x-ms-summary: Document ID
+          x-ms-url-encoding: single
+          required: true
+          x-ms-dynamic-values:
+            operationId: ListDocuments
+            value-path: id
+            value-title: name
+  '/documents/{documentId}/fields':
+    get:
+      summary: Get document recipients
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fields:
+                    type: array
+                    items:
+                      type: object
+                      properties:    
+                        field_id:
+                          type: string
+                        page_id:
+                          type: string
+                        field_type:
+                          type: string
+                        field_label:
+                          type: string
+                        field_value:
+                          type: string
+                        is_collectable:
+                          type: boolean
+                        is_editable:
+                          type: boolean
+                        is_required:
+                          type: boolean
+                        recipient_id:
+                          type: string
+                        recipient_name:
+                          type: string
+                        field_top:
+                          type: integer
+                        field_left:
+                          type: integer
+                        field_width:
+                          type: integer
+                        field_height:
+                          type: integer
+                        validation_regex:
+                          type: string
+                        validation_warning:
+                          type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: ListDocumentFields
+      description: Get a list of fields for a document or template. Can be used both before and after a document has been signed.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          x-ms-summary: Document ID
+          x-ms-url-encoding: single
+          required: true
   '/templates/{templateId}/roles':
-    parameters:
-      - schema:
-          type: string
-        name: templateId
-        in: path
-        required: true
     get:
       summary: Get template roles
       tags:
@@ -763,15 +1326,27 @@ paths:
                           type: string
                         role_id:
                           type: string
-      operationId: get-templates-templateId-roles
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: ListRoles
       description: Receive a list of roles for a specific template.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: templateId
+          description: Template ID
+          x-ms-summary: Template ID
+          x-ms-url-encoding: single
+          required: true
+          x-ms-dynamic-values:
+            operationId: ListTemplates
+            value-path: id
+            value-collection: templates
+            value-title: name
   '/templates/{templateId}/fields':
-    parameters:
-      - schema:
-          type: string
-        name: templateId
-        in: path
-        required: true
     get:
       summary: Get template fields
       tags:
@@ -806,7 +1381,7 @@ paths:
                         is_collectable:
                           type: boolean
                         recipient_id:
-                          type: integer
+                          type: string
                         recipient_name:
                           type: string
                         role_name:
@@ -827,50 +1402,34 @@ paths:
                           type: integer
                         validation_warning:
                           type: string
-      operationId: get-templates-templateId-fields
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: ListFields
       description: Receive a list of fields for a specific template.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: templateId
+          description: Template ID
+          x-ms-summary: Template ID
+          x-ms-url-encoding: single
+          required: true
+          x-ms-dynamic-values:
+            operationId: ListTemplates
+            value-path: id
+            value-collection: templates
+            value-title: name
   /subscriptions:
-    get:
-      summary: List subscriptions
-      tags:
-        - Subscriptions
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    subscription_id:
-                      type: string
-                    status:
-                      type: integer
-                    event:
-                      type: string
-                    host:
-                      type: string
-                    target_url:
-                      type: string
-                    notification_email:
-                      type: string
-                    created_at:
-                      type: string
-                    id:
-                      type: string
-                    payload:
-                      type: string
-                    global:
-                      type: boolean
-      operationId: get-subscriptions
-      description: This call will return a list of active subscriptions
     post:
-      summary: Create subscription
-      operationId: post-subscriptions
-      x-ms-visibility: important,
-      x-ms-trigger: single,
+      summary: Subscribe to event
+      operationId: CreateSubscription
+      x-ms-visibility: important
+      x-ms-summary: Subscribe to event
+      x-ms-trigger: single
+      x-ms-trigger-hint: Trigger a webhook by activating the subscribed event. Example opening a document to trigger document.viewed
       responses:
         '200':
           description: OK
@@ -878,11 +1437,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Subscription'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
       description: |-
         This call will create a new subscription.
         The response will be wrapped in an array even for single object according to REST hook standards.
-        Multiple subscriptions can be posted as an array in one request.
+
+        >Events
+          * `document.created` - Document is created
+          * `document.sent` - Document is sent
+          * `document.viewed` - Document is sent
+          * `document.signed` - Document is signed
+          * `document.approved` - Document is approved
+          * `document.expired` - Document has expired
+          * `document.rejected` - Document is rejected
+          * `document.downloaded` - Document is downloaded
+          * `document.printed` - Document is printed
+          * `document.forwarded` - Document is forwarded
+          * `document.partially_signed` - Document has been partially signed
+          * `document.commented` - Document is commented
+          * `document.hardbounced` - Document is hardbounced
+          * `document.imported` - Document is imported
       requestBody:
+        required: true
+        description: A JSON object containing subscription information
         content:
           application/json:
             schema:
@@ -890,8 +1470,9 @@ paths:
               properties:
                 event:
                   type: string
-                  description: The event to subscribe to
-                  x-ms-visibility: internal
+                  description: Event trigger
+                  x-ms-summary: Event trigger
+                  x-ms-visibility: important
                   enum:
                     - document.created
                     - document.sent
@@ -911,137 +1492,43 @@ paths:
                 target_url:
                   type: string
                   description: The URL to post payload to on event
-                  x-ms-notification-url: true,
-                  x-ms-visibility: internal,
+                  x-ms-notification-url: true
+                  x-ms-visibility: internal
                   example: 'https://abc.x.pipedream.net/'
                 host:
                   type: string
                   description: The host name to send the post to
+                  x-ms-visibility: internal
                 payload:
                   type: string
                   description: Additional payload data to post
+                  x-ms-visibility: advanced
                 global:
                   type: boolean
-                  description: If the webhook should catch events for all entity users.
+                  nullable: true
+                  enum:
+                    - true
+                    - false
                   example: true
+                  default: true
+                  description: If the webhook should catch events for all entity users.
+                  x-ms-summary: All entity users
                 notification_email:
                   type: string
                   example: hostmaster@example.com
                   description: 'If the webhook fails, send a notification to this email instead of the sender'
+                  x-ms-summary: Error email
               required:
                 - event
                 - target_url
-      # openapi 3 callback
-      # callbacks:
-      #   event:
-      #     '{$request.body#/target_url}':
-      #       post:
-      #         requestBody:
-      #           required: true
-      #           content:
-      #             application/json:
-      #               schema:
-      #                 type: object
-      #                 properties:
-      #                   subscription_id:
-      #                     type: string
-      #                   document:
-      #                     type: object
-      #                     properties:
-      #                       name:
-      #                         type: string
-      #                       is_selfsign:
-      #                         type: boolean
-      #                       sign_date:
-      #                         type: string
-      #                       email_send_subject:
-      #                         type: string
-      #                       email_send_message:
-      #                         type: string
-      #                       is_signing:
-      #                         type: boolean
-      #                       is_signing_order:
-      #                         type: boolean
-      #                       is_private:
-      #                         type: boolean
-      #                       is_scheduled_sending:
-      #                         type: boolean
-      #                       is_reminder_sending:
-      #                         type: boolean
-      #                       value:
-      #                         type: integer
-      #                       type:
-      #                         type: string
-      #                       tags:
-      #                         type: string
-      #                       is_signing_initials:
-      #                         type: boolean
-      #                       status:
-      #                         type: string
-      #                       user_id:
-      #                         type: string
-      #                       email_send_template_id:
-      #                         type: string
-      #                       preview_url:
-      #                         type: string
-      #                       download_url:
-      #                         type: string
-      #                       expiration_date:
-      #                         type: string
-      #                       id:
-      #                         type: string
-      #                       company_id:
-      #                         type: string
-      #                       is_signing_biometric:
-      #                         type: boolean
-      #                       scheduled_sending_time:
-      #                         type: string
-      #                       is_video:
-      #                         type: boolean
-      #                       external_id:
-      #                         type: string
-      #                       company_name:
-      #                         type: string
-      #                       send_date:
-      #                         type: string
-      #                       video_id:
-      #                         type: integer
-      #                   entity:
-      #                     type: object
-      #                     properties:
-      #                       email_send_subject:
-      #                         type: string
-      #                       email_send_message:
-      #                         type: string
-      #                   payload:
-      #                     type: string
-      #                   custom_fields:
-      #                     type: object
-      #                     properties:
-      #                       speaker_name:
-      #                         type: string
-      #                       shoe_size:
-      #                         type: string
-      #                   event:
-      #                     type: string
-      #                   event_type:
-      #                     type: string
-      #                   event_action:
-      #                     type: string
-      #         responses:
-      #           '200':
-      #             description: Your server returns this code if it accepts the callback
       tags:
         - Subscriptions
+    x-ms-notification-content:
+      schema:
+        $ref: '#/components/schemas/Webhook'
   '/subscriptions/{subscriptionId}':
-    parameters:
-      - schema:
-          type: string
-        name: subscriptionId
-        in: path
-        required: true
     get:
-      summary: Get subscription
+      summary: Get subscription details
       tags:
         - Subscriptions
       responses:
@@ -1051,22 +1538,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Subscription'
-      operationId: get-subscriptions-subscriptionId
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetSubscriptionDetails
       description: This call will return details of a single subscription
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: subscriptionId
+          description: Subscription ID
+          x-ms-summary: Subscription ID
+          x-ms-url-encoding: single
+          required: true
     delete:
       summary: Delete subscription
-      operationId: delete-subscriptions-subscriptionId
+      operationId: DeleteSubscription
       responses:
         '204':
           description: No Content
       description: Delete a single subscription.
       tags:
         - Subscriptions
-  /users/me:
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: subscriptionId
+          description: Subscription ID
+          x-ms-summary: Subscription ID
+          x-ms-url-encoding: single
+          required: true
+  /contacts:
     get:
-      summary: Get current user
+      summary: List contacts
       tags:
-        - Users
+        - Contacts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+              examples: {}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: ListContacts
+      description: Receive a list of available contact for the current entity
+    post:
+      summary: Create contact
+      tags:
+        - Contacts
+      operationId: CreateContact
+      x-ms-visibility: important
       responses:
         '200':
           description: OK
@@ -1075,62 +1603,287 @@ paths:
               schema:
                 type: object
                 properties:
-                  user:
-                    type: object
-                    properties:
-                      first_name:
-                        type: string
-                      last_name:
-                        type: string
-                      email:
-                        type: string
-                      entity_name:
-                        type: string
-                      app_mode:
-                        type: string
-                      role:
-                        type: string
-                      id:
-                        type: string
-                      mobile:
-                        type: string
-                      language:
-                        type: string
-                      timezone:
-                        type: string
-                      phone:
-                        type: string
-                      note:
-                        type: string
-                      thumb_url:
-                        type: string
-                      entity_id:
-                        type: string
-                      title:
-                        type: string
-                      status:
-                        type: string
-                      team_id:
-                        type: string
-                      disallow_create:
-                        type: boolean
-                  entities:
+                  contact_id:
+                    type: string
+                    example: abc58129f
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      description: This will create a new contact in the database for the current entity
+      requestBody:
+        required: true
+        description: A JSON object containing contact information
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullname:
+                  type: string
+                  description: Use to specify full name instead of first/last name
+                first_name:
+                  type: string
+                  description: First name of the contact
+                last_name:
+                  type: string
+                  description: Last name of the contact
+                email:
+                  type: string
+                  description: Email address of the contact
+                title:
+                  type: string
+                  description: 'The title of the contact, ex. CEO, Sales manager'
+                phone:
+                  type: string
+                  description: Phone number in international format
+                mobile:
+                  type: string
+                  description: Mobile number in international format
+                note:
+                  type: string
+                  description: Optional internal note for contact
+                company_name:
+                  type: string
+                  description: Associated company name
+                company_number:
+                  type: string
+                  description: Associated company number
+            examples:
+              Example:
+                value:
+                  first_name: Jane
+                  last_name: Doe
+                  email: jane@doe.com
+                  title: CEO
+                  phone: '+46401234567'
+                  mobile: '+12345678901'
+                  note: Just a random contact
+                  company_name: Doe Inc.
+                  company_number: '5678901'
+  /upload:
+    post:
+      summary: Upload a document file
+      operationId: UploadDocument
+      x-ms-visibility: important
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  file_id:
+                    type: string
+                    description: ID of the uploaded file to be used in file_ids when creating a document
+                  file_status:
+                    type: string
+                    description: Status of the uploaded file
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      description: |-
+        You can upload one file at a time and get a file id. The file id is used to connect a file with a GetAccept document which is sent to recipients. If you want to upload mutliple files you run multiple POST. We only accept files up to 10 MB as default. Uploaded file need to be imported/added to a document within 48 hours after uploading.
+
+        We recommended you to upload PDF files in order to guarantee the same look when sent. Other file types can be converted, such as:
+
+        Mirosoft Office: doc, docx, xl, xls, xlsx, ppt, pptx
+        Mac: numbers, key
+        Images: jpg, jpeg, png
+        Other: html, tex, csv
+      tags:
+        - Documents
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              x-ms-visibility: internal
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Binary File
+                  x-ms-summary: Binary File
+                  x-ms-visibility: important
+                file_name:
+                  type: string
+                  description: 'Filename of the document, with the extension. This will be helpful for converting different file-types.'
+                  x-ms-summary: File name
+          application/json:
+            schema:
+              type: object
+              x-ms-visibility: internal
+              properties:
+                file_name:
+                  type: string
+                  description: 'Filename of the document, with the extension. This will be helpful for converting different file-types.'
+                  x-ms-summary: File name
+                file_content:
+                  type: string
+                  format: base64
+                  description: 'Send the file as base64 encoded. Note that base64 encoding files will increase the file size with about 30%'
+                  x-ms-summary: File content
+                file_url:
+                  type: string
+                  description: Url to document file. File must be available for download without any authorization
+                  x-ms-summary: File URL
+          application/pdf:
+            schema:
+              type: string
+              format: binary
+  /upload/attachment:
+    post:
+      summary: Upload an attachment
+      operationId: UploadAttachment
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ID of the uploaded attachment to be used in attachment_id when creating a document
+                    x-ms-summary: Attachment ID
+                  type:
+                    type: string
+                    description: Type of the attachment
+                    x-ms-summary: Attachment type
+                  title:
+                    type: string
+                    description: Title of the attachment
+                    x-ms-summary: Attachment title
+                  filename:
+                    type: string
+                    description: File name of the attachment
+                    x-ms-summary: File name
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      description: |-
+        You can upload attachment files to include with documents you send.
+        Successful request will return the attachment_id. Use attachment_id to assign an attachment to a document.
+      tags:
+        - Attachments
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Binary File
+                  x-ms-summary: Binary File
+                file_name:
+                  type: string
+                  description: 'Filename of the document, with the extension. This will be helpful for converting different file-types.'
+                  x-ms-summary: File name
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+          application/pdf:
+            schema:
+              type: string
+              format: binary
+  /upload/video:
+    post:
+      summary: Upload a video
+      operationId: UploadVideo
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  video_id:
+                    type: string
+                    description: ID of the uploaded video to be used in video_id when creating a document
+                    x-ms-summary: Video ID
+                  filename:
+                    type: string
+                    description: File name of the video
+                    x-ms-summary: File name
+                  file_status:
+                    type: string
+                    description: Status of the video
+                    x-ms-summary: File status
+                  job_id:
+                    type: string
+                    description: Id of the processing job converting and compressing the video. Poll for job status updates using /video/job/<ID>.
+                    x-ms-summary: Job ID
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      description: |-
+        You can upload attachment files to include with documents you send.
+        Successful request will return the attachment_id. Use attachment_id to assign an attachment to a document.
+      tags:
+        - Videos
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Binary File
+                  x-ms-summary: Binary File
+                file_name:
+                  type: string
+                  description: 'Filename of the video, with the extension. This will be helpful for converting different file-types.'
+                  x-ms-summary: File name
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+  /attachments:
+    get:
+      summary: List attachments
+      tags:
+        - Attachments
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  attachments:
                     type: array
                     items:
                       type: object
                       properties:
-                        id:
+                        attachment_id:
                           type: string
-                        name:
+                        attachment_type:
                           type: string
-                        role:
+                        attachment_title:
                           type: string
-                        plan:
+                        attachment_url:
                           type: string
-                        plan_title:
-                          type: string
-      operationId: get-users-me
-      description: Receive details and available entities of the current authenticated user
+                        published:
+                          type: boolean
+                        library:
+                          type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: ListAttachments
+      description: Receive a list of available attachments. You can add new attachments in GetAccept using a new document.
 components:
   responses:
     NotFound:
@@ -1139,8 +1892,24 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+    Invalid:
+      description: Invalid data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    AccessDenied:
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
     Unauthorized:
       description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   schemas:
     Error:
       type: object
@@ -1151,11 +1920,8 @@ components:
           type: string
         description:
           type: string
-      # required:
-      #   - code
-      #   - message
     Document:
-      title: Document
+      title: Document response
       type: object
       properties:
         expiration_date:
@@ -1288,11 +2054,12 @@ components:
         sender_email:
           type: string
     Subscription:
-      title: Subscription
+      title: Subscription request
       type: object
       properties:
         status:
           type: integer
+          nullable: true
         host:
           type: string
         target_url:
@@ -1311,49 +2078,362 @@ components:
           type: string
         created_at:
           type: string
+    User:
+      title: User response
+      type: object
+      properties:
+        id:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        mobile:
+          type: string
+        title:
+          type: string
+        note:
+          type: string
+        thumb_url:
+          type: string
+        entity_id:
+          type: string
+        entity_name:
+          type: string
+        language:
+          type: string
+        timezone:
+          type: string
+        app_mode:
+          type: string
+        role:
+          type: string
+        disallow_create:
+          type: boolean
+        status:
+          type: string
+        team_id:
+          type: string
+    Webhook:
+      title: Subscription response
+      type: object
+      properties:
+        event_action:
+          type: string
+          x-ms-summary: Event action
+        subscription_id:
+          type: string
+          x-ms-summary: Subscription ID
+        document:
+          type: object
+          properties:
+            user_id:
+              type: string
+              x-ms-summary: User ID
+            email_send_subject:
+              type: string
+              x-ms-summary: Email Subject
+            is_signed:
+              type: boolean
+              x-ms-visibility: advanced
+            name:
+              type: string
+              x-ms-summary: Document name
+              x-ms-visibility: important
+            value:
+              type: integer
+              x-ms-summary: Document value
+            is_private:
+              type: boolean
+              x-ms-visibility: advanced
+            status:
+              type: string
+              x-ms-summary: Document status
+              x-ms-visibility: important
+            send_date:
+              type: string
+              x-ms-summary: Send date
+            is_scheduled_sending:
+              type: boolean
+              x-ms-visibility: advanced
+            is_signing_forward:
+              type: boolean
+              x-ms-visibility: advanced
+            sender_thumb_url:
+              type: string
+              x-ms-visibility: advanced
+            auto_comment_text:
+              type: string
+              x-ms-summary: Automatic chat text
+              x-ms-visibility: advanced
+            thumb_url:
+              type: string
+              x-ms-summary: Document thumb URL
+            tags:
+              type: string
+              x-ms-summary: Document tags
+            email_send_template_id:
+              type: string
+              x-ms-visibility: advanced
+            email_send_message:
+              type: string
+              x-ms-summary: Email message
+            is_auto_comment:
+              type: boolean
+              x-ms-visibility: advanced
+            is_signing_initials:
+              type: boolean
+              x-ms-visibility: advanced
+            sender_name:
+              type: string
+              x-ms-summary: Sender name
+            parent_id:
+              type: string
+              x-ms-summary: Parent ID
+            external_editor_id:
+              type: string
+              x-ms-visibility: advanced
+            company_name:
+              type: string
+              x-ms-visibility: advanced
+            is_auto_comment_email:
+              type: boolean
+              x-ms-visibility: advanced
+            download_url:
+              type: string
+              x-ms-summary: Download URL
+            expiration_date:
+              type: string
+              x-ms-summary: Expiration date
+            scheduled_sending_time:
+              type: string
+              x-ms-visibility: advanced
+            id:
+              type: string
+              x-ms-summary: Document ID
+              x-ms-visibility: important
+            external_id:
+              type: string
+              x-ms-summary: External ID
+            external_editor_type:
+              type: string
+              x-ms-visibility: advanced
+            company_logo_url:
+              type: string
+              x-ms-visibility: advanced
+            unique_id:
+              type: integer
+              x-ms-summary: Unique ID
+            is_video:
+              type: boolean
+              x-ms-visibility: advanced
+            is_identify_recipient:
+              type: boolean
+              x-ms-visibility: advanced
+            sender_email:
+              type: string
+              x-ms-summary: Sender email
+            is_signing:
+              type: boolean
+              x-ms-visibility: advanced
+            type:
+              type: string
+              x-ms-summary: Document type
+            external_client_id:
+              type: string
+              x-ms-visibility: advanced
+            company_id:
+              type: string
+              x-ms-visibility: advanced
+            is_selfsign:
+              type: boolean
+              x-ms-visibility: advanced
+            is_signing_biometric:
+              type: boolean
+              x-ms-visibility: advanced
+            is_signing_order:
+              type: boolean
+              x-ms-visibility: advanced
+            auto_comment_email:
+              type: string
+              x-ms-visibility: advanced
+            entity_auto_comment_text:
+              type: string
+              x-ms-visibility: advanced
+            field_count:
+              type: integer
+              x-ms-visibility: advanced
+            company_number:
+              type: string
+              x-ms-visibility: advanced
+            is_reminder_sending:
+              type: boolean
+              x-ms-visibility: advanced
+            preview_url:
+              type: string
+              x-ms-summary: Preview URL
+              x-ms-visibility: advanced
+        entity:
+          type: object
+          properties:
+            email_send_message:
+              type: string
+              x-ms-summary: Default email message
+              x-ms-visibility: advanced
+            sub_domain:
+              type: string
+              x-ms-summary: Entity sub-domain
+              x-ms-visibility: advanced
+            custom_domain:
+              type: string
+              x-ms-summary: Entity custom domain
+              x-ms-visibility: advanced
+            email_send_subject:
+              type: string
+              x-ms-summary: Default email subject
+              x-ms-visibility: advanced
+        recipient:
+          type: object
+          properties:
+            order_num:
+              type: string
+              x-ms-summary: Signing order
+              x-ms-visibility: advanced
+            email:
+              type: string
+              x-ms-summary: Recipient email
+              x-ms-visibility: important
+            gender:
+              type: string
+              x-ms-summary: Recipient gender
+              x-ms-visibility: advanced
+            mobile:
+              type: string
+              x-ms-summary: Recipient mobile
+            role:
+              type: string
+              x-ms-summary: Template role
+              x-ms-visibility: advanced
+            company_number:
+              type: string
+              x-ms-summary: Company number
+              x-ms-visibility: important
+            status:
+              type: string
+              x-ms-summary: Recipient status
+            title:
+              type: string
+              x-ms-summary: Recipient title
+            note:
+              type: string
+              x-ms-summary: Recipient note
+            fullname:
+              type: string
+              x-ms-summary: Recipient name
+              x-ms-visibility: important
+            first_name:
+              type: string
+              x-ms-summary: Recipient first name
+            thumb_url:
+              type: string
+              x-ms-summary: Recipient thumb URL
+            last_name:
+              type: string
+              x-ms-summary: Recipient last name
+            company_name:
+              type: string
+              x-ms-summary: Company name
+              x-ms-visibility: important
+        custom_fields:
+          type: object
+          additionalProperties:
+            type: string
+        event:
+          type: string
+          x-ms-summary: Event name
+        event_type:
+          type: string
+          x-ms-summary: Event type
+  headers:
+    X-Rate-Limit-Limit:
+      description: The number of allowed requests in the current period
+      schema:
+        format: int32
+        type: integer
+    X-Rate-Limit-Remaining:
+      description: The number of remaining requests in the current period
+      schema:
+        format: int32
+        type: integer
+    X-Rate-Limit-Reset:
+      description: The number of seconds left in the current period
+      schema:
+        format: int32
+        type: integer
   securitySchemes:
-    oauth2_auth:
+    Oauth2:
       type: oauth2
       flows:
         authorizationCode:
           authorizationUrl: 'https://app.getaccept.com/oauth2/authorize'
           tokenUrl: 'https://app.getaccept.com/oauth2/token'
           scopes:
-            #read: Grants read access
-            #write: Grants write access
             basic: Grants basic access to operations
-          refreshUrl: 'https://app.getaccept.com/oauth2/refresh'
+          refreshUrl: 'https://app.getaccept.com/oauth2/token'
       description: 'For testing purpose, use client_id **api** and client_secret **app**'
-    BearerAuth:
+    Token:
       type: http
       scheme: bearer
       description: 'Enter your bearer token in the format **bearer &lt;token>**'
       bearerFormat: JWT
 security:
-  - oauth2_auth:
+  - Oauth2:
       - basic
-  - BearerAuth: []
-tags: 
+  - Token: []
+tags:
   - name: Authentication
     description: 'Authentication with the GetAccept API can be made using JWT tokens (JSON Web Tokens) or OAuth 2.0 Authorization Framework http://oauth.net/2/  All requests must be made via HTTPS. All configuration URLs (webhooks, etc) should begin with https:// as well.'
     externalDocs:
-      url: https://app.getaccept.com/api/#authentication
+      url: 'https://app.getaccept.com/api/#authentication'
+  - name: Contacts
+    description: Everything related to contacts
+    externalDocs:
+      url: 'https://app.getaccept.com/api/#contacts'
   - name: Documents
     description: Everything related to documents
     externalDocs:
-      url: https://app.getaccept.com/api/#documents
+      url: 'https://app.getaccept.com/api/#documents'
   - name: Subscriptions
     description: 'To simplify the process of checking a documents status and make it more efficient in an integrated application, you can enable API Webhooks. Enable webhooks as a user with administrator privileges in the Settings | Integration | Webhooks. We support multiple webhooks for one application. Events will be POSTed to your webhook URLs and should be handled by you. A POST must be answered and your endpoint will need to return a 2xx HTTP. Otherwise, the callback will be considered a failure and will be retried later. Retries will be made after 1, 12, 24, and 48 hours. The sender (or notification_email) will receive an email notification after a failed attempt.'
     externalDocs:
-      url: https://app.getaccept.com/api/#subscriptions
+      url: 'https://app.getaccept.com/api/#subscriptions'
   - name: Templates
-    description: 'GetAccept has extensive support for creating templates in different formats. You can use form fields to receive input data from a recipient or word files to merge custom data into a document.'
+    description: GetAccept has extensive support for creating templates in different formats. You can use form fields to receive input data from a recipient or word files to merge custom data into a document.
     externalDocs:
-      url: https://app.getaccept.com/api/#templates
+      url: 'https://app.getaccept.com/api/#templates'
   - name: Users
     description: 'General user methods for creating, listing of users, single user details and statistics and managing existing users.'
     externalDocs:
-      url: https://app.getaccept.com/api/#users
+      url: 'https://app.getaccept.com/api/#users'
+  - name: Attachments
+    description: You can upload an attachment and reuse it in many documents.
+    externalDocs:
+      url: 'https://app.getaccept.com/api/#attachments'
+  - name: Videos
+    description: You can upload videos and reuse it in many documents.
+    externalDocs:
+      url: 'https://app.getaccept.com/api/#video'
 servers:
   - url: 'https://api.getaccept.com/v1'
     description: Production endpoint
+x-ms-connector-metadata:
+  - propertyName: Website
+    propertyValue: 'https://www.getaccept.com'
+  - propertyName: Privacy policy
+    propertyValue: 'https://www.getaccept.com/privacy-policy'
+  - propertyName: Categories
+    propertyValue: 'Sales and CRM,Productivity'

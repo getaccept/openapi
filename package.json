@@ -11,7 +11,12 @@
   },
   "devDependencies": {},
   "scripts": {
-    "convert": "node convert.js"
+    "convert": "node convert.js",
+    "ms-install": "pip install paconn",
+    "ms-login": "paconn login",
+    "ms-create": "cd connector && paconn create -s settings.json --secret app",
+    "ms-update": "cd connector && paconn update --api-prop apiPropertiesUpdate.json --api-def apiDefinition.swagger.json --icon icon.png --verbose",
+    "ms-validate": "cd connector && paconn validate --api-def apiDefinition.swagger.json --verbose"
   },
   "repository": {
     "type": "git",

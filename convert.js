@@ -1,5 +1,6 @@
 var converter = require('api-spec-converter');
 var fs = require('fs');
+// Convert to openapi 2 / swagger
 converter.convert({
   from: 'openapi_3',
   to: 'swagger_2',
@@ -22,7 +23,75 @@ converter.convert({
       });
   });
 
-// Convert to json
+// Convert to connector
+converter.convert({
+  from: 'openapi_3',
+  to: 'swagger_2',
+  source: 'swagger.yaml',
+})
+  .then(function(converted) {
+    // [Optional] Fill missing fields with dummy values
+    converted.fillMissing();
+
+    // [Optional] Validate converted spec
+    return converted.validate()
+      .then(function (result) {
+        if (result.errors)
+          // return console.error(JSON.stringify(result.errors, null, 2));
+      	  console.log(JSON.stringify(result.errors, null, 2));
+        if (result.warnings)
+          return console.error(JSON.stringify(result.warnings, null, 2));
+
+        fs.writeFileSync('connector/apiDefinition.swagger.json', converted.stringify());
+      });
+  });
+
+// Convert to connector
+converter.convert({
+  from: 'swagger_2',
+  to: 'wadl',
+  source: 'connector/apiDefinition.swagger.json',
+})
+  .then(function(converted) {
+    // [Optional] Fill missing fields with dummy values
+    converted.fillMissing();
+
+    // [Optional] Validate converted spec
+    return converted.validate()
+      .then(function (result) {
+        if (result.errors)
+          // return console.error(JSON.stringify(result.errors, null, 2));
+          console.log(JSON.stringify(result.errors, null, 2));
+        if (result.warnings)
+          return console.error(JSON.stringify(result.warnings, null, 2));
+        fs.writeFileSync('connector/apiDefinition.swagger.wadl', converted.stringify());
+      });
+  });
+
+// Convert to openapi 2 yaml
+converter.convert({
+  from: 'openapi_3',
+  to: 'swagger_2',
+  source: 'swagger.yaml',
+})
+  .then(function(converted) {
+    // [Optional] Fill missing fields with dummy values
+    converted.fillMissing();
+
+    // [Optional] Validate converted spec
+    return converted.validate()
+      .then(function (result) {
+        if (result.errors)
+          // return console.error(JSON.stringify(result.errors, null, 2));
+      	  console.log(JSON.stringify(result.errors, null, 2));
+        if (result.warnings)
+          return console.error(JSON.stringify(result.warnings, null, 2));
+        var options = {syntax: 'yaml', order: 'openapi'};
+        fs.writeFileSync('swagger2.yaml', converted.stringify(options));
+      });
+  });
+
+// Convert to openapi 3 json
 converter.convert({
   from: 'openapi_3',
   to: 'openapi_3',
