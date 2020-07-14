@@ -134,6 +134,7 @@ paths:
                     type: string
                   expires_in:
                     type: integer
+                    format: int64
       operationId: RefreshToken
       description: You can request a refreshed of the access token before the original token has expired.
   /documents:
@@ -145,36 +146,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    status:
-                      type: string
-                    value:
-                      type: integer
-                    sender_thumb:
-                      type: string
-                    sender_name:
-                      type: string
-                    name:
-                      type: string
-                    is_signing:
-                      type: boolean
-                    created_at:
-                      type: string
-                    id:
-                      type: string
-                    tags:
-                      type: string
-                    company_name:
-                      type: string
-                    expiration_date:
-                      type: string
-                    type:
-                      type: string
-                    is_private:
-                      type: boolean
+                $ref: '#/components/schemas/Documents'
               examples: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -265,7 +237,6 @@ paths:
           x-ms-summary: Limit
     post:
       summary: Create and send document or template
-      x-ms-visibility: important
       operationId: CreateDocument
       responses:
         '200':
@@ -325,6 +296,7 @@ paths:
                   default: sales
                 value:
                   type: integer
+                  format: int32
                   description: Value of deal or document
                   x-ms-summary: Document value
                   x-ms-visibility: important
@@ -420,6 +392,7 @@ paths:
                   type: boolean
                   description: Should the document be sent for signing
                   x-ms-summary: Sign document
+                  x-ms-visibility: advanced
                   nullable: true
                   enum:
                     - true
@@ -450,6 +423,7 @@ paths:
                   type: boolean
                   description: Should recipients be able to transfer signature rights
                   x-ms-summary: Allow signature transfer
+                  x-ms-visibility: advanced
                   nullable: true
                   enum:
                     - true
@@ -458,7 +432,6 @@ paths:
                 recipients:
                   type: array
                   x-ms-summary: Recipient
-                  x-ms-visibility: important
                   items:
                     type: object
                     properties:
@@ -490,7 +463,7 @@ paths:
                         type: boolean
                         description: Should a question be asked before signing
                         x-ms-summary: Sign question
-                        x-ms-visibility: internal
+                        x-ms-visibility: advanced
                         nullable: true
                         enum:
                           - true
@@ -500,13 +473,13 @@ paths:
                         type: string
                         description: Question to ask for verification
                         x-ms-summary: Verification question
-                        x-ms-visibility: internal
+                        x-ms-visibility: advanced
                         example: Enter your SSN
                       verify_qna:
                         type: boolean
                         description: Should a question be asked
                         x-ms-summary: Enable question
-                        x-ms-visibility: internal
+                        x-ms-visibility: advanced
                         nullable: true
                         enum:
                           - true
@@ -526,7 +499,7 @@ paths:
                         type: boolean
                         description: Should question be asked before opening document
                         x-ms-summary: Question on open
-                        x-ms-visibility: internal
+                        x-ms-visibility: advanced
                         nullable: true
                         enum:
                           - true
@@ -542,7 +515,7 @@ paths:
                         type: boolean
                         description: Should a SMS verify the recipient before signing
                         x-ms-summary: Verify by SMS
-                        x-ms-visibility: internal
+                        x-ms-visibility: advanced
                         nullable: true
                         enum:
                           - true
@@ -552,12 +525,12 @@ paths:
                         type: string
                         description: EID type to be used for personal verification
                         x-ms-summary: EID type
-                        x-ms-visibility: internal
+                        x-ms-visibility: advanced
                       note:
                         type: string
                         description: Additional note for a recipient
                         x-ms-summary: Note
-                        x-ms-visibility: internal
+                        x-ms-visibility: advanced
                       email:
                         type: string
                         description: Email address of the recipient
@@ -571,7 +544,7 @@ paths:
                         type: boolean
                         description: Verify recipient by SMS
                         x-ms-summary: Verify SMS
-                        x-ms-visibility: internal
+                        x-ms-visibility: advanced
                         nullable: true
                         enum:
                           - true
@@ -581,23 +554,24 @@ paths:
                         type: boolean
                         description: Verify SMS on open
                         x-ms-summary: Verify SMS on open
-                        x-ms-visibility: internal
+                        x-ms-visibility: advanced
                         enum:
                           - true
                           - false
                         example: true
                       order_num:
                         type: integer
+                        format: int32
                         description: If signing order is enabled
                         x-ms-summary: Signing order
-                        x-ms-visibility: internal
+                        x-ms-visibility: advanced
                         nullable: true
                         example: 1
                       verify_eid:
                         type: boolean
                         description: Verify using EID
                         x-ms-summary: Verify EID
-                        x-ms-visibility: internal
+                        x-ms-visibility: advanced
                         nullable: true
                         enum:
                           - true
@@ -607,6 +581,7 @@ paths:
                   type: boolean
                   description: Use handwritten signature
                   x-ms-summary: Handwritten signature
+                  x-ms-visibility: advanced
                   nullable: true
                   enum:
                     - true
@@ -616,11 +591,13 @@ paths:
                   type: string
                   description: Date and time when the document should expire
                   x-ms-summary: Expiration date
+                  x-ms-visibility: advanced
                   format: date-time
                 is_scheduled_sending:
                   type: boolean
                   description: Should the sending be scheduled for sending in the future
                   x-ms-summary: Schedule sending
+                  x-ms-visibility: advanced
                   nullable: true
                   enum:
                     - true
@@ -630,6 +607,7 @@ paths:
                   type: string
                   description: Date and time when the document should be sent out
                   x-ms-summary: Schedule send date
+                  x-ms-visibility: advanced
                   format: date-time
                 custom_fields:
                   type: array
@@ -676,31 +654,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  users:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        user_id:
-                          type: string
-                        name:
-                          type: string
-                        first_name:
-                          type: string
-                        last_name:
-                          type: string
-                        email:
-                          type: string
-                        status:
-                          type: string
-                        role:
-                          type: string
-                        team_name:
-                          type: string
-                        last_login:
-                          type: string
+                $ref: '#/components/schemas/Users'
         '401':
           $ref: '#/components/responses/Unauthorized'
       operationId: ListUsers
@@ -717,45 +671,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  first_name:
-                    type: string
-                    description: First name of the user
-                  last_name:
-                    type: string
-                    description: Last name of the user
-                  email:
-                    type: string
-                    description: Email address of the user
-                  title:
-                    type: string
-                    description: 'The title of the user, ex. CEO, Sales manager'
-                  phone:
-                    type: string
-                    description: Phone number in international format
-                  mobile:
-                    type: string
-                    description: Mobile number in international format
-                  note:
-                    type: string
-                    description: Optional internal note for user
-                  role:
-                    type: string
-                    enum:
-                      - user
-                      - manager
-                      - admin
-                    example: user
-                  team_id:
-                    type: string
-                  skip_invitation:
-                    type: boolean
-                    nullable: true
-                    enum:
-                      - true
-                      - false
-                    example: false
+                $ref: '#/components/schemas/User'
         '400':
           $ref: '#/components/responses/Invalid'
         '401':
@@ -763,7 +679,7 @@ paths:
       description: This will create a new contact in the database for the current entity
       requestBody:
         required: true
-        description: A JSON object containing contact information
+        description: A JSON object containing user information
         content:
           application/json:
             schema:
@@ -889,6 +805,7 @@ paths:
                           type: boolean
                         role_count:
                           type: integer
+                          format: int32
                         thumb_url:
                           type: string
                         video_id:
@@ -913,8 +830,10 @@ paths:
                           type: string
                         page_count:
                           type: integer
+                          format: int32
                         field_count:
                           type: integer
+                          format: int32
                         sender_name:
                           type: string
                         sender_thumb_url:
@@ -931,11 +850,13 @@ paths:
           in: query
           name: showall
           description: Show all templates for entity
+          x-ms-summary: Show all
         - schema:
             type: string
           in: query
           name: folder_id
           description: Show templates in a specific folder
+          x-ms-summary: Folder ID
   /videos:
     get:
       summary: List videos
@@ -1022,11 +943,18 @@ paths:
                 properties:
                   document_url:
                     type: string
+                  file:
+                    type: string
             application/pdf:
               schema:
                 type: string
                 format: binary
-                x-ms-visibility: important
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                description: Used only with `application/pdf` responses
+                example: attachment; filename="download.pdf"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1131,7 +1059,7 @@ paths:
 
         If document was created using self-sign option it will also be self-signed by the authenticated or specified user before sealing.
       requestBody:
-        description: An optional JSON object containing sender information
+        description: An optional JSON object containing seal information
         content:
           application/json:
             schema:
@@ -1174,42 +1102,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    fullname:
-                      type: string
-                    email:
-                      type: string
-                    thumb_url:
-                      type: string
-                    order_num:
-                      type: string
-                    last_name:
-                      type: string
-                    status:
-                      type: string
-                    mobile:
-                      type: string
-                    id:
-                      type: string
-                    role:
-                      type: string
-                    title:
-                      type: string
-                    gender:
-                      type: string
-                    document_url:
-                      type: string
-                    first_name:
-                      type: string
-                    company_name:
-                      type: string
-                    company_number:
-                      type: string
-                    note:
-                      type: string
+                $ref: '#/components/schemas/Recipients'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1231,7 +1124,7 @@ paths:
             value-title: name
   '/documents/{documentId}/fields':
     get:
-      summary: Get document recipients
+      summary: Get document fields
       tags:
         - Documents
       responses:
@@ -1240,45 +1133,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  fields:
-                    type: array
-                    items:
-                      type: object
-                      properties:    
-                        field_id:
-                          type: string
-                        page_id:
-                          type: string
-                        field_type:
-                          type: string
-                        field_label:
-                          type: string
-                        field_value:
-                          type: string
-                        is_collectable:
-                          type: boolean
-                        is_editable:
-                          type: boolean
-                        is_required:
-                          type: boolean
-                        recipient_id:
-                          type: string
-                        recipient_name:
-                          type: string
-                        field_top:
-                          type: integer
-                        field_left:
-                          type: integer
-                        field_width:
-                          type: integer
-                        field_height:
-                          type: integer
-                        validation_regex:
-                          type: string
-                        validation_warning:
-                          type: string
+                $ref: '#/components/schemas/Fields'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1357,51 +1212,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  fields:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        field_id:
-                          type: string
-                        field_type:
-                          type: string
-                        is_editable:
-                          type: boolean
-                        company_name:
-                          type: string
-                        field_left:
-                          type: integer
-                        field_label:
-                          type: string
-                        field_value:
-                          type: string
-                        is_collectable:
-                          type: boolean
-                        recipient_id:
-                          type: string
-                        recipient_name:
-                          type: string
-                        role_name:
-                          type: string
-                        field_width:
-                          type: integer
-                        field_height:
-                          type: integer
-                        validation_regex:
-                          type: string
-                        is_required:
-                          type: boolean
-                        company_number:
-                          type: string
-                        page_id:
-                          type: string
-                        field_top:
-                          type: integer
-                        validation_warning:
-                          type: string
+                $ref: '#/components/schemas/Fields'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1605,6 +1416,8 @@ paths:
                 properties:
                   contact_id:
                     type: string
+                    description: ID of the created contact
+                    x-ms-summary: Contact ID
                     example: abc58129f
         '400':
           $ref: '#/components/responses/Invalid'
@@ -1730,10 +1543,6 @@ paths:
                   type: string
                   description: Url to document file. File must be available for download without any authorization
                   x-ms-summary: File URL
-          application/pdf:
-            schema:
-              type: string
-              format: binary
   /upload/attachment:
     post:
       summary: Upload an attachment
@@ -1772,6 +1581,7 @@ paths:
       tags:
         - Attachments
       requestBody:
+        required: true
         content:
           multipart/form-data:
             schema:
@@ -1786,14 +1596,6 @@ paths:
                   type: string
                   description: 'Filename of the document, with the extension. This will be helpful for converting different file-types.'
                   x-ms-summary: File name
-          application/octet-stream:
-            schema:
-              type: string
-              format: binary
-          application/pdf:
-            schema:
-              type: string
-              format: binary
   /upload/video:
     post:
       summary: Upload a video
@@ -1846,10 +1648,6 @@ paths:
                   type: string
                   description: 'Filename of the video, with the extension. This will be helpful for converting different file-types.'
                   x-ms-summary: File name
-          application/octet-stream:
-            schema:
-              type: string
-              format: binary
   /attachments:
     get:
       summary: List attachments
@@ -1911,8 +1709,230 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
   schemas:
-    Error:
+    Document:
+      title: Document
       type: object
+      description: Document details
+      x-ms-summary: Document
+      properties:
+        user_id:
+          type: string
+          x-ms-summary: User ID
+          x-ms-visibility: advanced
+        email_send_subject:
+          type: string
+          x-ms-summary: Email Subject
+          x-ms-visibility: advanced
+        is_signed:
+          type: boolean
+          x-ms-summary: Is signed
+          x-ms-visibility: advanced
+        name:
+          type: string
+          x-ms-summary: Name
+          x-ms-visibility: important
+        value:
+          type: integer
+          format: int32
+          x-ms-summary: Value
+        is_private:
+          type: boolean
+          x-ms-summary: Is private
+          x-ms-visibility: advanced
+        status:
+          type: string
+          x-ms-summary: Status
+          x-ms-visibility: important
+        send_date:
+          type: string
+          x-ms-summary: Send date
+        sign_date:
+          type: string
+          x-ms-summary: Sign date
+        is_scheduled_sending:
+          type: boolean
+          x-ms-summary: Scheduled sending
+          x-ms-visibility: advanced
+        is_signing_forward:
+          type: boolean
+          x-ms-summary: Allow signature transfer
+          x-ms-visibility: advanced
+        sender_thumb_url:
+          type: string
+          x-ms-summary: Sender thumb URL
+          x-ms-visibility: advanced
+        auto_comment_text:
+          type: string
+          x-ms-summary: Automatic chat text
+          x-ms-visibility: advanced
+        thumb_url:
+          type: string
+          x-ms-summary: Thumb URL
+          x-ms-visibility: advanced
+        tags:
+          type: string
+          x-ms-summary: Tags
+        email_send_template_id:
+          type: string
+          x-ms-summary: Email send template ID
+          x-ms-visibility: internal
+        email_send_message:
+          type: string
+          x-ms-summary: Email message
+          x-ms-visibility: advanced
+        is_auto_comment:
+          type: boolean
+          x-ms-summary: Auto comment
+          x-ms-visibility: advanced
+        is_signing_initials:
+          type: boolean
+          x-ms-visibility: internal
+        sender_name:
+          type: string
+          x-ms-summary: Sender name
+        parent_id:
+          type: string
+          x-ms-summary: Parent ID
+        external_editor_id:
+          type: string
+          x-ms-visibility: advanced
+        company_name:
+          type: string
+          x-ms-visibility: advanced
+        is_auto_comment_email:
+          type: boolean
+          x-ms-visibility: advanced
+        download_url:
+          type: string
+          x-ms-summary: Download URL
+        expiration_date:
+          type: string
+          x-ms-summary: Expiration date
+        scheduled_sending_time:
+          type: string
+          x-ms-summary: Scheduled sending time
+          x-ms-visibility: advanced
+        created_at:
+          type: string
+          x-ms-summary: Created at
+          x-ms-visibility: advanced
+        id:
+          type: string
+          x-ms-summary: ID
+          x-ms-visibility: important
+        external_id:
+          type: string
+          x-ms-summary: External ID
+        external_editor_type:
+          type: string
+          x-ms-visibility: advanced
+        company_logo_url:
+          type: string
+          x-ms-visibility: internal
+        unique_id:
+          type: integer
+          format: int32
+          x-ms-summary: Unique ID
+        is_video:
+          type: boolean
+          x-ms-visibility: advanced
+        is_identify_recipient:
+          type: boolean
+          x-ms-visibility: advanced
+        sender_email:
+          type: string
+          x-ms-summary: Sender email
+        is_signing:
+          type: boolean
+          x-ms-visibility: advanced
+        type:
+          type: string
+          x-ms-summary: Type
+        external_client_id:
+          type: string
+          x-ms-summary: External Client ID
+          x-ms-visibility: advanced
+        company_id:
+          type: string
+          x-ms-visibility: internal
+        is_selfsign:
+          type: boolean
+          x-ms-summary: Is Self-signing
+          x-ms-visibility: advanced
+        is_signing_biometric:
+          type: boolean
+          x-ms-summary: Handwritten signature
+          x-ms-visibility: advanced
+        is_signing_order:
+          type: boolean
+          x-ms-summary: Signature order
+          x-ms-visibility: advanced
+        auto_comment_email:
+          type: string
+          x-ms-visibility: internal
+        entity_auto_comment_text:
+          type: string
+          x-ms-visibility: internal
+        field_count:
+          type: integer
+          format: int32
+          x-ms-summary: Field count
+          x-ms-visibility: advanced
+        company_number:
+          type: string
+          x-ms-visibility: internal
+        is_reminder_sending:
+          type: boolean
+          x-ms-summary: Send reminders
+          x-ms-visibility: advanced
+        preview_url:
+          type: string
+          x-ms-summary: Preview URL
+          x-ms-visibility: advanced
+        recipients:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recipient'
+
+    Documents:
+      title: Documents
+      type: array
+      description: Document list
+      x-ms-summary: Documents
+      items:
+        type: object
+        properties:
+          status:
+            type: string
+          value:
+            type: integer
+            format: int32
+          sender_thumb:
+            type: string
+          sender_name:
+            type: string
+          name:
+            type: string
+          is_signing:
+            type: boolean
+          created_at:
+            type: string
+          id:
+            type: string
+          tags:
+            type: string
+          company_name:
+            type: string
+          expiration_date:
+            type: string
+          type:
+            type: string
+          is_private:
+            type: boolean
+    Error:
+      title: Error
+      type: object
+      x-ms-summary: Error
       properties:
         status:
           type: number
@@ -1920,145 +1940,156 @@ components:
           type: string
         description:
           type: string
-    Document:
-      title: Document response
+
+    Field:
+      title: Field
       type: object
+      description: Field details
+      x-ms-summary: Field
+      properties:    
+        field_id:
+          type: string
+        page_id:
+          type: string
+        field_type:
+          type: string
+        field_label:
+          type: string
+        field_value:
+          type: string
+        is_collectable:
+          type: boolean
+        is_editable:
+          type: boolean
+        is_required:
+          type: boolean
+        recipient_id:
+          type: string
+        recipient_name:
+          type: string
+        field_top:
+          type: integer
+          format: int32
+        field_left:
+          type: integer
+          format: int32
+        field_width:
+          type: integer
+          format: int32
+        field_height:
+          type: integer
+          format: int32
+        validation_regex:
+          type: string
+        validation_warning:
+          type: string
+
+    Fields:
+      title: Fields
+      type: object
+      description: Field list
+      x-ms-summary: Fields
       properties:
-        expiration_date:
-          type: string
-        scheduled_sending_time:
-          type: string
-        is_video:
-          type: boolean
-        external_editor_type:
-          type: string
-        is_identify_recipient:
-          type: boolean
-        send_date:
-          type: string
-        sender_name:
-          type: string
-        email_send_template_id:
-          type: string
-        download_url:
-          type: string
-        auto_comment_text:
-          type: string
-        entity_auto_comment_text:
-          type: string
-        field_count:
-          type: integer
-        value:
-          type: integer
-        type:
-          type: string
-        is_selfsign:
-          type: boolean
-        is_signing:
-          type: boolean
-        is_signed:
-          type: boolean
-        company_name:
-          type: string
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/Field'
+
+    Recipient:
+      title: Recipient
+      type: object
+      description: Recipient details
+      x-ms-summary: Recipient
+      properties:
         thumb_url:
           type: string
-        preview_url:
+          description: Thumb URL of the recipient
+          x-ms-summary: Thumb URL
+        id:
           type: string
-        unique_id:
-          type: integer
+          description: ID of the recipient
+          x-ms-summary: ID
+          x-ms-visibility: advanced
+        fullname:
+          type: string
+          description: Full name of the recipient
+          x-ms-summary: Full name
+        last_name:
+          type: string
+          description: Last name of the recipient
+          x-ms-summary: Last name
+        email:
+          type: string
+          description: Name of the created document
+          x-ms-summary: Recipient email
+        company_name:
+          type: string
+          description: Company name of the recipient
+          x-ms-summary: Company name
         status:
           type: string
-        sender_thumb_url:
+          description: Status of the recipient
+          x-ms-summary: Status
+        mobile:
           type: string
-        email_send_message:
+          description: Mobile number of the recipient
+          x-ms-summary: Mobile
+        document_url:
           type: string
-        is_scheduled_sending:
-          type: boolean
-        auto_comment_email:
+          description: Unique URL for the recipient to view/sign
+          x-ms-summary: Document URL
+          x-ms-visibility: important
+        first_name:
           type: string
-        external_client_id:
+          description: First name of the recipient
+          x-ms-summary: First name
+        company_number:
           type: string
-        external_editor_id:
+          description: Company number of the recipient
+          x-ms-summary: Company number
+        title:
           type: string
-        company_id:
+          description: Title of the recipient
+          x-ms-summary: Title
+        note:
           type: string
-        is_signing_initials:
-          type: boolean
-        email_send_subject:
+          description: Note of the recipient
+          x-ms-summary: Note
+          x-ms-visibility: advanced
+        order_num:
           type: string
+          description: Signing order of the recipient
+          x-ms-summary: Signing order num
+          x-ms-visibility: advanced
+        role:
+          type: string
+          x-ms-visibility: internal
+        gender:
+          type: string
+          description: Gender of the recipient
+          x-ms-summary: Gender
+          x-ms-visibility: advanced
+
+    Recipients:
+      title: Recipients
+      type: object
+      description: Recipient list
+      x-ms-summary: Recipients
+      properties:
         recipients:
           type: array
           items:
-            type: object
-            properties:
-              last_name:
-                type: string
-              note:
-                type: string
-              company_number:
-                type: string
-              title:
-                type: string
-              role:
-                type: string
-              first_name:
-                type: string
-              gender:
-                type: string
-              thumb_url:
-                type: string
-              order_num:
-                type: string
-              fullname:
-                type: string
-              email:
-                type: string
-              mobile:
-                type: string
-              company_name:
-                type: string
-              status:
-                type: string
-        is_private:
-          type: boolean
-        user_id:
-          type: string
-        parent_id:
-          type: string
-        id:
-          type: string
-        tags:
-          type: string
-        external_id:
-          type: string
-        company_number:
-          type: string
-        company_logo_url:
-          type: string
-        is_reminder_sending:
-          type: boolean
-        is_signing_order:
-          type: boolean
-        is_auto_comment:
-          type: boolean
-        is_auto_comment_email:
-          type: boolean
-        name:
-          type: string
-        is_signing_biometric:
-          type: boolean
-        is_signing_forward:
-          type: boolean
-        sign_date:
-          type: string
-        sender_email:
-          type: string
+            $ref: '#/components/schemas/Recipient'
+
     Subscription:
-      title: Subscription request
+      title: Subscription
       type: object
+      description: Subscription details
+      x-ms-summary: Subscription
       properties:
         status:
           type: integer
+          format: int32
           nullable: true
         host:
           type: string
@@ -2078,49 +2109,123 @@ components:
           type: string
         created_at:
           type: string
+
     User:
-      title: User response
+      title: User
       type: object
+      description: User details
+      x-ms-summary: User
       properties:
         id:
           type: string
+          description: ID of the user
+          x-ms-summary: ID
         first_name:
           type: string
+          description: First name of the user
+          x-ms-summary: First name
         last_name:
           type: string
+          description: Last name of the user
+          x-ms-summary: Last name
         email:
           type: string
-        phone:
-          type: string
-        mobile:
-          type: string
+          description: Email address of the user
+          x-ms-summary: Email
         title:
           type: string
+          description: 'The title of the user, ex. CEO, Sales manager'
+          x-ms-summary: Title
+        phone:
+          type: string
+          description: Phone number in international format
+          x-ms-summary: Phone
+        mobile:
+          type: string
+          description: Mobile number in international format
+          x-ms-summary: mobile
         note:
           type: string
-        thumb_url:
-          type: string
-        entity_id:
-          type: string
-        entity_name:
-          type: string
-        language:
-          type: string
-        timezone:
-          type: string
-        app_mode:
-          type: string
+          description: Optional internal note for user
+          x-ms-summary: Note
         role:
           type: string
+          enum:
+            - user
+            - manager
+            - admin
+          x-ms-summary: Role
+          example: user
+        team_id:
+          type: string
+          x-ms-summary: Team ID
+        skip_invitation:
+          type: boolean
+          nullable: true
+          enum:
+            - true
+            - false
+          x-ms-summary: Skip sending invitation
+          example: false
+        thumb_url:
+          type: string
+          x-ms-summary: Thumb URL
+        entity_id:
+          type: string
+          x-ms-summary: Entity ID
+        entity_name:
+          type: string
+          x-ms-summary: Entity Name
+        language:
+          type: string
+          x-ms-summary: Language
+        timezone:
+          type: string
+          x-ms-summary: Timezone
+        app_mode:
+          type: string
+          x-ms-summary: App Mode
         disallow_create:
           type: boolean
         status:
           type: string
-        team_id:
-          type: string
-    Webhook:
-      title: Subscription response
+          x-ms-summary: Status
+
+    Users:
+      title: Users
       type: object
+      description: User list
+      x-ms-summary: Users
+      properties:
+        users:
+          type: array
+          items:
+            type: object
+            properties:
+              user_id:
+                type: string
+              name:
+                type: string
+              first_name:
+                type: string
+              last_name:
+                type: string
+              email:
+                type: string
+              status:
+                type: string
+              role:
+                type: string
+              team_name:
+                type: string
+              last_login:
+                type: string
+
+    Webhook:
+      title: Webhook
+      type: object
+      description: Webhook payload
+      x-ms-summary: Webhook
       properties:
         event_action:
           type: string
@@ -2129,154 +2234,7 @@ components:
           type: string
           x-ms-summary: Subscription ID
         document:
-          type: object
-          properties:
-            user_id:
-              type: string
-              x-ms-summary: User ID
-            email_send_subject:
-              type: string
-              x-ms-summary: Email Subject
-            is_signed:
-              type: boolean
-              x-ms-visibility: advanced
-            name:
-              type: string
-              x-ms-summary: Document name
-              x-ms-visibility: important
-            value:
-              type: integer
-              x-ms-summary: Document value
-            is_private:
-              type: boolean
-              x-ms-visibility: advanced
-            status:
-              type: string
-              x-ms-summary: Document status
-              x-ms-visibility: important
-            send_date:
-              type: string
-              x-ms-summary: Send date
-            is_scheduled_sending:
-              type: boolean
-              x-ms-visibility: advanced
-            is_signing_forward:
-              type: boolean
-              x-ms-visibility: advanced
-            sender_thumb_url:
-              type: string
-              x-ms-visibility: advanced
-            auto_comment_text:
-              type: string
-              x-ms-summary: Automatic chat text
-              x-ms-visibility: advanced
-            thumb_url:
-              type: string
-              x-ms-summary: Document thumb URL
-            tags:
-              type: string
-              x-ms-summary: Document tags
-            email_send_template_id:
-              type: string
-              x-ms-visibility: advanced
-            email_send_message:
-              type: string
-              x-ms-summary: Email message
-            is_auto_comment:
-              type: boolean
-              x-ms-visibility: advanced
-            is_signing_initials:
-              type: boolean
-              x-ms-visibility: advanced
-            sender_name:
-              type: string
-              x-ms-summary: Sender name
-            parent_id:
-              type: string
-              x-ms-summary: Parent ID
-            external_editor_id:
-              type: string
-              x-ms-visibility: advanced
-            company_name:
-              type: string
-              x-ms-visibility: advanced
-            is_auto_comment_email:
-              type: boolean
-              x-ms-visibility: advanced
-            download_url:
-              type: string
-              x-ms-summary: Download URL
-            expiration_date:
-              type: string
-              x-ms-summary: Expiration date
-            scheduled_sending_time:
-              type: string
-              x-ms-visibility: advanced
-            id:
-              type: string
-              x-ms-summary: Document ID
-              x-ms-visibility: important
-            external_id:
-              type: string
-              x-ms-summary: External ID
-            external_editor_type:
-              type: string
-              x-ms-visibility: advanced
-            company_logo_url:
-              type: string
-              x-ms-visibility: advanced
-            unique_id:
-              type: integer
-              x-ms-summary: Unique ID
-            is_video:
-              type: boolean
-              x-ms-visibility: advanced
-            is_identify_recipient:
-              type: boolean
-              x-ms-visibility: advanced
-            sender_email:
-              type: string
-              x-ms-summary: Sender email
-            is_signing:
-              type: boolean
-              x-ms-visibility: advanced
-            type:
-              type: string
-              x-ms-summary: Document type
-            external_client_id:
-              type: string
-              x-ms-visibility: advanced
-            company_id:
-              type: string
-              x-ms-visibility: advanced
-            is_selfsign:
-              type: boolean
-              x-ms-visibility: advanced
-            is_signing_biometric:
-              type: boolean
-              x-ms-visibility: advanced
-            is_signing_order:
-              type: boolean
-              x-ms-visibility: advanced
-            auto_comment_email:
-              type: string
-              x-ms-visibility: advanced
-            entity_auto_comment_text:
-              type: string
-              x-ms-visibility: advanced
-            field_count:
-              type: integer
-              x-ms-visibility: advanced
-            company_number:
-              type: string
-              x-ms-visibility: advanced
-            is_reminder_sending:
-              type: boolean
-              x-ms-visibility: advanced
-            preview_url:
-              type: string
-              x-ms-summary: Preview URL
-              x-ms-visibility: advanced
+          $ref: '#/components/schemas/Document'
         entity:
           type: object
           properties:
@@ -2297,57 +2255,7 @@ components:
               x-ms-summary: Default email subject
               x-ms-visibility: advanced
         recipient:
-          type: object
-          properties:
-            order_num:
-              type: string
-              x-ms-summary: Signing order
-              x-ms-visibility: advanced
-            email:
-              type: string
-              x-ms-summary: Recipient email
-              x-ms-visibility: important
-            gender:
-              type: string
-              x-ms-summary: Recipient gender
-              x-ms-visibility: advanced
-            mobile:
-              type: string
-              x-ms-summary: Recipient mobile
-            role:
-              type: string
-              x-ms-summary: Template role
-              x-ms-visibility: advanced
-            company_number:
-              type: string
-              x-ms-summary: Company number
-              x-ms-visibility: important
-            status:
-              type: string
-              x-ms-summary: Recipient status
-            title:
-              type: string
-              x-ms-summary: Recipient title
-            note:
-              type: string
-              x-ms-summary: Recipient note
-            fullname:
-              type: string
-              x-ms-summary: Recipient name
-              x-ms-visibility: important
-            first_name:
-              type: string
-              x-ms-summary: Recipient first name
-            thumb_url:
-              type: string
-              x-ms-summary: Recipient thumb URL
-            last_name:
-              type: string
-              x-ms-summary: Recipient last name
-            company_name:
-              type: string
-              x-ms-summary: Company name
-              x-ms-visibility: important
+          $ref: '#/components/schemas/Recipient'
         custom_fields:
           type: object
           additionalProperties:
@@ -2358,6 +2266,7 @@ components:
         event_type:
           type: string
           x-ms-summary: Event type
+
   headers:
     X-Rate-Limit-Limit:
       description: The number of allowed requests in the current period
@@ -2388,7 +2297,7 @@ components:
     Token:
       type: http
       scheme: bearer
-      description: 'Enter your bearer token in the format **bearer &lt;token>**'
+      description: 'Enter your bearer token'
       bearerFormat: JWT
 security:
   - Oauth2:
