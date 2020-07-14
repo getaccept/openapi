@@ -620,14 +620,6 @@ paths:
                         type: string
                         description: ID of custom template field
                         x-ms-summary: Field ID
-                        # x-ms-dynamic-values:
-                        #   operationId: ListDocumentFields
-                        #   value-collection: fields
-                        #   value-path: field_id
-                        #   value-title: field_label
-                        #   parameters:
-                        #     documentId:
-                        #       parameterReference: requestBody/template_id
                       name:
                         type: string
                         description: Name of custom template field
@@ -954,7 +946,7 @@ paths:
               schema:
                 type: string
                 description: Used only with `application/pdf` responses
-                example: attachment; filename="download.pdf"
+                example: 'attachment; filename="download.pdf"'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1622,7 +1614,7 @@ paths:
                     x-ms-summary: File status
                   job_id:
                     type: string
-                    description: Id of the processing job converting and compressing the video. Poll for job status updates using /video/job/<ID>.
+                    description: 'Id of the processing job converting and compressing the video. Poll for job status updates using /video/job/<ID>.'
                     x-ms-summary: Job ID
         '400':
           $ref: '#/components/responses/Invalid'
@@ -1893,7 +1885,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Recipient'
-
     Documents:
       title: Documents
       type: array
@@ -1940,13 +1931,12 @@ components:
           type: string
         description:
           type: string
-
     Field:
       title: Field
       type: object
       description: Field details
       x-ms-summary: Field
-      properties:    
+      properties:
         field_id:
           type: string
         page_id:
@@ -1983,7 +1973,6 @@ components:
           type: string
         validation_warning:
           type: string
-
     Fields:
       title: Fields
       type: object
@@ -1994,7 +1983,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Field'
-
     Recipient:
       title: Recipient
       type: object
@@ -2069,7 +2057,6 @@ components:
           description: Gender of the recipient
           x-ms-summary: Gender
           x-ms-visibility: advanced
-
     Recipients:
       title: Recipients
       type: object
@@ -2080,7 +2067,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Recipient'
-
     Subscription:
       title: Subscription
       type: object
@@ -2109,7 +2095,6 @@ components:
           type: string
         created_at:
           type: string
-
     User:
       title: User
       type: object
@@ -2190,7 +2175,6 @@ components:
         status:
           type: string
           x-ms-summary: Status
-
     Users:
       title: Users
       type: object
@@ -2220,7 +2204,6 @@ components:
                 type: string
               last_login:
                 type: string
-
     Webhook:
       title: Webhook
       type: object
@@ -2266,7 +2249,6 @@ components:
         event_type:
           type: string
           x-ms-summary: Event type
-
   headers:
     X-Rate-Limit-Limit:
       description: The number of allowed requests in the current period
@@ -2297,7 +2279,7 @@ components:
     Token:
       type: http
       scheme: bearer
-      description: 'Enter your bearer token'
+      description: Enter your bearer token
       bearerFormat: JWT
 security:
   - Oauth2:

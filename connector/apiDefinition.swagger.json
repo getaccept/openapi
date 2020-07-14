@@ -11,8 +11,8 @@
     "title": "GetAccept",
     "version": "1.6"
   },
-  "host": "c8551119d1d3.ngrok.io",
-  "basePath": "/api/v1",
+  "host": "api.getaccept.com",
+  "basePath": "/v1",
   "schemes": [
     "https"
   ],
