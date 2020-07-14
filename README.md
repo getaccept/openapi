@@ -6,50 +6,59 @@
 
 1. [Getting Started](#getting-started)
 2. [OpenAPI formats](#openapi-formats)
-3. [Microsoft Custom connector](#microsoft-custom-connector)
-4. [Creating Custom connector](#creating-custom-connector)
-5. [Running the converter](#running-the-converter)
+3. [Creating Microsoft Custom connector](#creating-microsoft-custom-connector)
+4. [Running the converter](#running-the-converter)
 
 ---
 
 ## Getting Started
 To run these scripts, you need to have a copy of the NodeJS runtime. The easiest way to do this is through npm. If you have NodeJS installed you have npm installed as well.
 
+
 ## OpenAPI formats
-In the Connector folder we have the files needed to create a custom connectors to be used in Azure Logic Apps, Microsoft Power Automate, and Microsoft Power Apps.
 * [openapi.json](openapi.json)  OpenAPI 3 definition in JSON format
 * [swagger.yaml](swagger.yaml)  OpenAPI 3 definition in YAML format
 * [swagger2.json](swagger2.json)  OpenAPI 2 definition in JSON format
 * [swagger2.yaml](swagger2.yaml)  OpenAPI 2 definition in YAML format
 
-## Microsoft Custom connector
+
+## Creating Microsoft Custom connector
 In the [connector](connector) folder we have the files needed to create a custom connectors to be used in Azure Logic Apps, Microsoft Power Automate, and Microsoft Power Apps.
 
-## Creating Custom connector
-To automatically create a custom connector in your Microsoft environment, follow the guide below.
-** Install required packages
+**Install required packages**
+To create a custom connector in your Microsoft Power Platform environment, follow the guide below.
 ```terminal
 $ npm install
 ```
 
-Install paconn, Microsoft Power Platform Connectors CLI, by running:
+**Install paconn**
+
+Paconn is the Microsoft Power Platform Connectors CLI which is required to install a custom connector from the terminal.
 ```terminal
 $ npm run ms-install
 ```
 
-Login to Power Platform by running:
+**Login to Power Platform**
+
 ```terminal
 $ npm run ms-login
 ```
 This will ask you to login using the device code login process. Follow the prompt for the login.
 
-Install custom connector
+
+**Create Custom connector**
+
 A new custom connector can be created from the files in the connector folder. Create a connector by running:
 ```terminal
 $ npm run ms-create
 ```
 When the environment is not specified the command will prompt for it. 
-Currently you can't update a connector so you will have to remove the [existing custom connector](https://us.flow.microsoft.com/manage/environments/Default/connections/custom) first before creating it again.
+
+
+**Update Custom connector**
+
+Currently you can't update a connector so you will have to remove the [existing custom connector](https://us.flow.microsoft.com/manage/environments/Default/connections/custom) before creating it again.
+
 
 ## Running the converter
 
