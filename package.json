@@ -7,7 +7,8 @@
     "doc": "docs"
   },
   "dependencies": {
-    "api-spec-converter": "^2.11.0"
+    "api-spec-converter": "^2.11.1",
+    "mem": "^6.1.0"
   },
   "devDependencies": {
     "eslint": "^7.4.0",

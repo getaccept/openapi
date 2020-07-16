@@ -974,6 +974,8 @@ paths:
     post:
       consumes:
         - application/json
+      produces:
+        - application/json
       parameters:
         - description: Document ID
           in: path
@@ -2441,21 +2443,29 @@ tags:
 x-components:
   responses:
     AccessDenied:
+      content:
+        application/json:
+          schema:
+            $ref: '#/definitions/Error'
       description: Access denied
-      schema:
-        $ref: '#/definitions/Error'
     Invalid:
+      content:
+        application/json:
+          schema:
+            $ref: '#/definitions/Error'
       description: Invalid data
-      schema:
-        $ref: '#/definitions/Error'
     NotFound:
+      content:
+        application/json:
+          schema:
+            $ref: '#/definitions/Error'
       description: The specified resource was not found
-      schema:
-        $ref: '#/definitions/Error'
     Unauthorized:
+      content:
+        application/json:
+          schema:
+            $ref: '#/definitions/Error'
       description: Unauthorized
-      schema:
-        $ref: '#/definitions/Error'
   headers:
     X-Rate-Limit-Limit:
       description: The number of allowed requests in the current period

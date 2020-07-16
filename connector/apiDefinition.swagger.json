@@ -1117,6 +1117,9 @@
         "consumes": [
           "application/json"
         ],
+        "produces": [
+          "application/json"
+        ],
         "parameters": [
           {
             "description": "Document ID",
@@ -2998,28 +3001,44 @@
   "x-components": {
     "responses": {
       "AccessDenied": {
-        "description": "Access denied",
-        "schema": {
-          "$ref": "#/definitions/Error"
-        }
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "description": "Access denied"
       },
       "Invalid": {
-        "description": "Invalid data",
-        "schema": {
-          "$ref": "#/definitions/Error"
-        }
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "description": "Invalid data"
       },
       "NotFound": {
-        "description": "The specified resource was not found",
-        "schema": {
-          "$ref": "#/definitions/Error"
-        }
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "description": "The specified resource was not found"
       },
       "Unauthorized": {
-        "description": "Unauthorized",
-        "schema": {
-          "$ref": "#/definitions/Error"
-        }
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "description": "Unauthorized"
       }
     },
     "headers": {
