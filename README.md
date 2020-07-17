@@ -12,7 +12,15 @@
 ---
 
 ## Getting Started
-To run these scripts, you need to have a copy of the NodeJS runtime. The easiest way to do this is through npm. If you have NodeJS installed you have npm installed as well.
+Welcome to GetAccept API! You can use this API to access all our API endpoints.
+
+The API is organized around REST. All requests should be made over SSL to the servers. All request and response bodies, including errors, are encoded in JSON.
+
+To authenticate to the API you need to have a valid and active GetAccept account.
+
+We welcome the study and testing of our API to all GetAccept users but commercial usage is subject to the purchase of a GetAccept API package.
+
+If you need help during the integration or want to learn more about pricing, please don't hesitate to reach out to us using the built-in support-chat on this page at the lower-right corner.
 
 
 ## OpenAPI formats
@@ -23,6 +31,8 @@ To run these scripts, you need to have a copy of the NodeJS runtime. The easiest
 
 
 ## Creating Microsoft Custom connector
+To run these scripts, you need to have a copy of the NodeJS runtime. The easiest way to do this is through npm. If you have NodeJS installed you have npm installed as well.
+
 In the [connector](connector) folder we have the files needed to create a custom connectors to be used in Azure Logic Apps, Microsoft Power Automate, and Microsoft Power Apps.
 
 **Install required packages**

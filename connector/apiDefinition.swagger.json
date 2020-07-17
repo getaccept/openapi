@@ -6,7 +6,7 @@
       "name": "GetAccept API Team",
       "url": "https://app.getaccept.com/api"
     },
-    "description": "Welcome to GetAccept API! You can use this API to access all our API endpoints.\n\nThe API is organized around REST. All requests should be made over SSL to the servers. All request and response bodies, including errors, are encoded in JSON.\n\nTo authenticate to the API you need to have a valid and active GetAccept account.\n\nWe welcome the study and testing of our API to all GetAccept users but commercial usage is subject to the purchase of a GetAccept API package\n\nIf you need help during the integration or want to learn more about pricing, please don't hesitate to reach out to us using the built-in support-chat on this page at the lower-right corner.\n\n# Basics\nGetAccept consists of a few concepts that you should know about before starting to use the API.\n\n## Entity\nAn entity is the top node and all users and corresponding documents are connected to an entity. An entity is often the same as a company, a country or a department in a large organization.\n\n## User\nA user is defined by it´s e-mail address and is connected to one or many entities.\n\n### User Roles\n\n#### Administrator:\n- View all documents\n- Edit all documents\n- Change entity settings, info and billing\n- Add new users to the entity\n- Assign entity roles\n\n#### Manager:\n- View team documents\n- Edit all documents\n- Add new users to the entity\n\n#### User:\n- View, edit and send any/own documents\n\n#### Team:\n- Teams consists of users and has no policies connected\n\n## Document\nA document is one or multiple uploaded file(s) that is to be sent to one or many recipients created by an user.\n\n## Recipients\nEvery unique e-mail address (or mobile number) that is connected to a document is a recipient.\n\n## Contacts\nAll contacts added as a recipient are saved as a contact and is available for later use on that entity.",
+    "description": "GetAccept provides a sales enablement platform for sales to design, send, promote, track, and e-sign sales documents, leveraging sales collateral, contract management, proposals, and electronic signatures in one place.",
     "termsOfService": "https://www.getaccept.com/terms.html",
     "title": "GetAccept",
     "version": "1.6"
@@ -184,7 +184,7 @@
         "tags": [
           "Contacts"
         ],
-        "description": "Receive a list of available contact for the current entity",
+        "description": "Receive a list of available contact for the current entity.\nAll contacts added as a recipient are saved as a contact and is available for later use on that entity.",
         "operationId": "ListContacts",
         "summary": "List contacts"
       },
@@ -2181,7 +2181,7 @@
   },
   "definitions": {
     "Document": {
-      "description": "Document details",
+      "description": "A document is one or multiple uploaded file(s) that is to be sent to one or many recipients created by a user.",
       "properties": {
         "tags": {
           "type": "string",
@@ -2559,7 +2559,7 @@
       "x-ms-summary": "Fields"
     },
     "Recipient": {
-      "description": "Recipient details",
+      "description": "Every unique e-mail address (or mobile number) that is connected to a document is a recipient.",
       "properties": {
         "company_name": {
           "description": "Company name of the recipient",
@@ -2705,7 +2705,7 @@
       "x-ms-summary": "Subscription"
     },
     "User": {
-      "description": "User details",
+      "description": "A user is defined by it´s e-mail address and is connected to one or many entities.\n\n### User Roles\n\n#### Administrator:\n- View all documents\n- Edit all documents\n- Change entity settings, info and billing\n- Add new users to the entity\n- Assign entity roles\n\n#### Manager:\n- View team documents\n- Edit all documents\n- Add new users to the entity\n\n## Entity\nAn entity is the top node and all users and corresponding documents are connected to an entity. An entity is often the same as a company, a country or a department in a large organization.\n",
       "properties": {
         "app_mode": {
           "type": "string",
@@ -3076,7 +3076,7 @@
     },
     {
       "propertyName": "Categories",
-      "propertyValue": "Sales and CRM,Productivity"
+      "propertyValue": "Sales and CRM;Productivity"
     }
   ]
 }

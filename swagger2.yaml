@@ -5,98 +5,9 @@ info:
     name: GetAccept API Team
     url: 'https://app.getaccept.com/api'
   description: >-
-    Welcome to GetAccept API! You can use this API to access all our API
-    endpoints.
-
-
-    The API is organized around REST. All requests should be made over SSL to
-    the servers. All request and response bodies, including errors, are encoded
-    in JSON.
-
-
-    To authenticate to the API you need to have a valid and active GetAccept
-    account.
-
-
-    We welcome the study and testing of our API to all GetAccept users but
-    commercial usage is subject to the purchase of a GetAccept API package
-
-
-    If you need help during the integration or want to learn more about pricing,
-    please don't hesitate to reach out to us using the built-in support-chat on
-    this page at the lower-right corner.
-
-
-    # Basics
-
-    GetAccept consists of a few concepts that you should know about before
-    starting to use the API.
-
-
-    ## Entity
-
-    An entity is the top node and all users and corresponding documents are
-    connected to an entity. An entity is often the same as a company, a country
-    or a department in a large organization.
-
-
-    ## User
-
-    A user is defined by it´s e-mail address and is connected to one or many
-    entities.
-
-
-    ### User Roles
-
-
-    #### Administrator:
-
-    - View all documents
-
-    - Edit all documents
-
-    - Change entity settings, info and billing
-
-    - Add new users to the entity
-
-    - Assign entity roles
-
-
-    #### Manager:
-
-    - View team documents
-
-    - Edit all documents
-
-    - Add new users to the entity
-
-
-    #### User:
-
-    - View, edit and send any/own documents
-
-
-    #### Team:
-
-    - Teams consists of users and has no policies connected
-
-
-    ## Document
-
-    A document is one or multiple uploaded file(s) that is to be sent to one or
-    many recipients created by an user.
-
-
-    ## Recipients
-
-    Every unique e-mail address (or mobile number) that is connected to a
-    document is a recipient.
-
-
-    ## Contacts
-
-    All contacts added as a recipient are saved as a contact and is available
-    for later use on that entity.
+    GetAccept provides a sales enablement platform for sales to design, send,
+    promote, track, and e-sign sales documents, leveraging sales collateral,
+    contract management, proposals, and electronic signatures in one place.
   termsOfService: 'https://www.getaccept.com/terms.html'
   title: GetAccept
   version: '1.6'
@@ -234,7 +145,11 @@ paths:
             $ref: '#/definitions/Error'
       tags:
         - Contacts
-      description: Receive a list of available contact for the current entity
+      description: >-
+        Receive a list of available contact for the current entity.
+
+        All contacts added as a recipient are saved as a contact and is
+        available for later use on that entity.
       operationId: ListContacts
       summary: List contacts
     post:
@@ -1823,7 +1738,9 @@ paths:
       summary: List videos
 definitions:
   Document:
-    description: Document details
+    description: >-
+      A document is one or multiple uploaded file(s) that is to be sent to one
+      or many recipients created by a user.
     properties:
       tags:
         type: string
@@ -2105,7 +2022,9 @@ definitions:
     type: object
     x-ms-summary: Fields
   Recipient:
-    description: Recipient details
+    description: >-
+      Every unique e-mail address (or mobile number) that is connected to a
+      document is a recipient.
     properties:
       company_name:
         description: Company name of the recipient
@@ -2217,7 +2136,41 @@ definitions:
     type: object
     x-ms-summary: Subscription
   User:
-    description: User details
+    description: >
+      A user is defined by it´s e-mail address and is connected to one or many
+      entities.
+
+
+      ### User Roles
+
+
+      #### Administrator:
+
+      - View all documents
+
+      - Edit all documents
+
+      - Change entity settings, info and billing
+
+      - Add new users to the entity
+
+      - Assign entity roles
+
+
+      #### Manager:
+
+      - View team documents
+
+      - Edit all documents
+
+      - Add new users to the entity
+
+
+      ## Entity
+
+      An entity is the top node and all users and corresponding documents are
+      connected to an entity. An entity is often the same as a company, a
+      country or a department in a large organization.
     properties:
       app_mode:
         type: string
@@ -2488,4 +2441,4 @@ x-ms-connector-metadata:
   - propertyName: Privacy policy
     propertyValue: 'https://www.getaccept.com/privacy-policy'
   - propertyName: Categories
-    propertyValue: 'Sales and CRM,Productivity'
+    propertyValue: Sales and CRM;Productivity
