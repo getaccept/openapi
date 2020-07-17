@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "api-spec-converter": "^2.11.1",
+    "lodash": "^4.17.19",
     "mem": "^6.1.0"
   },
   "devDependencies": {
