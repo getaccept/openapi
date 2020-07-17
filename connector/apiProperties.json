@@ -39,7 +39,7 @@
         "type": "oauthSetting"
       }
     },
-    "iconBrandColor": "#383A41",
+    "iconBrandColor": "#F08F00",
     "displayname": "GetAccept",
     "publisher": "GetAccept, Inc.",
     "policyTemplateInstances": [
