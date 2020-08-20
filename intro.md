@@ -1,0 +1,23 @@
+GetAccept provides a sales enablement platform for sales to design, send, promote, track, and e-sign sales documents, leveraging sales collateral, contract management, proposals, and electronic signatures in one place.
+This connector helps to automate your workflows for document storage, retrieval, task assignment, and customized notifications.
+
+## Prerequisites
+
+A GetAccept account is required to use this connection.
+Goto [getaccept.com](https://www.getaccept.com) to register a free account.
+
+
+## How to get credentials?
+
+Only a valid GetAccept account is required as OAuth2 is used to authenticate the current logged-in user in GetAccept.
+
+## Supported Operations
+- You can create signature requests based on templates or files provided by the connector
+- Flows can be triggered based on status changes of documents, viewed/signed etc.
+- Send documents for viewing and tracking automatically from example Sharepoint
+- Automatically retrieve field data from fillable fields and update your CRM
+- Manage users, create contacts and much more with ease
+
+## Known issues and limitations
+
+Please contact our [mailto:support@getaccept.com](technical support) for any integration related issues.

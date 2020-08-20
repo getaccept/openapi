@@ -151,7 +151,8 @@
           "description": "A JSON object containing authentication credentials",
           "required": true
         },
-        "summary": "Authentication by token"
+        "summary": "Authentication by token",
+        "x-ms-visibility": "internal"
       }
     },
     "/contacts": {
@@ -1190,7 +1191,8 @@
           },
           "description": "An optional JSON object containing seal information"
         },
-        "summary": "Seal document"
+        "summary": "Seal document",
+        "x-ms-visibility": "internal"
       }
     },
     "/documents/{documentId}/send": {
@@ -1298,7 +1300,8 @@
         ],
         "description": "You can request a refreshed of the access token before the original token has expired.",
         "operationId": "RefreshToken",
-        "summary": "Refresh an access token"
+        "summary": "Refresh an access token",
+        "x-ms-visibility": "internal"
       }
     },
     "/subscriptions": {
@@ -1342,6 +1345,7 @@
                       "document.created",
                       "document.sent",
                       "document.viewed",
+                      "document.reviewed",
                       "document.signed",
                       "document.approved",
                       "document.expired",
@@ -1356,7 +1360,12 @@
                     ],
                     "example": "document.signed",
                     "type": "string",
-                    "x-ms-summary": "Event trigger",
+                    "x-ms-dynamic-values": {
+                      "operationId": "ListSubscriptionEvents",
+                      "value-path": "value",
+                      "value-title": "name"
+                    },
+                    "x-ms-summary": "Select event",
                     "x-ms-visibility": "important"
                   },
                   "global": {
@@ -1372,14 +1381,16 @@
                     "x-ms-summary": "All entity users"
                   },
                   "notification_email": {
-                    "description": "If the webhook fails, send a notification to this email instead of the sender",
+                    "description": "If the event fails, send a notification to this email instead of the sender",
                     "example": "hostmaster@example.com",
                     "type": "string",
-                    "x-ms-summary": "Error email"
+                    "x-ms-summary": "Error email",
+                    "x-ms-visibility": "advanced"
                   },
                   "payload": {
                     "description": "Additional payload data to post",
                     "type": "string",
+                    "x-ms-summary": "Payload",
                     "x-ms-visibility": "advanced"
                   },
                   "target_url": {
@@ -1401,10 +1412,341 @@
           "description": "A JSON object containing subscription information",
           "required": true
         },
-        "summary": "Subscribe to event",
-        "x-ms-summary": "Subscribe to event",
+        "summary": "Subscribe to document events",
+        "x-ms-summary": "When a document status changes",
         "x-ms-trigger": "single",
-        "x-ms-trigger-hint": "Trigger a webhook by activating the subscribed event. Example opening a document to trigger document.viewed",
+        "x-ms-trigger-hint": "Trigger when a document status is changed",
+        "x-ms-visibility": "important"
+      },
+      "x-ms-notification-content": {
+        "schema": {
+          "$ref": "#/components/schemas/Webhook"
+        }
+      }
+    },
+    "/subscriptions/events": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Subscriptions"
+        ],
+        "description": "This call will return a list of available subscription events",
+        "operationId": "ListSubscriptionEvents",
+        "summary": "List available subscription events",
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/subscriptions/events/rejected": {
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Others"
+        ],
+        "description": "Triggers when a document has been rejected by any of the recipients",
+        "operationId": "CreateRejectedSubscription",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "host": {
+                    "description": "The host name to send the post to",
+                    "type": "string",
+                    "x-ms-visibility": "internal"
+                  },
+                  "event": {
+                    "default": "document.rejected",
+                    "description": "Event trigger",
+                    "type": "string",
+                    "x-ms-summary": "Event trigger",
+                    "x-ms-visibility": "internal"
+                  },
+                  "global": {
+                    "default": true,
+                    "description": "If the webhook should catch events for all entity users.",
+                    "enum": [
+                      true,
+                      false
+                    ],
+                    "example": true,
+                    "nullable": true,
+                    "type": "boolean",
+                    "x-ms-summary": "All entity users"
+                  },
+                  "notification_email": {
+                    "description": "If the event fails, send a notification to this email instead of the sender",
+                    "example": "hostmaster@example.com",
+                    "type": "string",
+                    "x-ms-summary": "Error email",
+                    "x-ms-visibility": "advanced"
+                  },
+                  "payload": {
+                    "description": "Additional payload data to post",
+                    "type": "string",
+                    "x-ms-summary": "Payload",
+                    "x-ms-visibility": "advanced"
+                  },
+                  "target_url": {
+                    "description": "The URL to post payload to on event",
+                    "example": "https://abc.x.pipedream.net/",
+                    "type": "string",
+                    "x-ms-notification-url": true,
+                    "x-ms-visibility": "internal"
+                  }
+                },
+                "required": [
+                  "event",
+                  "target_url"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "description": "A JSON object containing subscription information",
+          "required": true
+        },
+        "summary": "When a document has been rejected",
+        "x-ms-summary": "When a document has been rejected",
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "important"
+      },
+      "x-ms-notification-content": {
+        "schema": {
+          "$ref": "#/components/schemas/Webhook"
+        }
+      }
+    },
+    "/subscriptions/events/reviewed": {
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Others"
+        ],
+        "description": "Triggers when a document has been reviewed by any of the recipients",
+        "operationId": "CreateReviewedSubscription",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "host": {
+                    "description": "The host name to send the post to",
+                    "type": "string",
+                    "x-ms-visibility": "internal"
+                  },
+                  "event": {
+                    "default": "document.reviewed",
+                    "description": "Event trigger",
+                    "type": "string",
+                    "x-ms-summary": "Event trigger",
+                    "x-ms-visibility": "internal"
+                  },
+                  "global": {
+                    "default": true,
+                    "description": "If the webhook should catch events for all entity users.",
+                    "enum": [
+                      true,
+                      false
+                    ],
+                    "example": true,
+                    "nullable": true,
+                    "type": "boolean",
+                    "x-ms-summary": "All entity users"
+                  },
+                  "notification_email": {
+                    "description": "If the event fails, send a notification to this email instead of the sender",
+                    "example": "hostmaster@example.com",
+                    "type": "string",
+                    "x-ms-summary": "Error email",
+                    "x-ms-visibility": "advanced"
+                  },
+                  "payload": {
+                    "description": "Additional payload data to post",
+                    "type": "string",
+                    "x-ms-summary": "Payload",
+                    "x-ms-visibility": "advanced"
+                  },
+                  "target_url": {
+                    "description": "The URL to post payload to on event",
+                    "example": "https://abc.x.pipedream.net/",
+                    "type": "string",
+                    "x-ms-notification-url": true,
+                    "x-ms-visibility": "internal"
+                  }
+                },
+                "required": [
+                  "event",
+                  "target_url"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "description": "A JSON object containing subscription information",
+          "required": true
+        },
+        "summary": "When a document has been reviewed",
+        "x-ms-summary": "When a document has been reviewed",
+        "x-ms-trigger": "single",
+        "x-ms-visibility": "important"
+      },
+      "x-ms-notification-content": {
+        "schema": {
+          "$ref": "#/components/schemas/Webhook"
+        }
+      }
+    },
+    "/subscriptions/events/signed": {
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Others"
+        ],
+        "description": "Triggers when a document has been signed by all signing parties",
+        "operationId": "CreateSignedSubscription",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "host": {
+                    "description": "The host name to send the post to",
+                    "type": "string",
+                    "x-ms-visibility": "internal"
+                  },
+                  "event": {
+                    "default": "document.signed",
+                    "description": "Event trigger",
+                    "type": "string",
+                    "x-ms-summary": "Event trigger",
+                    "x-ms-visibility": "internal"
+                  },
+                  "global": {
+                    "default": true,
+                    "description": "If the webhook should catch events for all entity users.",
+                    "enum": [
+                      true,
+                      false
+                    ],
+                    "example": true,
+                    "nullable": true,
+                    "type": "boolean",
+                    "x-ms-summary": "All entity users"
+                  },
+                  "notification_email": {
+                    "description": "If the event fails, send a notification to this email instead of the sender",
+                    "example": "hostmaster@example.com",
+                    "type": "string",
+                    "x-ms-summary": "Error email",
+                    "x-ms-visibility": "advanced"
+                  },
+                  "payload": {
+                    "description": "Additional payload data to post",
+                    "type": "string",
+                    "x-ms-summary": "Payload",
+                    "x-ms-visibility": "advanced"
+                  },
+                  "target_url": {
+                    "description": "The URL to post payload to on event",
+                    "example": "https://abc.x.pipedream.net/",
+                    "type": "string",
+                    "x-ms-notification-url": true,
+                    "x-ms-visibility": "internal"
+                  }
+                },
+                "required": [
+                  "event",
+                  "target_url"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "description": "A JSON object containing subscription information",
+          "required": true
+        },
+        "summary": "When a document has been signed",
+        "x-ms-summary": "When a document has been signed",
+        "x-ms-trigger": "single",
         "x-ms-visibility": "important"
       },
       "x-ms-notification-content": {
@@ -1438,7 +1780,8 @@
         ],
         "description": "Delete a single subscription.",
         "operationId": "DeleteSubscription",
-        "summary": "Delete subscription"
+        "summary": "Delete subscription",
+        "x-ms-visibility": "internal"
       },
       "get": {
         "parameters": [
@@ -1477,7 +1820,8 @@
         ],
         "description": "This call will return details of a single subscription",
         "operationId": "GetSubscriptionDetails",
-        "summary": "Get subscription details"
+        "summary": "Get subscription details",
+        "x-ms-visibility": "internal"
       }
     },
     "/templates": {
@@ -3089,6 +3433,10 @@
       },
       "description": "You can upload videos and reuse it in many documents.",
       "name": "Videos"
+    },
+    {
+      "description": "Additional endpoints used in various integrations.",
+      "name": "Others"
     }
   ],
   "x-ms-connector-metadata": [

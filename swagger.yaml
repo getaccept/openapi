@@ -37,6 +37,7 @@ paths:
       description: |-
         Token based authentication is recommended for server-based access or access from clients where OAuth is not suitable. Access tokens has to be requested using an administrators login credentials.
         Requests should include the header Content-Type with value application/json
+      x-ms-visibility: internal
       parameters: []
       security: []
       requestBody:
@@ -91,6 +92,7 @@ paths:
                     format: int64
       operationId: RefreshToken
       description: You can request a refreshed of the access token before the original token has expired.
+      x-ms-visibility: internal
   /documents:
     get:
       summary: List documents
@@ -1004,6 +1006,7 @@ paths:
         This API call triggers the document seal action and can only be performed on documents with document_status = draft. The method will return individual access/signing links for each recipient.
 
         If document was created using self-sign option it will also be self-signed by the authenticated or specified user before sealing.
+      x-ms-visibility: internal
       requestBody:
         description: An optional JSON object containing seal information
         content:
@@ -1181,12 +1184,12 @@ paths:
             value-title: name
   /subscriptions:
     post:
-      summary: Subscribe to event
+      summary: Subscribe to document events
       operationId: CreateSubscription
       x-ms-visibility: important
-      x-ms-summary: Subscribe to event
+      x-ms-summary: When a document status changes
       x-ms-trigger: single
-      x-ms-trigger-hint: Trigger a webhook by activating the subscribed event. Example opening a document to trigger document.viewed
+      x-ms-trigger-hint: Trigger when a document status is changed
       responses:
         '200':
           description: OK
@@ -1228,12 +1231,13 @@ paths:
                 event:
                   type: string
                   description: Event trigger
-                  x-ms-summary: Event trigger
+                  x-ms-summary: Select event
                   x-ms-visibility: important
                   enum:
                     - document.created
                     - document.sent
                     - document.viewed
+                    - document.reviewed
                     - document.signed
                     - document.approved
                     - document.expired
@@ -1245,6 +1249,10 @@ paths:
                     - document.commented
                     - document.hardbounced
                     - document.imported
+                  x-ms-dynamic-values:
+                    operationId: ListSubscriptionEvents
+                    value-path: value
+                    value-title: name
                   example: document.signed
                 target_url:
                   type: string
@@ -1259,6 +1267,7 @@ paths:
                 payload:
                   type: string
                   description: Additional payload data to post
+                  x-ms-summary: Payload
                   x-ms-visibility: advanced
                 global:
                   type: boolean
@@ -1273,8 +1282,9 @@ paths:
                 notification_email:
                   type: string
                   example: hostmaster@example.com
-                  description: 'If the webhook fails, send a notification to this email instead of the sender'
+                  description: If the event fails, send a notification to this email instead of the sender
                   x-ms-summary: Error email
+                  x-ms-visibility: advanced
               required:
                 - event
                 - target_url
@@ -1283,6 +1293,253 @@ paths:
     x-ms-notification-content:
       schema:
         $ref: '#/components/schemas/Webhook'
+
+  /subscriptions/events/signed:
+    post:
+      summary: When a document has been signed
+      operationId: CreateSignedSubscription
+      x-ms-visibility: important
+      x-ms-summary: When a document has been signed
+      x-ms-trigger: single
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      description: Triggers when a document has been signed by all signing parties
+      requestBody:
+        required: true
+        description: A JSON object containing subscription information
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event:
+                  type: string
+                  description: Event trigger
+                  x-ms-summary: Event trigger
+                  x-ms-visibility: internal
+                  default: document.signed
+                target_url:
+                  type: string
+                  description: The URL to post payload to on event
+                  x-ms-notification-url: true
+                  x-ms-visibility: internal
+                  example: 'https://abc.x.pipedream.net/'
+                host:
+                  type: string
+                  description: The host name to send the post to
+                  x-ms-visibility: internal
+                payload:
+                  type: string
+                  description: Additional payload data to post
+                  x-ms-summary: Payload
+                  x-ms-visibility: advanced
+                global:
+                  type: boolean
+                  nullable: true
+                  enum:
+                    - true
+                    - false
+                  example: true
+                  default: true
+                  description: If the webhook should catch events for all entity users.
+                  x-ms-summary: All entity users
+                notification_email:
+                  type: string
+                  example: hostmaster@example.com
+                  description: If the event fails, send a notification to this email instead of the sender
+                  x-ms-summary: Error email
+                  x-ms-visibility: advanced
+              required:
+                - event
+                - target_url
+      tags:
+        - Others
+    x-ms-notification-content:
+      schema:
+        $ref: '#/components/schemas/Webhook'
+
+  /subscriptions/events/reviewed:
+    post:
+      summary: When a document has been reviewed
+      operationId: CreateReviewedSubscription
+      x-ms-visibility: important
+      x-ms-summary: When a document has been reviewed
+      x-ms-trigger: single
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      description: Triggers when a document has been reviewed by any of the recipients
+      requestBody:
+        required: true
+        description: A JSON object containing subscription information
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event:
+                  type: string
+                  description: Event trigger
+                  x-ms-summary: Event trigger
+                  x-ms-visibility: internal
+                  default: document.reviewed
+                target_url:
+                  type: string
+                  description: The URL to post payload to on event
+                  x-ms-notification-url: true
+                  x-ms-visibility: internal
+                  example: 'https://abc.x.pipedream.net/'
+                host:
+                  type: string
+                  description: The host name to send the post to
+                  x-ms-visibility: internal
+                payload:
+                  type: string
+                  description: Additional payload data to post
+                  x-ms-summary: Payload
+                  x-ms-visibility: advanced
+                global:
+                  type: boolean
+                  nullable: true
+                  enum:
+                    - true
+                    - false
+                  example: true
+                  default: true
+                  description: If the webhook should catch events for all entity users.
+                  x-ms-summary: All entity users
+                notification_email:
+                  type: string
+                  example: hostmaster@example.com
+                  description: If the event fails, send a notification to this email instead of the sender
+                  x-ms-summary: Error email
+                  x-ms-visibility: advanced
+              required:
+                - event
+                - target_url
+      tags:
+        - Others
+    x-ms-notification-content:
+      schema:
+        $ref: '#/components/schemas/Webhook'
+
+  /subscriptions/events/rejected:
+    post:
+      summary: When a document has been rejected
+      operationId: CreateRejectedSubscription
+      x-ms-visibility: important
+      x-ms-summary: When a document has been rejected
+      x-ms-trigger: single
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      description: Triggers when a document has been rejected by any of the recipients
+      requestBody:
+        required: true
+        description: A JSON object containing subscription information
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event:
+                  type: string
+                  description: Event trigger
+                  x-ms-summary: Event trigger
+                  x-ms-visibility: internal
+                  default: document.rejected
+                target_url:
+                  type: string
+                  description: The URL to post payload to on event
+                  x-ms-notification-url: true
+                  x-ms-visibility: internal
+                  example: 'https://abc.x.pipedream.net/'
+                host:
+                  type: string
+                  description: The host name to send the post to
+                  x-ms-visibility: internal
+                payload:
+                  type: string
+                  description: Additional payload data to post
+                  x-ms-summary: Payload
+                  x-ms-visibility: advanced
+                global:
+                  type: boolean
+                  nullable: true
+                  enum:
+                    - true
+                    - false
+                  example: true
+                  default: true
+                  description: If the webhook should catch events for all entity users.
+                  x-ms-summary: All entity users
+                notification_email:
+                  type: string
+                  example: hostmaster@example.com
+                  description: If the event fails, send a notification to this email instead of the sender
+                  x-ms-summary: Error email
+                  x-ms-visibility: advanced
+              required:
+                - event
+                - target_url
+      tags:
+        - Others
+    x-ms-notification-content:
+      schema:
+        $ref: '#/components/schemas/Webhook'
+
+  '/subscriptions/events':
+    get:
+      summary: List available subscription events
+      tags:
+        - Subscriptions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    value:
+                      type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: ListSubscriptionEvents
+      description: This call will return a list of available subscription events
+      x-ms-visibility: internal
+
   '/subscriptions/{subscriptionId}':
     get:
       summary: Get subscription details
@@ -1301,6 +1558,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       operationId: GetSubscriptionDetails
       description: This call will return details of a single subscription
+      x-ms-visibility: internal
       parameters:
         - in: path
           schema:
@@ -1317,6 +1575,7 @@ paths:
         '204':
           description: No Content
       description: Delete a single subscription.
+      x-ms-visibility: internal
       tags:
         - Subscriptions
       parameters:
@@ -2292,6 +2551,8 @@ tags:
     description: You can upload videos and reuse it in many documents.
     externalDocs:
       url: 'https://app.getaccept.com/api/#video'
+  - name: Others
+    description: Additional endpoints used in various integrations.
 servers:
   - url: 'https://api.getaccept.com/v1'
     description: Production endpoint
