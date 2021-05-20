@@ -2168,8 +2168,6 @@ components:
           type: boolean
         is_required:
           type: boolean
-        recipient_id:
-          type: string
         recipient_name:
           type: string
         field_top:

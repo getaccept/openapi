@@ -2901,9 +2901,6 @@
         "page_id": {
           "type": "string"
         },
-        "recipient_id": {
-          "type": "string"
-        },
         "recipient_name": {
           "type": "string"
         },

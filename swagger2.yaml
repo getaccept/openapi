@@ -2281,8 +2281,6 @@ definitions:
         type: boolean
       page_id:
         type: string
-      recipient_id:
-        type: string
       recipient_name:
         type: string
       validation_regex:
