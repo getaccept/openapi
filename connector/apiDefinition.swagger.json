@@ -2860,57 +2860,6 @@
     },
     "Field": {
       "description": "Field details",
-      "properties": {
-        "field_height": {
-          "format": "int32",
-          "type": "integer"
-        },
-        "field_id": {
-          "type": "string"
-        },
-        "field_label": {
-          "type": "string"
-        },
-        "field_left": {
-          "format": "int32",
-          "type": "integer"
-        },
-        "field_top": {
-          "format": "int32",
-          "type": "integer"
-        },
-        "field_type": {
-          "type": "string"
-        },
-        "field_value": {
-          "type": "string"
-        },
-        "field_width": {
-          "format": "int32",
-          "type": "integer"
-        },
-        "is_collectable": {
-          "type": "boolean"
-        },
-        "is_editable": {
-          "type": "boolean"
-        },
-        "is_required": {
-          "type": "boolean"
-        },
-        "page_id": {
-          "type": "string"
-        },
-        "recipient_name": {
-          "type": "string"
-        },
-        "validation_regex": {
-          "type": "string"
-        },
-        "validation_warning": {
-          "type": "string"
-        }
-      },
       "title": "Field",
       "type": "object",
       "x-ms-summary": "Field"

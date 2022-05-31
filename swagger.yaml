@@ -2151,41 +2151,6 @@ components:
       type: object
       description: Field details
       x-ms-summary: Field
-      properties:
-        field_id:
-          type: string
-        page_id:
-          type: string
-        field_type:
-          type: string
-        field_label:
-          type: string
-        field_value:
-          type: string
-        is_collectable:
-          type: boolean
-        is_editable:
-          type: boolean
-        is_required:
-          type: boolean
-        recipient_name:
-          type: string
-        field_top:
-          type: integer
-          format: int32
-        field_left:
-          type: integer
-          format: int32
-        field_width:
-          type: integer
-          format: int32
-        field_height:
-          type: integer
-          format: int32
-        validation_regex:
-          type: string
-        validation_warning:
-          type: string
     Fields:
       title: Fields
       type: object
