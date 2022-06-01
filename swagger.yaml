@@ -103,7 +103,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Documents'
-              examples: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
       operationId: ListDocuments
@@ -367,6 +366,10 @@ paths:
                   type: string
                   description: 'Comma-separated, unique file-ids received when uploading files'
                   x-ms-summary: File IDs
+                file_name:
+                  type: string
+                  description: 'Filename of the document, with the extension. This will be helpful for converting different file-types.'
+                  x-ms-summary: File name
                 file_content:
                   type: string
                   description: Base64 encoded file content
@@ -588,7 +591,6 @@ paths:
                   type: string
                   description: External system ID for identification
                   x-ms-summary: External ID
-            examples: {}
       tags:
         - Documents
   /users:
@@ -994,6 +996,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recipients'
         '400':
           $ref: '#/components/responses/Invalid'
         '401':
@@ -1293,6 +1299,23 @@ paths:
     x-ms-notification-content:
       schema:
         $ref: '#/components/schemas/Webhook'
+    get:
+      summary: List subscriptions
+      x-ms-visibility: internal
+      tags:
+        - Subscriptions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscriptions'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: ListSubscriptions
+      description: |-
+        Receive a list of available subscriptions for the current entity.
 
   /subscriptions/events/signed:
     post:
@@ -1598,9 +1621,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties: {}
-              examples: {}
+                $ref: '#/components/schemas/Contacts'
         '401':
           $ref: '#/components/responses/Unauthorized'
       operationId: ListContacts
@@ -1642,33 +1663,43 @@ paths:
                 fullname:
                   type: string
                   description: Use to specify full name instead of first/last name
+                  x-ms-summary: Full name
                 first_name:
                   type: string
                   description: First name of the contact
+                  x-ms-summary: First name
                 last_name:
                   type: string
                   description: Last name of the contact
+                  x-ms-summary: Last name
                 email:
                   type: string
                   description: Email address of the contact
+                  x-ms-summary: Email
                 title:
                   type: string
                   description: 'The title of the contact, ex. CEO, Sales manager'
+                  x-ms-summary: Title
                 phone:
                   type: string
                   description: Phone number in international format
+                  x-ms-summary: Phone
                 mobile:
                   type: string
                   description: Mobile number in international format
+                  x-ms-summary: Mobile
                 note:
                   type: string
                   description: Optional internal note for contact
+                  x-ms-summary: Note
                 company_name:
                   type: string
                   description: Associated company name
+                  x-ms-summary: Company Name
                 company_number:
                   type: string
                   description: Associated company number
+                  x-ms-summary: Company Number
             examples:
               Example:
                 value:
@@ -1716,7 +1747,25 @@ paths:
       tags:
         - Documents
       requestBody:
+        required: true
+        description: A JSON object containing the uploaded document information
         content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_name:
+                  type: string
+                  description: 'Filename of the document, with the extension. This will be helpful for converting different file-types.'
+                  x-ms-summary: File name
+                file_content:
+                  type: string
+                  description: 'Send the file as base64 encoded. Note that base64 encoding files will increase the file size with about 30%'
+                  x-ms-summary: File content
+                file_url:
+                  type: string
+                  description: Url to document file. File must be available for download without any authorization
+                  x-ms-summary: File URL
           multipart/form-data:
             schema:
               type: object
@@ -1727,29 +1776,6 @@ paths:
                   format: binary
                   description: Binary File
                   x-ms-summary: Binary File
-                  x-ms-visibility: important
-                file_name:
-                  type: string
-                  description: 'Filename of the document, with the extension. This will be helpful for converting different file-types.'
-                  x-ms-summary: File name
-          application/json:
-            schema:
-              type: object
-              x-ms-visibility: internal
-              properties:
-                file_name:
-                  type: string
-                  description: 'Filename of the document, with the extension. This will be helpful for converting different file-types.'
-                  x-ms-summary: File name
-                file_content:
-                  type: string
-                  format: base64
-                  description: 'Send the file as base64 encoded. Note that base64 encoding files will increase the file size with about 30%'
-                  x-ms-summary: File content
-                file_url:
-                  type: string
-                  description: Url to document file. File must be available for download without any authorization
-                  x-ms-summary: File URL
   /upload/attachment:
     post:
       summary: Upload an attachment
@@ -1789,20 +1815,34 @@ paths:
         - Attachments
       requestBody:
         required: true
+        description: A JSON object containing the uploaded attachment information
         content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_name:
+                  type: string
+                  description: 'Filename of the document, with the extension. This will be helpful for converting different file-types.'
+                  x-ms-summary: File name
+                file_content:
+                  type: string
+                  description: 'Send the file as base64 encoded. Note that base64 encoding files will increase the file size with about 30%'
+                  x-ms-summary: File content
+                file_url:
+                  type: string
+                  description: Url to document file. File must be available for download without any authorization
+                  x-ms-summary: File URL
           multipart/form-data:
             schema:
               type: object
+              x-ms-visibility: internal
               properties:
                 file:
                   type: string
                   format: binary
                   description: Binary File
                   x-ms-summary: Binary File
-                file_name:
-                  type: string
-                  description: 'Filename of the document, with the extension. This will be helpful for converting different file-types.'
-                  x-ms-summary: File name
   /upload/video:
     post:
       summary: Upload a video
@@ -1841,20 +1881,35 @@ paths:
       tags:
         - Videos
       requestBody:
+        required: true
+        description: A JSON object containing the uploaded video information
         content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_name:
+                  type: string
+                  description: 'Filename of the document, with the extension. This will be helpful for converting different file-types.'
+                  x-ms-summary: File name
+                file_content:
+                  type: string
+                  description: 'Send the file as base64 encoded. Note that base64 encoding files will increase the file size with about 30%'
+                  x-ms-summary: File content
+                file_url:
+                  type: string
+                  description: Url to document file. File must be available for download without any authorization
+                  x-ms-summary: File URL
           multipart/form-data:
             schema:
               type: object
+              x-ms-visibility: internal
               properties:
                 file:
                   type: string
                   format: binary
                   description: Binary File
                   x-ms-summary: Binary File
-                file_name:
-                  type: string
-                  description: 'Filename of the video, with the extension. This will be helpful for converting different file-types.'
-                  x-ms-summary: File name
   /attachments:
     get:
       summary: List attachments
@@ -1924,60 +1979,75 @@ components:
       properties:
         user_id:
           type: string
+          description: ID of the sender user
           x-ms-summary: User ID
           x-ms-visibility: advanced
         email_send_subject:
           type: string
+          description: Email subject text
           x-ms-summary: Email Subject
           x-ms-visibility: advanced
         is_signed:
           type: boolean
+          description: If the document has been signed
           x-ms-summary: Is signed
           x-ms-visibility: advanced
         name:
           type: string
+          description: Name of document
           x-ms-summary: Name
           x-ms-visibility: important
         value:
           type: integer
           format: int32
+          description: Value of document
           x-ms-summary: Value
         is_private:
           type: boolean
+          description: If the document is private
           x-ms-summary: Is private
           x-ms-visibility: advanced
         status:
           type: string
+          description: Current status of document
           x-ms-summary: Status
           x-ms-visibility: important
         send_date:
           type: string
+          description: Document send date
           x-ms-summary: Send date
         sign_date:
           type: string
+          description: Document sign date
           x-ms-summary: Sign date
         is_scheduled_sending:
           type: boolean
+          description: If the document has scheduled sending
           x-ms-summary: Scheduled sending
           x-ms-visibility: advanced
         is_signing_forward:
           type: boolean
+          description: If transfer of signing rights is enabled
           x-ms-summary: Allow signature transfer
           x-ms-visibility: advanced
         sender_thumb_url:
           type: string
+          description: Thumb image of sender user
           x-ms-summary: Sender thumb URL
           x-ms-visibility: advanced
         auto_comment_text:
           type: string
+          description: Automatic chat text
           x-ms-summary: Automatic chat text
           x-ms-visibility: advanced
         thumb_url:
           type: string
+          description: Thumb image of document
           x-ms-summary: Thumb URL
           x-ms-visibility: advanced
         tags:
           type: string
+          description: Document tags
           x-ms-summary: Tags
         email_send_template_id:
           type: string
@@ -1985,42 +2055,57 @@ components:
           x-ms-visibility: internal
         email_send_message:
           type: string
+          description: Sending email message
           x-ms-summary: Email message
           x-ms-visibility: advanced
         is_auto_comment:
           type: boolean
+          description: If automatic chat comment is enabled
           x-ms-summary: Auto comment
           x-ms-visibility: advanced
         is_signing_initials:
           type: boolean
+          x-ms-summary: Signing Initials
           x-ms-visibility: internal
         sender_name:
           type: string
+          description: Name of sender user
           x-ms-summary: Sender name
         parent_id:
           type: string
+          description: ID of previous document version
           x-ms-summary: Parent ID
         external_editor_id:
           type: string
+          description: ID in external editor
+          x-ms-summary: External Editor ID
           x-ms-visibility: advanced
         company_name:
           type: string
+          description: Company Name
+          x-ms-summary: Company Name
           x-ms-visibility: advanced
         is_auto_comment_email:
           type: boolean
+          description: If automatic chat email is enabled
+          x-ms-summary: Auto Comment Email
           x-ms-visibility: advanced
         download_url:
           type: string
+          description: URL to download signed document
           x-ms-summary: Download URL
         expiration_date:
           type: string
+          description: Document expiration date
           x-ms-summary: Expiration date
         scheduled_sending_time:
           type: string
+          description: When the document was scheduled for sending
           x-ms-summary: Scheduled sending time
           x-ms-visibility: advanced
         created_at:
           type: string
+          description: When document was created
           x-ms-summary: Created at
           x-ms-visibility: advanced
         id:
@@ -2032,28 +2117,39 @@ components:
           x-ms-summary: External ID
         external_editor_type:
           type: string
+          x-ms-summary: External Editor Type
           x-ms-visibility: advanced
         company_logo_url:
           type: string
+          x-ms-summary: Company Logo URL
           x-ms-visibility: internal
         unique_id:
           type: integer
           format: int32
+          description: Unique ID for document
           x-ms-summary: Unique ID
         is_video:
           type: boolean
+          description: If the document has a introduction video
+          x-ms-summary: Has Video
           x-ms-visibility: advanced
         is_identify_recipient:
           type: boolean
+          description: If document has identify recipient enabled
+          x-ms-summary: Identify Recipient
           x-ms-visibility: advanced
         sender_email:
           type: string
+          description: Email address of sender user
           x-ms-summary: Sender email
         is_signing:
           type: boolean
+          description: If document is signable
+          x-ms-summary: Signable document
           x-ms-visibility: advanced
         type:
           type: string
+          description: Document type
           x-ms-summary: Type
         external_client_id:
           type: string
@@ -2061,17 +2157,22 @@ components:
           x-ms-visibility: advanced
         company_id:
           type: string
+          description: Company ID
+          x-ms-summary: Company ID
           x-ms-visibility: internal
         is_selfsign:
           type: boolean
-          x-ms-summary: Is Self-signing
+          description: If document has been self-signed by sender
+          x-ms-summary: Self-signing
           x-ms-visibility: advanced
         is_signing_biometric:
           type: boolean
+          description: If handwritten signature is enabled
           x-ms-summary: Handwritten signature
           x-ms-visibility: advanced
         is_signing_order:
           type: boolean
+          description: If recipient signing order is enabled
           x-ms-summary: Signature order
           x-ms-visibility: advanced
         auto_comment_email:
@@ -2083,6 +2184,7 @@ components:
         field_count:
           type: integer
           format: int32
+          description: Number of fields in document
           x-ms-summary: Field count
           x-ms-visibility: advanced
         company_number:
@@ -2090,10 +2192,12 @@ components:
           x-ms-visibility: internal
         is_reminder_sending:
           type: boolean
+          description: If automatic reminders are enabled
           x-ms-summary: Send reminders
           x-ms-visibility: advanced
         preview_url:
           type: string
+          description: Link to internal preview of document
           x-ms-summary: Preview URL
           x-ms-visibility: advanced
         recipients:
@@ -2186,7 +2290,7 @@ components:
           x-ms-summary: Last name
         email:
           type: string
-          description: Name of the created document
+          description: Email of the recipient
           x-ms-summary: Recipient email
         company_name:
           type: string
@@ -2245,34 +2349,145 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Recipient'
+    Contact:
+      title: Contact
+      type: object
+      description: Every unique e-mail address (or mobile number) is defined as a contact.
+      x-ms-summary: Contact
+      properties:
+        contact_id:
+          type: string
+          description: Contact ID
+          x-ms-summary: Contact ID
+          x-ms-visibility: advanced
+        fullname:
+          type: string
+          description: Full name of the contact
+          x-ms-summary: Full name
+        first_name:
+          type: string
+          description: First name of the contact
+          x-ms-summary: First name
+        last_name:
+          type: string
+          description: Last name of the contact
+          x-ms-summary: Last name
+        title:
+          type: string
+          description: Title of the contact
+          x-ms-summary: Title
+        mobile:
+          type: string
+          description: Mobile number of the contact
+          x-ms-summary: Mobile
+        email:
+          type: string
+          description: Name of the created document
+          x-ms-summary: Contact email
+        thumb_url:
+          type: string
+          description: Thumb URL of the contact
+          x-ms-summary: Thumb URL
+        note:
+          type: string
+          description: Note of the contact
+          x-ms-summary: Note
+          x-ms-visibility: advanced
+        gender:
+          type: string
+          description: Gender of the recipient
+          x-ms-summary: Gender
+          x-ms-visibility: advanced
+        document_count:
+          type: number
+          description: Number of documents for a contact
+          x-ms-summary: Documents
+          x-ms-visibility: advanced
+        company_id:
+          type: string
+          description: Company ID
+          x-ms-summary: Company ID
+        company_name:
+          type: string
+          description: Company name of the contact
+          x-ms-summary: Company name
+        company_number:
+          type: string
+          description: Company number of the contact
+          x-ms-summary: Company number
+        company_logo_url:
+          type: string
+          description: Company logo
+          x-ms-summary: Company logo
+        created_at:
+          type: string
+          description: Date of created contact
+          x-ms-summary: Created
+    Contacts:
+      title: Contacts
+      type: object
+      description: Contact list
+      x-ms-summary: Contacts
+      properties:
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'
     Subscription:
       title: Subscription
       type: object
       description: Subscription details
       x-ms-summary: Subscription
       properties:
+        id:
+          type: string
+          description: ID of the subscription
+          x-ms-summary: Subscription ID
+        subscription_id:
+          type: string
+          description: ID of the subscription
+          x-ms-summary: Subscription ID
         status:
           type: integer
           format: int32
           nullable: true
-        host:
-          type: string
-        target_url:
-          type: string
-        payload:
-          type: string
-        global:
-          type: boolean
-        notification_email:
-          type: string
-        id:
-          type: string
-        subscription_id:
-          type: string
+          description: Status of subscription
+          x-ms-summary: Status
         event:
           type: string
+          description: Event
+          x-ms-summary: Event
+        host:
+          type: string
+          description: Host
+          x-ms-summary: Host
+        target_url:
+          type: string
+          description: Target URL
+          x-ms-summary: Target URL
+        payload:
+          type: string
+          description: Payload
+          x-ms-summary: Payload
+        global:
+          type: boolean
+          description: Global
+          x-ms-summary: Global
+        notification_email:
+          type: string
+          description: Notification Email
+          x-ms-summary: Notification Email
         created_at:
           type: string
+          description: Created
+          x-ms-summary: Created
+    Subscriptions:
+      title: Subscriptions
+      type: array
+      description: Subscription list
+      x-ms-summary: Subscriptions
+      items:
+        $ref: '#/components/schemas/Subscription'
     User:
       title: User
       type: object
@@ -2384,22 +2599,31 @@ components:
             properties:
               user_id:
                 type: string
+                x-ms-summary: User ID
               name:
                 type: string
+                x-ms-summary: User Name
               first_name:
                 type: string
+                x-ms-summary: First Name
               last_name:
                 type: string
+                x-ms-summary: Last Name
               email:
                 type: string
+                x-ms-summary: Email
               status:
                 type: string
+                x-ms-summary: Status
               role:
                 type: string
+                x-ms-summary: Role
               team_name:
                 type: string
+                x-ms-summary: Team Name
               last_login:
                 type: string
+                x-ms-summary: Last Login
     Webhook:
       title: Webhook
       type: object
@@ -2416,27 +2640,34 @@ components:
           $ref: '#/components/schemas/Document'
         entity:
           type: object
+          description: Entity for the webhook
+          x-ms-summary: Entity
           properties:
             email_send_message:
               type: string
+              description: Default email message
               x-ms-summary: Default email message
               x-ms-visibility: advanced
             sub_domain:
               type: string
+              description: Sub-domain for the entity
               x-ms-summary: Entity sub-domain
               x-ms-visibility: advanced
             custom_domain:
               type: string
+              description: Custom domain setting for entity
               x-ms-summary: Entity custom domain
               x-ms-visibility: advanced
             email_send_subject:
               type: string
+              description: Default email subject
               x-ms-summary: Default email subject
               x-ms-visibility: advanced
         recipient:
           $ref: '#/components/schemas/Recipient'
         custom_fields:
           type: object
+          x-ms-summary: Custom Fields
           additionalProperties:
             type: string
         event:
