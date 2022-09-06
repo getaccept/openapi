@@ -81,6 +81,7 @@
           { name: "name" },
           { name: "type" },
           { name: "external_id" },
+          { name: "external_client_id" },
           { name: "is_private", type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
           { name: "is_signing", type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
           { name: "user_id" },
@@ -172,8 +173,36 @@
         ]
       end,
     },
-    fields: {
+    contacts: {
       fields: lambda do |_connection, _config_fields|
+        [
+          {
+            name: "contacts",
+            type: "array",
+            of: "object",
+            properties: [
+              { name: "user_id" },
+              { name: "fullname" },
+              { name: "first_name" },
+              { name: "last_name" },
+              { name: "title" },
+              { name: "mobile" },
+              { name: "email", control_type: "email" },
+              { name: "thumb_url" },
+              { name: "note" },
+              { name: "gender" },
+              { name: "document_count", type: "integer", control_type: "number" },
+              { name: "company_id" },
+              { name: "company_name" },
+              { name: "company_logo_url" },
+              { name: "created_at", type: "date_time", control_type: "date_time" },
+            ],
+          },
+        ]
+      end,
+    },
+    fields: {
+      fields: lambda do |_connection, config_fields|
         [
           {
             name: "fields",
@@ -198,6 +227,33 @@
               { name: "validation_warning" },
             ],
           },
+          {
+            name: "editor_fields",
+            type: "array",
+            of: "object",
+            properties: [
+              { name: "id" },
+              { name: "type" },
+              { name: "recipient_id" },
+              { name: "user_id" },
+              { name: "value" },
+              {
+                name: "input_settings",
+                type: "object",
+                properties: [
+                  { name: "type" },
+                  { name: "required", type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                  { name: "label" },
+                  { name: "options",
+                    type: "array",
+                    of: "string"
+                  },
+                  { name: "min_value" },
+                  { name: "max_value" },
+                ]
+              }
+            ]
+          },
         ]
       end,
     },
@@ -213,7 +269,7 @@
               properties: get("documents/#{config_fields["document_id"]}/field_values")&.first&.
                 map do |key, value|
                 {
-                  name: key.downcase.gsub(/\s+/, "_").gsub(/\-/, "_"),
+                  name: key.downcase.gsub(/\s+/, "_").gsub(/\-/, "_").gsub(/\./, "").gsub(/\//, ""),
                   type: "string",
                   label: key,
                   control_type: "text",
@@ -271,6 +327,7 @@
               { name: "value", type: "integer", control_type: "number" },
               { name: "status" },
               { name: "external_id" },
+              { name: "external_client_id" },
               { name: "type" },
               { name: "tags" },
               { name: "send_date", type: "date_time", control_type: "date_time" },
@@ -319,7 +376,7 @@
               get("documents/#{config_fields["document_id"]}/field_values")&.first&.
                 map do |key, value|
                 {
-                  name: key.downcase.gsub(/\s+/, "_").gsub(/\-/, "_"),
+                  name: key.downcase.gsub(/\s+/, "_").gsub(/\-/, "_").gsub(/\./, "").gsub(/\//, ""),
                   type: "string",
                   label: key,
                   control_type: "text",
@@ -340,8 +397,9 @@
     send_document_input: {
       fields: lambda do |_connection, config_fields|
         custom_fields = []
+        pricing_tables = []
+        file_fields = []
         if config_fields["template_id"].present?
-          file_fields = []
           fields_data = get("templates/#{config_fields["template_id"]}/fields")
           if fields_data["fields"].present?
             fields_data["fields"].each do |field|
@@ -380,37 +438,88 @@
           if roles["roles"].present?
             roles = roles["roles"].pluck("role_name", "role_id")
           end
+
+          pricing_data = get("templates/#{config_fields["template_id"]}/pricing-tables")
+          if pricing_data["pricing_tables"].present?
+            pricing_data["pricing_tables"].each do |table|
+              sections = []
+              if table["sections"].present?
+                table["sections"].each do |section|
+                  columns = []
+                  values = []
+                  section["columns"].each do |column|
+                    columns << {
+                      name: column["column_id"],
+                      label: column["display_name"],
+                      type: "string",
+                      default: "",
+                      sticky: column["enabled"],
+                      optional: !column["enabled"],
+                    }
+                  end
+                  values << { name: "values", type: "array", of: "object", optional: false, sticky: true, properties: columns, convert_input: "pricing_column_conversion" }
+                  sections << { name: "rows", label: section["display_name"], type: "array", list_mode: "static", list_mode_toggle: true, optional: false, sticky: true, properties: values }
+                  sections << { name: "display_name", label: "Section Name", type: "string", default: section["display_name"], optional: false, sticky: true }
+                  sections << { name: "id", label: "Section ID", type: "string", default: section["section_id"], optional: false, sticky: false }
+                  sections << { name: "section_summary", label: "Summary", type: "object", optional: true, sticky: false, properties: [
+                    { name: "tax", label: "Tax", type: "object", optional: true, sticky: true, properties: [
+                      { name: "value", label: "Value", optional: true, sticky: true },
+                      { name: "flat_fee", label: "Flat Fee", optional: true, default: true, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                      { name: "enabled", label: "Enabled", optional: true, default: false, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                      ] 
+                    },
+                    { name: "price", label: "Price", type: "object", optional: true, sticky: true, properties: [
+                      { name: "value", label: "Value", optional: true, sticky: true },
+                      { name: "flat_fee", label: "Flat Fee", optional: true, default: true, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                      { name: "enabled", label: "Enabled", optional: true, default: true, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                      ] 
+                    },
+                    { name: "discount", label: "Discount", type: "object", optional: true, sticky: true, properties: [
+                      { name: "value", label: "Value", optional: true, sticky: true },
+                      { name: "flat_fee", label: "Flat Fee", optional: true, default: true, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                      { name: "enabled", label: "Enabled", optional: true, default: false, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                      ] 
+                    },
+                  ] }
+                end
+              end
+              pricing_tables << { name: "sections", label: table["display_name"], type: "array", optional: false, sticky: true, properties: sections }
+              pricing_tables << { name: "display_name", label: "Table Name", type: "string", default: table["display_name"], optional: false, sticky: true }
+              pricing_tables << { name: "pre_calculated", label: "Pre calculated totals", type: "boolean", default: table["pre_calculated"], optional: false, sticky: false, control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" }
+              pricing_tables << { name: "id", label: "Table ID", type: "string", default: table["table_id"], optional: false, sticky: false }
+            end
+          end
         else
           roles = []
-          file_fields = [
-            {
-              name: "file_url",
-              label: "File URL",
-              hint: "Url to document file. Documents must be public available for download",
-              control_type: "url",
-              sticky: true,
-            },
-            {
-              name: "file_name",
-              label: "File name",
-              hint: "Filename of the document, with the extension. This will be helpful for converting different file-types.",
-              sticky: true,
-            },
-            {
-              name: "file_content",
-              label: "File content",
-              control_type: "text-area",
-              hint: "Base64-encoded file binary data",
-              sticky: true,
-            },
-            {
-              name: "file_ids",
-              label: "File IDs",
-              hint: "Comma-separated, unique file-ids received when uploading files",
-              sticky: false,
-            },
-          ]
         end
+        file_fields = [
+          {
+            name: "file_url",
+            label: "File URL",
+            hint: "Url to document file. Documents must be public available for download",
+            control_type: "url",
+            sticky: true,
+          },
+          {
+            name: "file_name",
+            label: "File name",
+            hint: "Filename of the document, with the extension. This will be helpful for converting different file-types.",
+            sticky: true,
+          },
+          {
+            name: "file_content",
+            label: "File content",
+            control_type: "text-area",
+            hint: "Base64-encoded file binary data",
+            sticky: true,
+          },
+          {
+            name: "file_ids",
+            label: "File IDs",
+            hint: "Comma-separated, unique file-ids received when uploading files",
+            sticky: false,
+          },
+        ]
 
         standard_fields = [
           { name: "name", label: "Document Name", hint: "Enter a name of the document", optional: false },
@@ -474,7 +583,8 @@
               { name: "require_view", label: "Require recipient to view", optional: true, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
             ],
           },
-          { name: "custom_fields", type: "object", optional: true, sticky: custom_fields.length() > 0, properties: custom_fields },
+          { ngIf: custom_fields.length() > 0, name: "custom_fields", type: "object", optional: true, sticky: custom_fields.length() > 0, properties: custom_fields },
+          { ngIf: pricing_tables.length() > 0, name: "custom_pricing_tables", type: "array", of: "object", optional: true, sticky: pricing_tables.length() > 0, properties: pricing_tables },
         ]
         json_fields = [
           { name: "custom", label: "Custom JSON parameters", hint: "Specify custom parameters using JSON object", control_type: "text-area" },
@@ -733,6 +843,31 @@
         end
         post("documents", input)
       end,
+      output_fields: lambda { |object_definitions|
+        object_definitions["document"]
+      },
+    },
+    seal_document: {
+      title: "Seal document",
+      subtitle: "Manually seal a document that is currently in draft status.",
+      description: "Seal a <span class='provider'>document</span> in <span class='provider'>GetAccept</span>",
+      input_fields: lambda { |_object_definitions|
+        [
+          { name: "id", label: "Document ID", optional: false },
+          { name: "sender_email", label: "Sender Email", hint: "Send from other email (existing user) than authenticated user", optional: true, sticky: false, control_type: "email" },
+          { name: "sender_id", label: "Sender User ID", hint: "Send from other user than authenticated", optional: true, sticky: false },
+        ]
+      },
+      output_fields: lambda { |object_definitions|
+        object_definitions["recipients"]
+      },
+      execute: lambda { |_connection, input|
+        post("documents/#{input["id"]}/seal")
+      },
+      sample_output: lambda { |_connection, _input|
+        latest = get("documents/latest")
+        get("documents/#{latest["id"]}/recipients")
+      },
     },
     upload_attachment: {
       title: "Upload attachment",
@@ -741,7 +876,7 @@
       hint: "You can upload attachment files to include with documents you send.",
       input_fields: lambda do
         [
-          { name: "file_name", optional: false, sticky: true, },
+          { name: "file_name", optional: false, sticky: true },
           { name: "file_data", optional: false, sticky: true },
         ]
       end,
@@ -803,11 +938,13 @@
           { name: "showteam", label: "Include documents from team members", type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
           { name: "showall", label: "Include all documents from entity", type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
           { name: "external_id", label: "External id on document" },
+          { name: "offset", label: "Start listing from record x", hint: "Default value is 0" },
+          { name: "limit", label: "Return x number of records", hint: "Default value is 100" },
         ]
       end,
       execute: lambda do |_connection, input, _input_schema, _output_schema|
         {
-          documents: Array.wrap(get("documents").params(input)),
+          documents: get("documents").params(input),
         }
       end,
 
@@ -869,6 +1006,10 @@
       execute: lambda { |_connection, input|
         get("documents/#{input["id"]}")
       },
+      sample_output: lambda { |_connection, _input|
+        latest = get("documents/latest")
+        get("documents/#{latest["id"]}")
+      },
     },
 
     get_document_fields: {
@@ -877,7 +1018,7 @@
       description: "Get <span class='provider'>fields</span> for a <span class='provider'>document</span> in <span class='provider'>GetAccept</span>",
       input_fields: lambda { |_object_definitions|
         [
-          { name: "id", label: "Document ID", optional: false },
+          { name: "id", label: "Document ID", hint: "A Document ID from previous step", optional: false },
         ]
       },
       output_fields: lambda { |object_definitions|
@@ -885,6 +1026,10 @@
       },
       execute: lambda { |_connection, input|
         get("documents/#{input["id"]}/fields")
+      },
+      sample_output: lambda { |_connection, _input|
+        latest = get("documents/latest")
+        get("documents/#{latest["id"]}/fields")
       },
     },
 
@@ -917,6 +1062,10 @@
           fields: get("documents/#{input["id"]}/field_values"),
         }
       },
+      sample_output: lambda { |_connection, _input|
+        latest = get("documents/latest")
+        get("documents/#{latest["id"]}/fields")
+      },
     },
 
     get_document_recipients: {
@@ -931,6 +1080,10 @@
       },
       execute: lambda { |_connection, input|
         get("documents/#{input["id"]}/recipients")
+      },
+      sample_output: lambda { |_connection, _input|
+        latest = get("documents/latest")
+        get("documents/#{latest["id"]}/recipients")
       },
     },
 
@@ -995,6 +1148,57 @@
       execute: lambda { |_connection, input|
         get("users/#{input["id"]}")
       },
+      sample_output: lambda do |_connection, input|
+        get("users/me")
+      end,
+    },
+    
+    get_user_statistics: {
+      title: "Get user statistics",
+      subtitle: "Show statistics for specific user",
+      description: "Get <span class='provider'>user statistics</span> in <span class='provider'>GetAccept</span>",
+      help: {
+        body: "User API documentation",
+        learn_more_text: "Read more",
+        learn_more_url: "https://app.getaccept.com/api/#getuserstatistics",
+      },
+      input_fields: lambda { |_object_definitions|
+        [{ name: "id", label: "User ID", optional: false,
+           control_type: "text" }]
+      },
+      output_fields: lambda { |object_definitions|
+        object_definitions["users"]
+      },
+      execute: lambda { |_connection, input|
+        get("users/#{input["id"]}/statistics")
+      },
+      sample_output: lambda do |_connection, input|
+        get("users/me/statistics")
+      end,
+    },
+
+    get_user_statistics: {
+      title: "Get entity information",
+      subtitle: "Show information about current entity",
+      description: "Get <span class='provider'>entity information</span> in <span class='provider'>GetAccept</span>",
+      help: {
+        body: "User API documentation",
+        learn_more_text: "Read more",
+        learn_more_url: "https://app.getaccept.com/api/#getuserstatistics",
+      },
+      input_fields: lambda { |_object_definitions|
+        [{ name: "id", label: "User ID", optional: false,
+           control_type: "text" }]
+      },
+      output_fields: lambda { |object_definitions|
+        object_definitions["users"]
+      },
+      execute: lambda { |_connection, input|
+        get("users/#{input["id"]}/statistics")
+      },
+      sample_output: lambda do |_connection, input|
+        get("users/me/statistics")
+      end,
     },
 
     create_contact: {
@@ -1016,6 +1220,34 @@
       },
       execute: lambda { |_connection, input|
         post("contacts", input)
+      },
+    },
+    
+    list_contacts: {
+      title: "List contacts",
+      subtitle: "Show a list of available contacts",
+      description: "List <span class='provider'>contacts</span> in <span class='provider'>GetAccept</span>",
+      help: {
+        body: "User API documentation",
+        learn_more_text: "Read more",
+        learn_more_url: "https://app.getaccept.com/api/#contacts",
+      },
+      output_fields: lambda { |object_definitions|
+        object_definitions["contacts"]
+      },
+      input_fields: lambda do |_object_definitions|
+        [
+          { name: "filter", label: "Filter on active, inactive or signed" },
+          { name: "sort_by", label: "Sort result by name, email, company_name, document_count or created" },
+          { name: "sort_order", label: "Sort order, asc or desc" },
+          { name: "showteam", label: "Include contacts from team members", type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+          { name: "showall", label: "Include all contacts from entity", type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+          { name: "offset", label: "Start listing from record x" },
+          { name: "limit", label: "Return x number of records" },
+        ]
+      end,
+      execute: lambda { |_connection, input|
+        get("contacts").params(input)
       },
     },
 
@@ -1190,7 +1422,7 @@
       end,
 
       dedup: lambda do |subscription|
-        subscription.dig('document', 'id')
+        subscription.dig("document", "id")
       end,
 
       output_fields: lambda do |object_definitions|
@@ -1263,7 +1495,7 @@
       end,
 
       dedup: lambda do |subscription|
-        subscription.dig('document', 'id')
+        subscription.dig("document", "id")
       end,
 
       output_fields: lambda do |object_definitions|
@@ -1282,10 +1514,18 @@
     # possible arguements - connection
     # see more at https://docs.workato.com/developing-connectors/sdk/pick-list.html
     template_list: lambda do |_connection|
-      [["- No template / Upload file -", ""]] + get("templates")["templates"].pluck("name", "id")
+      fields = [["- No template / Upload file -", ""]]
+      if get("templates").params({ showall: true })["templates"].present?
+        fields = fields + get("templates").params({ showall: true })["templates"].pluck("name", "id")
+      end
+      fields
     end,
     template_folder_list: lambda do |_connection|
-      [["- All templates -", ""]] + get("folders?type=template")["folders"].pluck("name", "id")
+      folders = [["- All templates -", ""]]
+      if get("folders?type=template")["folders"].present?
+        folders = folders + get("folders?type=template")["folders"].pluck("name", "id")
+      end
+      folders
     end,
     document_list: lambda do |_connection|
       [["- No document selected -", ""]] + get("documents").pluck("name", "id")
@@ -1357,6 +1597,7 @@
           "name": "Test proposal",
           "value": 4900,
           "external_id": "doc_19953",
+          "external_client_id": "hubspot",
           "type": "sales",
           "tags": "",
           "company_name": "Demo Company Inc",
@@ -1476,5 +1717,17 @@
       end
       input
     end,
+    pricing_column_conversion: lambda do |input|
+      if input.is_a?(Array)
+      input[0]
+      else
+        input.map do |key, value|
+          {
+            "column_id" => key,
+            "value" => value
+          }
+        end
+      end
+    end,  
   },
 }
