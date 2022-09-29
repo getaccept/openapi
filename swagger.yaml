@@ -7,8 +7,10 @@ info:
     email: integrations@getaccept.com
     url: 'https://app.getaccept.com/api'
   termsOfService: 'https://www.getaccept.com/terms.html'
-  description: |-
-    GetAccept provides a sales enablement platform for sales to design, send, promote, track, and e-sign sales documents, leveraging sales collateral, contract management, proposals, and electronic signatures in one place.
+  description: 'GetAccept provides a sales enablement platform for sales to design, send, promote, track, and e-sign sales documents, leveraging sales collateral, contract management, proposals, and electronic signatures in one place.'
+  license:
+    name: Apache 2.0
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
 paths:
   /auth:
     post:
@@ -587,6 +589,248 @@ paths:
                         type: string
                         description: Value of custom template field
                         x-ms-summary: Field Value
+                custom_pricing_tables:
+                  type: array
+                  description: Pricing
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        description: Table ID
+                        type: string
+                        x-ms-summary: Table ID
+                        x-ms-visibility: advanced
+                      display_name:
+                        description: Display name of the pricing table
+                        type: string
+                        x-ms-summary: Display Name
+                        x-ms-visibility: advanced
+                      external_id:
+                        description: External ID to represent the summary object within a third-party system
+                        type: string
+                        x-ms-summary: External ID
+                        x-ms-visibility: advanced
+                      pre_calculated:
+                        description: If pricing table totals should be pre-calculated
+                        enum:
+                          - true
+                          - false
+                        example: true
+                        default: false
+                        type: boolean
+                        x-ms-summary: Precalculated totals
+                        x-ms-visibility: advanced
+                      currency_settings:
+                        description: Currency Settings
+                        properties:
+                          locale:
+                            description: 'Locale, ex. sv-SE'
+                            type: string
+                            x-ms-summary: Locale
+                          currency:
+                            description: 'Currency, ex. SEK'
+                            type: string
+                            x-ms-summary: Currency
+                        type: object
+                        x-ms-summary: Currency Settings
+                        x-ms-visibility: advanced
+                      summary_values:
+                        properties:
+                          price:
+                            properties:
+                              value:
+                                type: string
+                                description: The value for summary price
+                                x-ms-summary: Price Value
+                              flat_fee:
+                                description: If pricing table should use using flat fee pricing
+                                enum:
+                                  - true
+                                  - false
+                                example: true
+                                nullable: true
+                                type: boolean
+                                x-ms-summary: Flat fee
+                                x-ms-visibility: advanced
+                              enabled:
+                                description: If pricing table price should be enabled
+                                enum:
+                                  - true
+                                  - false
+                                example: true
+                                nullable: true
+                                type: boolean
+                                x-ms-summary: Enabled
+                                x-ms-visibility: advanced
+                            type: object
+                            x-ms-summary: Price
+                          discount:
+                            properties:
+                              value:
+                                type: string
+                                description: The value for summary discount
+                                x-ms-summary: Discount Value
+                              flat_fee:
+                                description: If pricing table should use using flat fee discounts
+                                enum:
+                                  - true
+                                  - false
+                                example: true
+                                nullable: true
+                                type: boolean
+                                x-ms-summary: Flat fee
+                                x-ms-visibility: advanced
+                              enabled:
+                                description: If pricing table discount should be enabled
+                                enum:
+                                  - true
+                                  - false
+                                example: true
+                                nullable: true
+                                type: boolean
+                                x-ms-summary: Enabled
+                                x-ms-visibility: advanced
+                            type: object
+                            x-ms-summary: Discount
+                          tax:
+                            properties:
+                              value:
+                                type: string
+                                description: The value for summary tax
+                                x-ms-summary: Value
+                              flat_fee:
+                                description: If pricing table should use using flat fee taxes
+                                enum:
+                                  - true
+                                  - false
+                                example: true
+                                nullable: true
+                                type: boolean
+                                x-ms-summary: Flat fee
+                                x-ms-visibility: advanced
+                              enabled:
+                                description: If pricing table tax should be enabled
+                                enum:
+                                  - true
+                                  - false
+                                example: true
+                                nullable: true
+                                type: boolean
+                                x-ms-summary: Enabled
+                                x-ms-visibility: advanced
+                            type: object
+                            x-ms-summary: Tax
+                        type: object
+                        x-ms-summary: Summary Values
+                        x-ms-visibility: advanced
+                      sections:
+                        type: array
+                        description: Sections
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              description: Section ID
+                              type: string
+                              x-ms-summary: ID
+                            display_name:
+                              description: Display name of the pricing table
+                              type: string
+                              x-ms-summary: Display Name
+                            section_summary:
+                              type: object
+                              properties:
+                                price:
+                                  properties:
+                                    value:
+                                      type: string
+                                      description: The value for section price
+                                      x-ms-summary: Price Value
+                                    flat_fee:
+                                      description: If section should use using flat fee pricing
+                                      enum:
+                                        - true
+                                        - false
+                                      example: true
+                                      nullable: true
+                                      type: boolean
+                                      x-ms-summary: Flat fee
+                                    enabled:
+                                      description: If section price should be enabled
+                                      enum:
+                                        - true
+                                        - false
+                                      example: true
+                                      nullable: true
+                                      type: boolean
+                                      x-ms-summary: Enabled
+                                  type: object
+                                  x-ms-summary: Price
+                                discount:
+                                  properties:
+                                    value:
+                                      type: string
+                                      description: The value for section discount
+                                      x-ms-summary: Discount Value
+                                    flat_fee:
+                                      description: If section should use using flat fee discounts
+                                      enum:
+                                        - true
+                                        - false
+                                      example: true
+                                      nullable: true
+                                      type: boolean
+                                      x-ms-summary: Flat fee
+                                    enabled:
+                                      description: If section discount should be enabled
+                                      enum:
+                                        - true
+                                        - false
+                                      example: true
+                                      nullable: true
+                                      type: boolean
+                                      x-ms-summary: Enabled
+                                  type: object
+                                  x-ms-summary: Discount
+                                tax:
+                                  properties:
+                                    value:
+                                      type: string
+                                      description: The value for section tax
+                                      x-ms-summary: Tax Value
+                                    flat_fee:
+                                      description: If section should use using flat fee taxes
+                                      enum:
+                                        - true
+                                        - false
+                                      example: true
+                                      nullable: true
+                                      type: boolean
+                                      x-ms-summary: Flat fee
+                                    enabled:
+                                      description: If section tax should be enabled
+                                      enum:
+                                        - true
+                                        - false
+                                      example: true
+                                      nullable: true
+                                      type: boolean
+                                      x-ms-summary: Enabled
+                                  type: object
+                                  x-ms-summary: Tax
+                              x-ms-summary: Summary Values
+                            rows:
+                              additionalProperties: 
+                                type: array
+                                items:
+                                  type: object
+                              example: [{ "values": [{"column_id": "abc123", "value": "My product"}, {"column_id": "def456", "value": 240}] } ]
+                              description: Array with values object with array of column_id, value
+                              x-ms-summary: Rows
+                        x-ms-summary: Section
+                        x-ms-visibility: advanced
+                  x-ms-summary: Pricing
+                  x-ms-visibility: advanced
                 external_id:
                   type: string
                   description: External system ID for identification
@@ -904,14 +1148,19 @@ paths:
               schema:
                 type: string
                 description: Used only with `application/pdf` responses
-                example: 'attachment; filename="download.pdf"'
+                example: attachment; filename="download.pdf"
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
       operationId: DownloadDocument
       x-ms-visibility: important
-      description: "Document file can always be downloaded but most likely you want to download it when it has status Signed. \n\nYou can select to receive a download-url or get the binary file.\n\nThe download URL is accessable 10 minutes after a request has been made."
+      description: |-
+        Document file can always be downloaded but most likely you want to download it when it has status Signed. 
+
+        You can select to receive a download-url or get the binary file.
+
+        The download URL is accessable 10 minutes after a request has been made.
       parameters:
         - in: path
           schema:
@@ -1156,6 +1405,38 @@ paths:
             value-path: id
             value-collection: templates
             value-title: name
+  '/templates/{templateId}/pricing-tables':
+    get:
+      parameters:
+        - description: Template ID
+          in: path
+          name: templateId
+          required: true
+          schema:
+            type: string
+          x-ms-dynamic-values:
+            operationId: ListTemplates
+            value-collection: templates
+            value-path: id
+            value-title: name
+          x-ms-summary: Template ID
+          x-ms-url-encoding: single
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingTables'
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+        - Templates
+      description: Receive a list of pricing-table items for a specific template.
+      operationId: GetPricingTables
+      summary: Get template pricing tables
   '/templates/{templateId}/fields':
     get:
       summary: Get template fields
@@ -1288,7 +1569,7 @@ paths:
                 notification_email:
                   type: string
                   example: hostmaster@example.com
-                  description: If the event fails, send a notification to this email instead of the sender
+                  description: 'If the event fails, send a notification to this email instead of the sender'
                   x-ms-summary: Error email
                   x-ms-visibility: advanced
               required:
@@ -1314,9 +1595,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
       operationId: ListSubscriptions
-      description: |-
-        Receive a list of available subscriptions for the current entity.
-
+      description: Receive a list of available subscriptions for the current entity.
   /subscriptions/events/signed:
     post:
       summary: When a document has been signed
@@ -1378,7 +1657,7 @@ paths:
                 notification_email:
                   type: string
                   example: hostmaster@example.com
-                  description: If the event fails, send a notification to this email instead of the sender
+                  description: 'If the event fails, send a notification to this email instead of the sender'
                   x-ms-summary: Error email
                   x-ms-visibility: advanced
               required:
@@ -1389,7 +1668,6 @@ paths:
     x-ms-notification-content:
       schema:
         $ref: '#/components/schemas/Webhook'
-
   /subscriptions/events/reviewed:
     post:
       summary: When a document has been reviewed
@@ -1451,7 +1729,7 @@ paths:
                 notification_email:
                   type: string
                   example: hostmaster@example.com
-                  description: If the event fails, send a notification to this email instead of the sender
+                  description: 'If the event fails, send a notification to this email instead of the sender'
                   x-ms-summary: Error email
                   x-ms-visibility: advanced
               required:
@@ -1462,7 +1740,6 @@ paths:
     x-ms-notification-content:
       schema:
         $ref: '#/components/schemas/Webhook'
-
   /subscriptions/events/rejected:
     post:
       summary: When a document has been rejected
@@ -1524,7 +1801,7 @@ paths:
                 notification_email:
                   type: string
                   example: hostmaster@example.com
-                  description: If the event fails, send a notification to this email instead of the sender
+                  description: 'If the event fails, send a notification to this email instead of the sender'
                   x-ms-summary: Error email
                   x-ms-visibility: advanced
               required:
@@ -1535,8 +1812,7 @@ paths:
     x-ms-notification-content:
       schema:
         $ref: '#/components/schemas/Webhook'
-
-  '/subscriptions/events':
+  /subscriptions/events:
     get:
       summary: List available subscription events
       tags:
@@ -1562,7 +1838,6 @@ paths:
       operationId: ListSubscriptionEvents
       description: This call will return a list of available subscription events
       x-ms-visibility: internal
-
   '/subscriptions/{subscriptionId}':
     get:
       summary: Get subscription details
@@ -1760,7 +2035,7 @@ paths:
                   x-ms-summary: File name
                 file_content:
                   type: string
-                  description: 'Send the file as base64 encoded. Note that base64 encoding files will increase the file size with about 30%'
+                  description: Send the file as base64 encoded. Note that base64 encoding files will increase the file size with about 30%
                   x-ms-summary: File content
                 file_url:
                   type: string
@@ -1827,7 +2102,7 @@ paths:
                   x-ms-summary: File name
                 file_content:
                   type: string
-                  description: 'Send the file as base64 encoded. Note that base64 encoding files will increase the file size with about 30%'
+                  description: Send the file as base64 encoded. Note that base64 encoding files will increase the file size with about 30%
                   x-ms-summary: File content
                 file_url:
                   type: string
@@ -1869,7 +2144,7 @@ paths:
                     x-ms-summary: File status
                   job_id:
                     type: string
-                    description: 'Id of the processing job converting and compressing the video. Poll for job status updates using /video/job/<ID>.'
+                    description: Id of the processing job converting and compressing the video. Poll for job status updates using /video/job/<ID>.
                     x-ms-summary: Job ID
         '400':
           $ref: '#/components/responses/Invalid'
@@ -1894,7 +2169,7 @@ paths:
                   x-ms-summary: File name
                 file_content:
                   type: string
-                  description: 'Send the file as base64 encoded. Note that base64 encoding files will increase the file size with about 30%'
+                  description: Send the file as base64 encoded. Note that base64 encoding files will increase the file size with about 30%
                   x-ms-summary: File content
                 file_url:
                   type: string
@@ -2265,6 +2540,96 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Field'
+    PricingColumn:
+      title: Column
+      type: object
+      description: Pricing Table Column
+      x-ms-summary: Column
+      properties:
+        column_id:
+          type: string
+          description: ID
+          x-ms-summary: ID
+        name:
+          type: string
+          description: Name
+          x-ms-summary: Name
+        display_name:
+          type: string
+          description: Display Name
+          x-ms-summary: Display Name
+        enabled:
+          type: boolean
+          description: Enabled
+          x-ms-summary: Enabled
+          enum:
+            - true
+            - false
+          example: false
+    PricingSection:
+      title: Section
+      type: object
+      description: Pricing Table Section
+      x-ms-summary: Section
+      properties:
+        section_id:
+          type: string
+          description: ID
+          x-ms-summary: ID
+        name:
+          type: string
+          description: Name
+          x-ms-summary: Name
+        display_name:
+          type: string
+          description: Display Name
+          x-ms-summary: Display Name
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/PricingColumn'
+    PricingTable:
+      description: Pricing Table
+      title: Table
+      type: object
+      x-ms-summary: Table
+      properties:
+        table_id:
+          type: string
+          description: Table ID
+          x-ms-summary: ID
+        pre_calculated:
+          type: boolean
+          description: Pre calculated totals
+          x-ms-summary: Pre calculated totals
+        currency_settings:
+          description: Currency Settings
+          title: Currency Settings
+          type: object
+          x-ms-summary: Currency Settings
+          properties:
+            currency:
+              type: string
+              description: Currency
+              x-ms-summary: Currency
+            locale:
+              type: string
+              description: Locale
+              x-ms-summary: Locale
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/PricingSection'
+    PricingTables:
+      description: Pricing Tables
+      properties:
+        pricing_tables:
+          type: array
+          items:
+            $ref: '#/components/schemas/PricingTable'
+      title: Pricing
+      type: object
+      x-ms-summary: Pricing
     Recipient:
       title: Recipient
       type: object
@@ -2756,4 +3121,4 @@ x-ms-connector-metadata:
   - propertyName: Privacy policy
     propertyValue: 'https://www.getaccept.com/privacy-policy'
   - propertyName: Categories
-    propertyValue: 'Sales and CRM;Productivity'
+    propertyValue: Sales and CRM;Productivity

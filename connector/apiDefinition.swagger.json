@@ -7,6 +7,10 @@
       "url": "https://app.getaccept.com/api"
     },
     "description": "GetAccept provides a sales enablement platform for sales to design, send, promote, track, and e-sign sales documents, leveraging sales collateral, contract management, proposals, and electronic signatures in one place.",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
     "termsOfService": "https://www.getaccept.com/terms.html",
     "title": "GetAccept",
     "version": "1.6"
@@ -488,6 +492,327 @@
                   },
                   "type": "array",
                   "x-ms-summary": "Custom"
+                },
+                "custom_pricing_tables": {
+                  "description": "Pricing",
+                  "items": {
+                    "properties": {
+                      "currency_settings": {
+                        "description": "Currency Settings",
+                        "properties": {
+                          "currency": {
+                            "description": "Currency, ex. SEK",
+                            "type": "string",
+                            "x-ms-summary": "Currency"
+                          },
+                          "locale": {
+                            "description": "Locale, ex. sv-SE",
+                            "type": "string",
+                            "x-ms-summary": "Locale"
+                          }
+                        },
+                        "type": "object",
+                        "x-ms-summary": "Currency Settings",
+                        "x-ms-visibility": "advanced"
+                      },
+                      "display_name": {
+                        "description": "Display name of the pricing table",
+                        "type": "string",
+                        "x-ms-summary": "Display Name",
+                        "x-ms-visibility": "advanced"
+                      },
+                      "external_id": {
+                        "description": "External ID to represent the summary object within a third-party system",
+                        "type": "string",
+                        "x-ms-summary": "External ID",
+                        "x-ms-visibility": "advanced"
+                      },
+                      "id": {
+                        "description": "Table ID",
+                        "type": "string",
+                        "x-ms-summary": "Table ID",
+                        "x-ms-visibility": "advanced"
+                      },
+                      "pre_calculated": {
+                        "default": false,
+                        "description": "If pricing table totals should be pre-calculated",
+                        "enum": [
+                          true,
+                          false
+                        ],
+                        "example": true,
+                        "type": "boolean",
+                        "x-ms-summary": "Precalculated totals",
+                        "x-ms-visibility": "advanced"
+                      },
+                      "sections": {
+                        "description": "Sections",
+                        "items": {
+                          "properties": {
+                            "display_name": {
+                              "description": "Display name of the pricing table",
+                              "type": "string",
+                              "x-ms-summary": "Display Name"
+                            },
+                            "id": {
+                              "description": "Section ID",
+                              "type": "string",
+                              "x-ms-summary": "ID"
+                            },
+                            "rows": {
+                              "additionalProperties": {
+                                "items": {
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "description": "Array with values object with array of column_id, value",
+                              "example": [
+                                {
+                                  "values": [
+                                    {
+                                      "column_id": "abc123",
+                                      "value": "My product"
+                                    },
+                                    {
+                                      "column_id": "def456",
+                                      "value": 240
+                                    }
+                                  ]
+                                }
+                              ],
+                              "x-ms-summary": "Rows"
+                            },
+                            "section_summary": {
+                              "properties": {
+                                "discount": {
+                                  "properties": {
+                                    "enabled": {
+                                      "description": "If section discount should be enabled",
+                                      "enum": [
+                                        true,
+                                        false
+                                      ],
+                                      "example": true,
+                                      "type": "boolean",
+                                      "x-ms-summary": "Enabled",
+                                      "x-nullable": true
+                                    },
+                                    "flat_fee": {
+                                      "description": "If section should use using flat fee discounts",
+                                      "enum": [
+                                        true,
+                                        false
+                                      ],
+                                      "example": true,
+                                      "type": "boolean",
+                                      "x-ms-summary": "Flat fee",
+                                      "x-nullable": true
+                                    },
+                                    "value": {
+                                      "description": "The value for section discount",
+                                      "type": "string",
+                                      "x-ms-summary": "Discount Value"
+                                    }
+                                  },
+                                  "type": "object",
+                                  "x-ms-summary": "Discount"
+                                },
+                                "price": {
+                                  "properties": {
+                                    "enabled": {
+                                      "description": "If section price should be enabled",
+                                      "enum": [
+                                        true,
+                                        false
+                                      ],
+                                      "example": true,
+                                      "type": "boolean",
+                                      "x-ms-summary": "Enabled",
+                                      "x-nullable": true
+                                    },
+                                    "flat_fee": {
+                                      "description": "If section should use using flat fee pricing",
+                                      "enum": [
+                                        true,
+                                        false
+                                      ],
+                                      "example": true,
+                                      "type": "boolean",
+                                      "x-ms-summary": "Flat fee",
+                                      "x-nullable": true
+                                    },
+                                    "value": {
+                                      "description": "The value for section price",
+                                      "type": "string",
+                                      "x-ms-summary": "Price Value"
+                                    }
+                                  },
+                                  "type": "object",
+                                  "x-ms-summary": "Price"
+                                },
+                                "tax": {
+                                  "properties": {
+                                    "enabled": {
+                                      "description": "If section tax should be enabled",
+                                      "enum": [
+                                        true,
+                                        false
+                                      ],
+                                      "example": true,
+                                      "type": "boolean",
+                                      "x-ms-summary": "Enabled",
+                                      "x-nullable": true
+                                    },
+                                    "flat_fee": {
+                                      "description": "If section should use using flat fee taxes",
+                                      "enum": [
+                                        true,
+                                        false
+                                      ],
+                                      "example": true,
+                                      "type": "boolean",
+                                      "x-ms-summary": "Flat fee",
+                                      "x-nullable": true
+                                    },
+                                    "value": {
+                                      "description": "The value for section tax",
+                                      "type": "string",
+                                      "x-ms-summary": "Tax Value"
+                                    }
+                                  },
+                                  "type": "object",
+                                  "x-ms-summary": "Tax"
+                                }
+                              },
+                              "type": "object",
+                              "x-ms-summary": "Summary Values"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": "array",
+                        "x-ms-summary": "Section",
+                        "x-ms-visibility": "advanced"
+                      },
+                      "summary_values": {
+                        "properties": {
+                          "discount": {
+                            "properties": {
+                              "enabled": {
+                                "description": "If pricing table discount should be enabled",
+                                "enum": [
+                                  true,
+                                  false
+                                ],
+                                "example": true,
+                                "type": "boolean",
+                                "x-ms-summary": "Enabled",
+                                "x-ms-visibility": "advanced",
+                                "x-nullable": true
+                              },
+                              "flat_fee": {
+                                "description": "If pricing table should use using flat fee discounts",
+                                "enum": [
+                                  true,
+                                  false
+                                ],
+                                "example": true,
+                                "type": "boolean",
+                                "x-ms-summary": "Flat fee",
+                                "x-ms-visibility": "advanced",
+                                "x-nullable": true
+                              },
+                              "value": {
+                                "description": "The value for summary discount",
+                                "type": "string",
+                                "x-ms-summary": "Discount Value"
+                              }
+                            },
+                            "type": "object",
+                            "x-ms-summary": "Discount"
+                          },
+                          "price": {
+                            "properties": {
+                              "enabled": {
+                                "description": "If pricing table price should be enabled",
+                                "enum": [
+                                  true,
+                                  false
+                                ],
+                                "example": true,
+                                "type": "boolean",
+                                "x-ms-summary": "Enabled",
+                                "x-ms-visibility": "advanced",
+                                "x-nullable": true
+                              },
+                              "flat_fee": {
+                                "description": "If pricing table should use using flat fee pricing",
+                                "enum": [
+                                  true,
+                                  false
+                                ],
+                                "example": true,
+                                "type": "boolean",
+                                "x-ms-summary": "Flat fee",
+                                "x-ms-visibility": "advanced",
+                                "x-nullable": true
+                              },
+                              "value": {
+                                "description": "The value for summary price",
+                                "type": "string",
+                                "x-ms-summary": "Price Value"
+                              }
+                            },
+                            "type": "object",
+                            "x-ms-summary": "Price"
+                          },
+                          "tax": {
+                            "properties": {
+                              "enabled": {
+                                "description": "If pricing table tax should be enabled",
+                                "enum": [
+                                  true,
+                                  false
+                                ],
+                                "example": true,
+                                "type": "boolean",
+                                "x-ms-summary": "Enabled",
+                                "x-ms-visibility": "advanced",
+                                "x-nullable": true
+                              },
+                              "flat_fee": {
+                                "description": "If pricing table should use using flat fee taxes",
+                                "enum": [
+                                  true,
+                                  false
+                                ],
+                                "example": true,
+                                "type": "boolean",
+                                "x-ms-summary": "Flat fee",
+                                "x-ms-visibility": "advanced",
+                                "x-nullable": true
+                              },
+                              "value": {
+                                "description": "The value for summary tax",
+                                "type": "string",
+                                "x-ms-summary": "Value"
+                              }
+                            },
+                            "type": "object",
+                            "x-ms-summary": "Tax"
+                          }
+                        },
+                        "type": "object",
+                        "x-ms-summary": "Summary Values",
+                        "x-ms-visibility": "advanced"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array",
+                  "x-ms-summary": "Pricing",
+                  "x-ms-visibility": "advanced"
                 },
                 "expiration_date": {
                   "description": "Date and time when the document should expire",
@@ -2071,6 +2396,56 @@
         "summary": "Get template fields"
       }
     },
+    "/templates/{templateId}/pricing-tables": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "description": "Template ID",
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "type": "string",
+            "x-ms-dynamic-values": {
+              "operationId": "ListTemplates",
+              "value-collection": "templates",
+              "value-path": "id",
+              "value-title": "name"
+            },
+            "x-ms-summary": "Template ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PricingTables"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "The specified resource was not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "tags": [
+          "Templates"
+        ],
+        "description": "Receive a list of pricing-table items for a specific template.",
+        "operationId": "GetPricingTables",
+        "summary": "Get template pricing tables"
+      }
+    },
     "/templates/{templateId}/roles": {
       "get": {
         "produces": [
@@ -3110,6 +3485,124 @@
       "title": "Fields",
       "type": "object",
       "x-ms-summary": "Fields"
+    },
+    "PricingColumn": {
+      "description": "Pricing Table Column",
+      "properties": {
+        "column_id": {
+          "description": "ID",
+          "type": "string",
+          "x-ms-summary": "ID"
+        },
+        "display_name": {
+          "description": "Display Name",
+          "type": "string",
+          "x-ms-summary": "Display Name"
+        },
+        "enabled": {
+          "description": "Enabled",
+          "enum": [
+            true,
+            false
+          ],
+          "example": false,
+          "type": "boolean",
+          "x-ms-summary": "Enabled"
+        },
+        "name": {
+          "description": "Name",
+          "type": "string",
+          "x-ms-summary": "Name"
+        }
+      },
+      "title": "Column",
+      "type": "object",
+      "x-ms-summary": "Column"
+    },
+    "PricingSection": {
+      "description": "Pricing Table Section",
+      "properties": {
+        "columns": {
+          "items": {
+            "$ref": "#/definitions/PricingColumn"
+          },
+          "type": "array"
+        },
+        "display_name": {
+          "description": "Display Name",
+          "type": "string",
+          "x-ms-summary": "Display Name"
+        },
+        "name": {
+          "description": "Name",
+          "type": "string",
+          "x-ms-summary": "Name"
+        },
+        "section_id": {
+          "description": "ID",
+          "type": "string",
+          "x-ms-summary": "ID"
+        }
+      },
+      "title": "Section",
+      "type": "object",
+      "x-ms-summary": "Section"
+    },
+    "PricingTable": {
+      "description": "Pricing Table",
+      "properties": {
+        "currency_settings": {
+          "description": "Currency Settings",
+          "properties": {
+            "currency": {
+              "description": "Currency",
+              "type": "string",
+              "x-ms-summary": "Currency"
+            },
+            "locale": {
+              "description": "Locale",
+              "type": "string",
+              "x-ms-summary": "Locale"
+            }
+          },
+          "title": "Currency Settings",
+          "type": "object",
+          "x-ms-summary": "Currency Settings"
+        },
+        "pre_calculated": {
+          "description": "Pre calculated totals",
+          "type": "boolean",
+          "x-ms-summary": "Pre calculated totals"
+        },
+        "sections": {
+          "items": {
+            "$ref": "#/definitions/PricingSection"
+          },
+          "type": "array"
+        },
+        "table_id": {
+          "description": "Table ID",
+          "type": "string",
+          "x-ms-summary": "ID"
+        }
+      },
+      "title": "Table",
+      "type": "object",
+      "x-ms-summary": "Table"
+    },
+    "PricingTables": {
+      "description": "Pricing Tables",
+      "properties": {
+        "pricing_tables": {
+          "items": {
+            "$ref": "#/definitions/PricingTable"
+          },
+          "type": "array"
+        }
+      },
+      "title": "Pricing",
+      "type": "object",
+      "x-ms-summary": "Pricing"
     },
     "Recipient": {
       "description": "Every unique e-mail address (or mobile number) that is connected to a document is a recipient.",
