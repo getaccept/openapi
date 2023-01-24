@@ -524,6 +524,7 @@
         standard_fields = [
           { name: "name", label: "Document Name", hint: "Enter a name of the document", optional: false },
           { name: "external_id", label: "External ID", hint: "External system ID for identification", optional: true, sticky: true },
+          { name: "external_client_id", label: "External Client ID", hint: "External Client ID for integration identification", optional: true, sticky: false },
           { name: "value", label: "Document Value", hint: "The value associated with the document for statistics", optional: true, sticky: true, type: "integer", control_type: "number" },
           { name: "type", label: "Document Type", control_type: "select", default: "sales", pick_list: "document_type_list", optional: true, sticky: false },
           { name: "is_automatic_sending", label: "Send automatically", hint: "If the document should be sent after creation", optional: true, default: true, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
@@ -867,6 +868,31 @@
       sample_output: lambda { |_connection, _input|
         latest = get("documents/latest")
         get("documents/#{latest["id"]}/recipients")
+      },
+    },
+    update_document_expiration: {
+      title: "Update document expiration",
+      subtitle: "Update the expiration date and time for a document.",
+      description: "Update expiration for <span class='provider'>document</span> in <span class='provider'>GetAccept</span>",
+      input_fields: lambda { |_object_definitions|
+        [
+          { name: "id", label: "Document ID", optional: false },
+          { name: "expiration_date", label: "Expiration date", hint: "Date and time when the document should expire (UTC)", optional: false, sticky: true, type: "date_time", control_type: "date_time" },
+          { name: "send_notification", label: "Send notification message", hint: "Should a notification about the update be sent to recipients", optional: true, default: false, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+        ]
+      },
+      output_fields: lambda do |_object_definitions|
+        [
+          { name: "status" },
+        ]
+      end,
+      execute: lambda { |_connection, input|
+        post("documents/#{input["id"]}/expiration",
+        expiration_date: input["expiration_date"],
+        send_notification: input["send_notification"])
+      },
+      sample_output: lambda { |_connection, _input|
+        { "status": 1 }
       },
     },
     upload_attachment: {
