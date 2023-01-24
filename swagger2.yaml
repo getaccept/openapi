@@ -28,25 +28,7 @@ paths:
         '200':
           description: OK
           schema:
-            properties:
-              attachments:
-                items:
-                  properties:
-                    attachment_id:
-                      type: string
-                    attachment_title:
-                      type: string
-                    attachment_type:
-                      type: string
-                    attachment_url:
-                      type: string
-                    library:
-                      type: boolean
-                    published:
-                      type: boolean
-                  type: object
-                type: array
-            type: object
+            $ref: '#/definitions/Attachments'
         '401':
           description: Unauthorized
           schema:
@@ -1040,6 +1022,44 @@ paths:
       description: Get document details by specifying a document id.
       operationId: GetDocumentDetails
       summary: Get document details
+  '/documents/{documentId}/attachments':
+    get:
+      produces:
+        - application/json
+      parameters:
+        - description: Document ID
+          in: path
+          name: documentId
+          required: true
+          type: string
+          x-ms-dynamic-values:
+            operationId: ListDocuments
+            value-path: id
+            value-title: name
+          x-ms-summary: Document ID
+          x-ms-url-encoding: single
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Attachments'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
+          description: Access denied
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: The specified resource was not found
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - Documents
+      description: Get document attachments by specifying a document id.
+      operationId: GetDocumentAttachments
+      summary: Get document attachments
   '/documents/{documentId}/download':
     get:
       produces:
@@ -1051,6 +1071,10 @@ paths:
           name: documentId
           required: true
           type: string
+          x-ms-dynamic-values:
+            operationId: ListDocuments
+            value-path: id
+            value-title: name
           x-ms-summary: Document ID
           x-ms-url-encoding: single
         - default: 'true'
@@ -1097,6 +1121,74 @@ paths:
       operationId: DownloadDocument
       summary: Download document
       x-ms-visibility: important
+  '/documents/{documentId}/expiration':
+    post:
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - description: Document ID
+          in: path
+          name: documentId
+          required: true
+          type: string
+          x-ms-dynamic-values:
+            operationId: ListDocuments
+            value-path: id
+            value-title: name
+          x-ms-summary: Document ID
+          x-ms-url-encoding: single
+        - description: An optional JSON object containing seal information
+          in: body
+          name: body
+          schema:
+            properties:
+              expiration_date:
+                description: Date and time when the document should expire (UTC)
+                format: date-time
+                type: string
+                x-ms-summary: Expiration date
+              send_notification:
+                default: false
+                description: Should a notification about the update be sent to recipients
+                enum:
+                  - true
+                  - false
+                example: false
+                type: boolean
+                x-ms-summary: Send notification
+                x-nullable: true
+            type: object
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              status:
+                description: Status of update
+                format: int32
+                type: integer
+                x-ms-summary: Status
+                x-nullable: true
+            type: object
+        '400':
+          description: Invalid data
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: The specified resource was not found
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - Documents
+      description: Use this method to update the expiration date and time for a document.
+      operationId: UpdateExpiration
+      summary: Update document expiration
   '/documents/{documentId}/fields':
     get:
       produces:
@@ -1107,6 +1199,10 @@ paths:
           name: documentId
           required: true
           type: string
+          x-ms-dynamic-values:
+            operationId: ListDocuments
+            value-path: id
+            value-title: name
           x-ms-summary: Document ID
           x-ms-url-encoding: single
       responses:
@@ -2388,6 +2484,78 @@ paths:
       operationId: ListVideos
       summary: List videos
 definitions:
+  Attachment:
+    description: Document attachment
+    properties:
+      access_recipient_names:
+        description: Recipients with access to the attachment
+        items:
+          type: string
+        type: array
+        x-ms-summary: Access Recipients
+        x-ms-visibility: advanced
+      attachment_description:
+        description: Description of the attachment
+        type: string
+        x-ms-summary: Description
+      attachment_download_url:
+        description: URL to download the attachment
+        type: string
+        x-ms-summary: Download URL
+      attachment_extension:
+        description: File extension of the attachment
+        type: string
+        x-ms-summary: File Extension
+        x-ms-visibility: advanced
+      attachment_filename:
+        description: Filename of the attachment
+        type: string
+        x-ms-summary: Filename
+        x-ms-visibility: advanced
+      attachment_id:
+        description: ID of the attachment
+        type: string
+        x-ms-summary: ID
+      attachment_preview_url:
+        description: Internal URL to preview the attachment
+        type: string
+        x-ms-summary: Preview URL
+        x-ms-visibility: advanced
+      attachment_title:
+        description: Title of the attachment
+        type: string
+        x-ms-summary: Title
+      attachment_type:
+        description: Type of the attachment
+        type: string
+        x-ms-summary: Type
+      attachment_url:
+        description: Url of the attachment
+        type: string
+        x-ms-summary: URL
+      last_attachment_view:
+        description: Date and time when the attachment was last viewed
+        type: string
+        x-ms-summary: Last View
+        x-ms-visibility: advanced
+      restrict_access:
+        description: Attachment has restricted access
+        type: boolean
+        x-ms-summary: Restricted access
+        x-ms-visibility: advanced
+    title: Attachment
+    type: object
+    x-ms-summary: Attachment
+  Attachments:
+    description: Attachment list
+    properties:
+      attachments:
+        items:
+          $ref: '#/definitions/Attachment'
+        type: array
+    title: Attachments
+    type: object
+    x-ms-summary: Attachments
   Contact:
     description: Every unique e-mail address (or mobile number) is defined as a contact.
     properties:
@@ -2742,6 +2910,52 @@ definitions:
     title: Documents
     type: array
     x-ms-summary: Documents
+  EditorField:
+    description: Editor Field details
+    properties:
+      id:
+        description: ID
+        type: string
+        x-ms-summary: ID
+        x-ms-visibility: advanced
+      input_settings:
+        description: Settings
+        properties:
+          label:
+            description: Label
+            type: string
+            x-ms-summary: Label
+          options:
+            description: Options
+            items:
+              type: string
+            type: array
+            x-ms-summary: Options
+          required:
+            description: Required
+            type: boolean
+            x-ms-summary: Required
+          type:
+            description: Type
+            type: string
+            x-ms-summary: Type
+        type: object
+        x-ms-summary: Settings
+      recipient_id:
+        description: Recipient ID
+        type: string
+        x-ms-summary: Recipient ID
+      type:
+        description: Type
+        type: string
+        x-ms-summary: Type
+      user_id:
+        description: User ID
+        type: string
+        x-ms-summary: User ID
+    title: Editor Field
+    type: object
+    x-ms-summary: Editor Field
   Error:
     properties:
       description:
@@ -2755,12 +2969,86 @@ definitions:
     x-ms-summary: Error
   Field:
     description: Field details
+    properties:
+      company_name:
+        description: Company Name
+        type: string
+        x-ms-summary: Company Name
+        x-ms-visibility: advanced
+      company_number:
+        description: Company Number
+        type: string
+        x-ms-summary: Company Number
+        x-ms-visibility: advanced
+      field_id:
+        description: Field ID
+        type: string
+        x-ms-summary: Field ID
+        x-ms-visibility: advanced
+      field_label:
+        description: Label
+        type: string
+        x-ms-summary: Label
+      field_options:
+        description: Options
+        items:
+          properties:
+            value:
+              type: string
+              x-ms-summary: Value
+          type: object
+        type: array
+        x-ms-summary: Options
+        x-ms-visibility: advanced
+      field_type:
+        description: Type
+        type: string
+        x-ms-summary: Type
+      field_value:
+        description: Value
+        type: string
+        x-ms-summary: Value
+      is_collectable:
+        description: Collecting field
+        type: boolean
+        x-ms-visibility: advanced
+      is_editable:
+        description: Editable field
+        type: boolean
+        x-ms-visibility: advanced
+      is_required:
+        description: Required field
+        type: boolean
+      page_id:
+        description: Page ID
+        type: string
+        x-ms-summary: Page ID
+        x-ms-visibility: advanced
+      recipient_id:
+        description: Recipient ID
+        type: string
+        x-ms-summary: Recipient ID
+        x-ms-visibility: advanced
+      recipient_name:
+        description: Recipient Name
+        type: string
+        x-ms-summary: Recipient Name
+        x-ms-visibility: advanced
+      role_name:
+        description: Role Name
+        type: string
+        x-ms-summary: Role Name
+        x-ms-visibility: advanced
     title: Field
     type: object
     x-ms-summary: Field
   Fields:
     description: Field list
     properties:
+      editor_fields:
+        items:
+          $ref: '#/definitions/EditorField'
+        type: array
       fields:
         items:
           $ref: '#/definitions/Field'

@@ -1122,6 +1122,39 @@ paths:
             operationId: ListDocuments
             value-path: id
             value-title: name
+  '/documents/{documentId}/attachments':
+    get:
+      summary: Get document attachments
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attachments'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/AccessDenied'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetDocumentAttachments
+      description: Get document attachments by specifying a document id.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          x-ms-summary: Document ID
+          x-ms-url-encoding: single
+          required: true
+          x-ms-dynamic-values:
+            operationId: ListDocuments
+            value-path: id
+            value-title: name
   '/documents/{documentId}/download':
     get:
       summary: Download document
@@ -1170,6 +1203,10 @@ paths:
           x-ms-summary: Document ID
           x-ms-url-encoding: single
           required: true
+          x-ms-dynamic-values:
+            operationId: ListDocuments
+            value-path: id
+            value-title: name
         - schema:
             type: string
             nullable: true
@@ -1295,6 +1332,68 @@ paths:
             operationId: ListDocuments
             value-path: id
             value-title: name
+  '/documents/{documentId}/expiration':
+    post:
+      summary: Update document expiration
+      operationId: UpdateExpiration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    format: int32
+                    nullable: true
+                    description: Status of update
+                    x-ms-summary: Status
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      description: Use this method to update the expiration date and time for a document.
+      requestBody:
+        description: An optional JSON object containing seal information
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                expiration_date:
+                  type: string
+                  description: Date and time when the document should expire (UTC)
+                  x-ms-summary: Expiration date
+                  format: date-time
+                send_notification:
+                  type: boolean
+                  nullable: true
+                  enum:
+                    - true
+                    - false
+                  example: false
+                  default: false
+                  description: Should a notification about the update be sent to recipients
+                  x-ms-summary: Send notification
+      tags:
+        - Documents
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          x-ms-summary: Document ID
+          x-ms-url-encoding: single
+          required: true
+          x-ms-dynamic-values:
+            operationId: ListDocuments
+            value-path: id
+            value-title: name
   '/documents/{documentId}/recipients':
     get:
       summary: Get document recipients
@@ -1353,6 +1452,10 @@ paths:
           x-ms-summary: Document ID
           x-ms-url-encoding: single
           required: true
+          x-ms-dynamic-values:
+            operationId: ListDocuments
+            value-path: id
+            value-title: name
   '/templates/{templateId}/roles':
     get:
       summary: Get template roles
@@ -2196,25 +2299,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  attachments:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        attachment_id:
-                          type: string
-                        attachment_type:
-                          type: string
-                        attachment_title:
-                          type: string
-                        attachment_url:
-                          type: string
-                        published:
-                          type: boolean
-                        library:
-                          type: boolean
+                $ref: '#/components/schemas/Attachments'
         '401':
           $ref: '#/components/responses/Unauthorized'
       operationId: ListAttachments
@@ -2525,11 +2610,199 @@ components:
           type: string
         description:
           type: string
+    Attachment:
+      title: Attachment
+      type: object
+      description: Document attachment
+      x-ms-summary: Attachment
+      properties:
+        attachment_id:
+          type: string
+          description: ID of the attachment
+          x-ms-summary: ID
+        attachment_type:
+          type: string
+          description: Type of the attachment
+          x-ms-summary: Type
+        attachment_title:
+          type: string
+          description: Title of the attachment
+          x-ms-summary: Title
+        attachment_description:
+          type: string
+          description: Description of the attachment
+          x-ms-summary: Description
+        attachment_extension:
+          type: string
+          description: File extension of the attachment
+          x-ms-visibility: advanced
+          x-ms-summary: File Extension
+        attachment_url:
+          type: string
+          description: Url of the attachment
+          x-ms-summary: URL
+        attachment_filename:
+          type: string
+          description: Filename of the attachment
+          x-ms-visibility: advanced
+          x-ms-summary: Filename
+        restrict_access:
+          type: boolean
+          description: Attachment has restricted access
+          x-ms-visibility: advanced
+          x-ms-summary: Restricted access
+        access_recipient_names:
+          type: array
+          description: Recipients with access to the attachment
+          x-ms-visibility: advanced
+          x-ms-summary: Access Recipients
+          items:
+            type: string
+        last_attachment_view:
+          type: string
+          description: Date and time when the attachment was last viewed
+          x-ms-summary: Last View
+          x-ms-visibility: advanced
+        attachment_preview_url:
+          type: string
+          description: Internal URL to preview the attachment
+          x-ms-visibility: advanced
+          x-ms-summary: Preview URL
+        attachment_download_url:
+          type: string
+          description: URL to download the attachment
+          x-ms-summary: Download URL
+    Attachments:
+      title: Attachments
+      type: object
+      description: Attachment list
+      x-ms-summary: Attachments
+      properties:
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attachment'
     Field:
       title: Field
       type: object
       description: Field details
       x-ms-summary: Field
+      properties:
+        field_id:
+          type: string
+          description: Field ID
+          x-ms-visibility: advanced
+          x-ms-summary: Field ID
+        page_id:
+          type: string
+          description: Page ID
+          x-ms-visibility: advanced
+          x-ms-summary: Page ID
+        field_type:
+          type: string
+          description: Type
+          x-ms-summary: Type
+        field_label:
+          type: string
+          description: Label
+          x-ms-summary: Label
+        field_value:
+          type: string
+          description: Value
+          x-ms-summary: Value
+        field_options:
+          type: array
+          description: Options
+          x-ms-visibility: advanced
+          x-ms-summary: Options
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+                x-ms-summary: Value
+        is_collectable:
+          type: boolean
+          description: Collecting field
+          x-ms-visibility: advanced
+        is_editable:
+          type: boolean
+          description: Editable field
+          x-ms-visibility: advanced
+        is_required:
+          type: boolean
+          description: Required field
+        recipient_id:
+          type: string
+          description: Recipient ID
+          x-ms-summary: Recipient ID
+          x-ms-visibility: advanced
+        recipient_name:
+          type: string
+          description: Recipient Name
+          x-ms-summary: Recipient Name
+          x-ms-visibility: advanced
+        company_name:
+          type: string
+          description: Company Name
+          x-ms-summary: Company Name
+          x-ms-visibility: advanced
+        company_number:
+          type: string
+          description: Company Number
+          x-ms-summary: Company Number
+          x-ms-visibility: advanced
+        role_name:
+          type: string
+          description: Role Name
+          x-ms-summary: Role Name
+          x-ms-visibility: advanced
+    EditorField:
+      title: Editor Field
+      type: object
+      description: Editor Field details
+      x-ms-summary: Editor Field
+      properties:
+        id:
+          type: string
+          description: ID
+          x-ms-summary: ID
+          x-ms-visibility: advanced
+        type:
+          type: string
+          description: Type
+          x-ms-summary: Type
+        recipient_id:
+          type: string
+          description: Recipient ID
+          x-ms-summary: Recipient ID
+        user_id:
+          type: string
+          description: User ID
+          x-ms-summary: User ID
+        input_settings:
+          type: object
+          description: Settings
+          x-ms-summary: Settings
+          properties:
+            type:
+              type: string
+              description: Type
+              x-ms-summary: Type
+            required:
+              type: boolean
+              description: Required
+              x-ms-summary: Required
+            label:
+              type: string
+              description: Label
+              x-ms-summary: Label
+            options:
+              type: array
+              description: Options
+              x-ms-summary: Options
+              items:
+                type: string
     Fields:
       title: Fields
       type: object
@@ -2540,6 +2813,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Field'
+        editor_fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/EditorField'
     PricingColumn:
       title: Column
       type: object
