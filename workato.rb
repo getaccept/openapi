@@ -577,10 +577,10 @@
             type: "array",
             of: "object",
             properties: [
-              { name: "type", label: "Type", sticky: true, optional: true, control_type: "select", pick_list: [["File", "file"], ["External url", "external"]] },
+              { name: "type", label: "Type", sticky: true, optional: true, control_type: "select", pick_list: [["File", "file"], ["External url", "external"], ["Recipient upload", "upload"]] },
               { name: "id", label: "Uploaded Attachment ID", sticky: true, optional: true },
               { name: "url", label: "Attachment URL", control_type: "url", sticky: true, optional: true },
-              { name: "title", label: "Title", optional: true },
+              { name: "title", label: "Title", sticky: true, optional: true },
               { name: "require_view", label: "Require recipient to view", optional: true, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
             ],
           },
