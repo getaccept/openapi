@@ -931,8 +931,8 @@ paths:
                 x-ms-visibility: important
               value:
                 description: Value of deal or document
-                format: int32
-                type: integer
+                format: float
+                type: number
                 x-ms-summary: Document value
                 x-ms-visibility: important
                 x-nullable: true
@@ -2869,8 +2869,8 @@ definitions:
         x-ms-visibility: advanced
       value:
         description: Value of document
-        format: int32
-        type: integer
+        format: float
+        type: number
         x-ms-summary: Value
     title: Document
     type: object
