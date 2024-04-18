@@ -576,13 +576,13 @@
                         name: column["column_id"],
                         label: column["display_name"],
                         type: ['name', 'description', 'sku'].include?(column["name"]) ? "string" : "integer",
-                        control_type: ['name', 'description', 'sku'].include?(column["name"]) ? "string" : "number",
+                        control_type: ['name', 'description', 'sku'].include?(column["name"]) ? "text" : "number",
                         optional: false,
                         default: "empty",
                       }
                     end
                     #values << { type: "object", optional: false, sticky: true, properties: columns } }
-                    add_section << { name: "rows", type: "array", of:"object", list_mode: "static", support_pills: false, list_mode_toggle: false, item_label: "Product", add_item_label: "Add another product", empty_list_title: "Product details", hint: "You need to leave the value 'empty' for fields where you don't want to input any data.", empty_list_text: "Click the button below to add a product to the list.", optional: false, sticky: true, properties: columns }
+                    add_section << { name: "rows", type: "array", of:"object", list_mode: "static", support_pills: true, list_mode_toggle: true, item_label: "Product", add_item_label: "Add another product", empty_list_title: "Product details", hint: "You need to leave the value 'empty' for fields where you don't want to input any data.", empty_list_text: "Click the button below to add a product to the list.", optional: false, sticky: true, properties: columns }
                     #error(add_section.to_json)
                     #add_section << { name: "rows", label: section["display_name"], type: "array", list_mode: "static", list_mode_toggle: true, optional: false, sticky: true, properties: values }
                     add_section << { name: "display_name", label: "Section Name", type: "string", default: section["display_name"], optional: false, sticky: true }
