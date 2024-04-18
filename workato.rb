@@ -23,12 +23,12 @@
       acquire: lambda do |_connection, auth_code|
         response = post("https://app.getaccept.com/oauth2/token").
           payload(
-          code: auth_code,
-          grant_type: "authorization_code",
-          client_id: "Workato",
-          client_secret: "app",
-          redirect_uri: "https://www.workato.com/oauth/callback",
-        ).
+            code: auth_code,
+            grant_type: "authorization_code",
+            client_id: "Workato",
+            client_secret: "app",
+            redirect_uri: "https://www.workato.com/oauth/callback",
+          ).
           request_format_www_form_urlencoded
         [
           {
@@ -43,12 +43,12 @@
       refresh: lambda do |_connection, refresh_token|
         response = post("https://app.getaccept.com/oauth2/token").
           payload(
-          grant_type: "refresh_token",
-          refresh_token: refresh_token,
-          client_id: "Workato",
-          client_secret: "app",
-          redirect_uri: "https://www.workato.com/oauth/callback",
-        ).
+            grant_type: "refresh_token",
+            refresh_token: refresh_token,
+            client_id: "Workato",
+            client_secret: "app",
+            redirect_uri: "https://www.workato.com/oauth/callback",
+          ).
           request_format_www_form_urlencoded
         [
           { # Tokens hash
@@ -89,8 +89,12 @@
           { name: "sender_thumb" },
           { name: "status" },
           { name: "value", type: "integer", control_type: "number" },
-          { name: "sign_date", type: "date_time", control_type: "date_time", parse_output: lambda do |field| field != "0000-00-00 00:00:00" ? field : nil end },
-          { name: "expiration_date", type: "date_time", control_type: "date_time", parse_output: lambda do |field| field != "0000-00-00 00:00:00" ? field : nil end },
+          { name: "sign_date", type: "date_time", control_type: "date_time", parse_output: lambda do |field|
+            field != "0000-00-00 00:00:00" ? field : nil
+          end },
+          { name: "expiration_date", type: "date_time", control_type: "date_time", parse_output: lambda do |field|
+            field != "0000-00-00 00:00:00" ? field : nil
+          end },
           { name: "created_at", type: "date_time", control_type: "date_time" },
           {
             name: "recipients",
@@ -167,7 +171,9 @@
               { name: "status" },
               { name: "role" },
               { name: "team_name" },
-              { name: "last_login", type: "date_time", control_type: "date_time", parse_output: lambda do |field| field != "0000-00-00 00:00:00" ? field : nil end },
+              { name: "last_login", type: "date_time", control_type: "date_time", parse_output: lambda do |field|
+                field != "0000-00-00 00:00:00" ? field : nil
+              end },
             ],
           },
         ]
@@ -305,8 +311,79 @@
               { name: "title" },
               { name: "note" },
               { name: "thumb_url", control_type: "url" },
+              { name: "order_num" },
               { name: "document_url", control_type: "url" },
             ],
+          },
+        ]
+      end,
+    },
+    pricing_tables: {
+      fields: lambda do |_connection, _config_fields|
+        [
+          {
+            name: "pricing_tables",
+            type: "array",
+            of: "object",
+            properties: [
+              { name: "table_id" },
+              { name: "external_id" },
+              { name: "name" },
+              { name: "display_name" },
+              {
+                name: "summary_settings",
+                type: "object",
+                properties: [
+                  { name: "type" },
+                  { name: "summary_enabled", type: "boolean" },
+                ]
+              },
+              { name: "pre_calculated", type: "boolean" },
+              {
+                name: "sections",
+                type: "object",
+                properties: [
+                  { name: "section_id" },
+                  { name: "name" },
+                  { name: "display_name" },
+                  {
+                    name: "section_summary_settings",
+                    type: "object",
+                    properties: [
+                      { name: "type" },
+                      { name: "summary_enabled", type: "boolean" },
+                    ]
+                  },
+                  {
+                    name: "columns",
+                    type: "object",
+                    properties: [
+                      { name: "column_id" },
+                      { name: "name" },
+                      { name: "display_name" },
+                      { name: "enabled", type: "boolean" },
+                    ],
+                  },
+                  {
+                    name: "rows",
+                    type: "object",
+                    properties: [
+                      { name: "row_id" },
+                      { name: "external_id" },
+                      {
+                        name: "values",
+                        type: "object",
+                        properties: [
+                          #{ name: "key" },
+                          #{ name: "value" }
+                        ],
+                        # convert_output: "column_value_conversion",
+                      },
+                    ],
+                  },
+                ],
+              },
+            ]
           },
         ]
       end,
@@ -373,19 +450,19 @@
             name: "custom_fields",
             type: "object",
             properties: if config_fields["document_id"].present?
-              get("documents/#{config_fields["document_id"]}/field_values")&.first&.
-                map do |key, value|
-                {
-                  name: key.downcase.gsub(/\s+/, "_").gsub(/\-/, "_").gsub(/\./, "").gsub(/\//, ""),
-                  type: "string",
-                  label: key,
-                  control_type: "text",
-                  optional: true,
-                  sticky: true,
-                  default: value,
-                }
-              end
-            end,
+                          get("documents/#{config_fields["document_id"]}/field_values")&.first&.
+                            map do |key, value|
+                            {
+                              name: key.downcase.gsub(/\s+/, "_").gsub(/\-/, "_").gsub(/\./, "").gsub(/\//, ""),
+                              type: "string",
+                              label: key,
+                              control_type: "text",
+                              optional: true,
+                              sticky: true,
+                              default: value,
+                            }
+                          end
+                        end,
           },
           {
             name: "event_sign_metadata",
@@ -400,6 +477,7 @@
         pricing_tables = []
         file_fields = []
         if config_fields["template_id"].present?
+          # Gives 404 error
           fields_data = get("templates/#{config_fields["template_id"]}/fields")
           if fields_data["fields"].present?
             fields_data["fields"].each do |field|
@@ -408,16 +486,12 @@
                 when "text", "merge"
                   add_field =
                     { name: field["field_id"], optional: true, sticky: true,
-                     default: field["field_value"],
-                     label: if field["field_label"]
-                      field["field_label"]
-                    else
-                      if field["field_value"]
-                        field["field_value"]
-                      else
-                        field["field_type"] + " " + field["field_id"]
-                      end
-                    end }
+                      default: field["field_value"],
+                      label: if field["field_label"]
+                               field["field_label"]
+                             else
+                                field["field_type"] + " " + field["field_id"]
+                             end }
                   custom_fields << add_field
                 when "check"
                   add_field = { name: field["field_id"], label: field["field_label"],
@@ -434,60 +508,145 @@
               end
             end
           end
+          if fields_data["editor_fields"].present?
+            fields_data["editor_fields"].each do |field|
+              if field["type"].present?
+                case field["type"]
+                when "Custom"
+                  add_field =
+                    { name: field["id"], optional: true, sticky: true,
+                      default: field["value"],
+                      label: if field["custom_name"]
+                               field["custom_name"]
+                             else
+                                field["type"] + " " + field["id"]
+                             end }
+                  custom_fields << add_field
+                when "Input"
+                  if field["input_settings"].present?
+                    case field["input_settings"]["type"]
+                    when "Text"
+                      add_field =
+                        { name: field["id"], optional: true, sticky: true,
+                          default: field["value"],
+                          label: if field["input_settings"]["label"]
+                          field["input_settings"]["label"]
+                                else
+                                  field["input_settings"]["type"] + " " + field["id"]
+                                end }
+                      custom_fields << add_field
+                    when "Checkbox"
+                      add_field = { name: field["id"], label: field["input_settings"]["label"],
+                                    type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_ouput: "boolean_conversion" }
+                      if field["value"] == 1
+                        add_field["default"] = true
+                      else
+                        if field["value"] == 0
+                          add_field["default"] = false
+                        end
+                      end
+                      custom_fields << add_field
+                    end
+                  end
+                end
+              end
+            end
+          end
           roles = get("templates/#{config_fields["template_id"]}/roles")
           if roles["roles"].present?
             roles = roles["roles"].pluck("role_name", "role_id")
+          else
+            roles = []
           end
 
-          pricing_data = get("templates/#{config_fields["template_id"]}/pricing-tables")
-          if pricing_data["pricing_tables"].present?
-            pricing_data["pricing_tables"].each do |table|
-              sections = []
-              if table["sections"].present?
-                table["sections"].each do |section|
-                  columns = []
-                  values = []
-                  section["columns"].each do |column|
-                    columns << {
-                      name: column["column_id"],
-                      label: column["display_name"],
-                      type: "string",
-                      default: "",
-                      sticky: column["enabled"],
-                      optional: !column["enabled"],
-                    }
+          if config_fields["template_id"].present?
+            pricing_data = get("templates/#{config_fields["template_id"]}/pricing-tables")
+            pricing_tables = []
+            if pricing_data["pricing_tables"].present?
+              pricing_data["pricing_tables"].each_with_index do |table,tabidx|
+                pricing_table = []
+                sections = []
+                if table["sections"].present?
+                  table["sections"].each_with_index do |section,secidx|
+                    columns = []
+                    values = []
+                    add_section = []
+                    section["columns"].each do |column|
+                      columns << {
+                        name: column["column_id"],
+                        label: column["display_name"],
+                        type: ['name', 'description', 'sku'].include?(column["name"]) ? "string" : "integer",
+                        control_type: ['name', 'description', 'sku'].include?(column["name"]) ? "string" : "number",
+                        optional: false,
+                        default: "empty",
+                      }
+                    end
+                    #values << { type: "object", optional: false, sticky: true, properties: columns } }
+                    add_section << { name: "rows", type: "array", of:"object", list_mode: "static", support_pills: false, list_mode_toggle: false, item_label: "Product", add_item_label: "Add another product", empty_list_title: "Product details", hint: "You need to leave the value 'empty' for fields where you don't want to input any data.", empty_list_text: "Click the button below to add a product to the list.", optional: false, sticky: true, properties: columns }
+                    #error(add_section.to_json)
+                    #add_section << { name: "rows", label: section["display_name"], type: "array", list_mode: "static", list_mode_toggle: true, optional: false, sticky: true, properties: values }
+                    add_section << { name: "display_name", label: "Section Name", type: "string", default: section["display_name"], optional: false, sticky: true }
+                    add_section << { name: "id", label: "Section ID", type: "string", default: section["section_id"], optional: false, sticky: false, ngIf: 'false' }
+                    add_section << { name: "show_section_summary", label: "Show section summary", default: false, type: "boolean",control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" }
+                    add_section << { name: "section_summary", label: "Summary", type: "object", optional: true, sticky: true, properties: [
+                      { name: "tax", label: "Tax", type: "object", properties: [
+                        { name: "value", label: "Value", default: 0, type: "integer", control_type: "number", convert_output: "float_conversion" },
+                        { name: "flat_fee", label: "Flat Fee", default: true, type: "boolean",control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                        { name: "enabled", label: "Enabled", default: true, type: "boolean",control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                      ]
+                      },
+                      { name: "price", label: "Price", type: "object",properties: [
+                        { name: "value", label: "Value", default: "", type: "integer", control_type: "number", convert_output: "float_conversion" },
+                        { name: "flat_fee", label: "Flat Fee", default: true, type: "boolean",control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                        { name: "enabled", label: "Enabled", default: true, type: "boolean",control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                      ]
+                      },
+                      { name: "discount", label: "Discount", type: "object",properties: [
+                        { name: "value", label: "Value", default: 0, type: "integer", control_type: "number", convert_output: "float_conversion" },
+                        { name: "flat_fee", label: "Flat Fee", default: false, type: "boolean",control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                        { name: "enabled", label: "Enabled", default: false, type: "boolean",control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                      ]
+                      },
+                    ], ngIf: "input.custom_pricing_tables['table-"+(tabidx+1)+"']['section-"+(secidx+1)+"']['show_section_summary'] == 'true'" }
+                    sections << { name: "section-"+(secidx+1), label: (section["display_name"].present? ? section["display_name"] : "Section "+(secidx+1)), type: "object", list_mode_toggle: false, support_pills: false, optional: false, sticky: true, properties: add_section }
+                    sections << { name: "display_name", label: "Table Name", type: "string", default: table["display_name"], optional: false, sticky: true, ngIf: 'false' }
+                    sections << { name: "pre_calculated", label: "Pre calculated totals", type: "boolean", default: table["pre_calculated"], optional: true, sticky: false, control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion", ngIf: 'false' }
+                    sections << { name: "locked", label: "Locked", type: "boolean", default: true, optional: true, sticky: true, control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" }
+                    sections << { name: "id", label: "Table ID", type: "string", default: table["table_id"], optional: false, sticky: false, ngIf: 'false' }
+                    sections << { name: "currency_settings", label: "Currency Settings", type: "object", optional: true, sticky: false, ngIf: 'false', properties: [
+                      { name: "currency", label: "Currency", type: "string", default: table["currency_settings"]["currency"], optional: true, sticky: true, ngIf: 'false' },
+                      { name: "locale", label: "Locale", type: "string", default: table["currency_settings"]["locale"], optional: true, sticky: true, ngIf: 'false' },
+                    ] }
+                    sections << { name: "show_table_summary", label: "Show table summary", default: false, type: "boolean",control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" }
+                    sections << { name: "summary_values", label: "Summary", type: "object", optional: true, sticky: true, properties: [
+                      { name: "tax", label: "Tax", type: "object", properties: [
+                        { name: "value", label: "Value", default: 0, type: "integer", sticky: true, control_type: "number", convert_output: "float_conversion" },
+                        { name: "flat_fee", label: "Flat Fee", default: false, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                        { name: "enabled", label: "Enabled", default: true, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                      ]
+                      },
+                      { name: "price", label: "Price", type: "object", properties: [
+                        { name: "value", label: "Value", default: 0, type: "integer", sticky: true, control_type: "number", convert_output: "float_conversion" },
+                        { name: "flat_fee", label: "Flat Fee", default: false, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                        { name: "enabled", label: "Enabled", default: true, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                      ]
+                      },
+                      { name: "discount", label: "Discount", type: "object", properties: [
+                        { name: "value", label: "Value", default: 0, type: "integer", sticky: true, control_type: "number", convert_output: "float_conversion" },
+                        { name: "flat_fee", label: "Flat Fee", default: false, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                        { name: "enabled", label: "Enabled", default: true, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+                      ]
+                      },
+                    ], ngIf: "input.custom_pricing_tables['table-"+(tabidx+1)+"']['show_table_summary'] == 'true'" }
                   end
-                  values << { name: "values", type: "array", of: "object", optional: false, sticky: true, properties: columns, convert_input: "pricing_column_conversion" }
-                  sections << { name: "rows", label: section["display_name"], type: "array", list_mode: "static", list_mode_toggle: true, optional: false, sticky: true, properties: values }
-                  sections << { name: "display_name", label: "Section Name", type: "string", default: section["display_name"], optional: false, sticky: true }
-                  sections << { name: "id", label: "Section ID", type: "string", default: section["section_id"], optional: false, sticky: false }
-                  sections << { name: "section_summary", label: "Summary", type: "object", optional: true, sticky: false, properties: [
-                    { name: "tax", label: "Tax", type: "object", optional: true, sticky: true, properties: [
-                      { name: "value", label: "Value", optional: true, sticky: true },
-                      { name: "flat_fee", label: "Flat Fee", optional: true, default: true, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
-                      { name: "enabled", label: "Enabled", optional: true, default: false, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
-                      ] 
-                    },
-                    { name: "price", label: "Price", type: "object", optional: true, sticky: true, properties: [
-                      { name: "value", label: "Value", optional: true, sticky: true },
-                      { name: "flat_fee", label: "Flat Fee", optional: true, default: true, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
-                      { name: "enabled", label: "Enabled", optional: true, default: true, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
-                      ] 
-                    },
-                    { name: "discount", label: "Discount", type: "object", optional: true, sticky: true, properties: [
-                      { name: "value", label: "Value", optional: true, sticky: true },
-                      { name: "flat_fee", label: "Flat Fee", optional: true, default: true, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
-                      { name: "enabled", label: "Enabled", optional: true, default: false, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
-                      ] 
-                    },
-                  ] }
                 end
+                pricing_tables << { name: "table-"+(tabidx+1), label: table["name"] ? table["name"] : "Table "+(tabidx+1), type: "object", list_mode_toggle: false, support_pills: false, optional: false, sticky: true, properties: sections }
+
+                #pricing_tables << { type:"object", list_mode_toggle: false, support_pills: false, optional: false, sticky: true, properties: pricing_table }
               end
-              pricing_tables << { name: "sections", label: table["display_name"], type: "array", optional: false, sticky: true, properties: sections }
-              pricing_tables << { name: "display_name", label: "Table Name", type: "string", default: table["display_name"], optional: false, sticky: true }
-              pricing_tables << { name: "pre_calculated", label: "Pre calculated totals", type: "boolean", default: table["pre_calculated"], optional: false, sticky: false, control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" }
-              pricing_tables << { name: "id", label: "Table ID", type: "string", default: table["table_id"], optional: false, sticky: false }
             end
+          else
+            pricing_data = []
           end
         else
           roles = []
@@ -529,15 +688,18 @@
           { name: "type", label: "Document Type", control_type: "select", default: "sales", pick_list: "document_type_list", optional: true, sticky: false },
           { name: "is_automatic_sending", label: "Send automatically", hint: "If the document should be sent after creation", optional: true, default: true, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
           { name: "is_sms_sending", label: "Send by SMS", hint: "Should the document be sent to recipient mobile by text", optional: true, default: false, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+          { name: "is_reminder", label: "Send reminders", hint: "Should GetAccept automatically send reminders for the document", optional: true, sticky: true, type: "boolean", default: null, control_type: "select", options: [["Entity settings value", null],["Yes", true],["No", false]], parse_output: "boolean_conversion" },
           { name: "expiration_date", label: "Expiration date", hint: "Date and time when the document should expire", optional: true, type: "date_time", control_type: "date_time" },
           { name: "sender_email", label: "Sender Email", hint: "Send from other email (existing user) than authenticated user", optional: true, sticky: false, control_type: "email" },
           { name: "sender_id", label: "Sender User ID", hint: "Send from other user than authenticated", optional: true, sticky: false },
           { name: "email_send_subject", label: "Email Send Subject", hint: "Subject line used to send out the document", optional: true, sticky: false, control_type: "text-area" },
           { name: "email_send_message", label: "Email Send Message", hint: "Message to the recipient(s) when sending out the document", optional: true, sticky: false, control_type: "text-area" },
-          { name: "send_date", label: "Send date", optional: true, type: "date_time", control_type: "date_time" },
+          { name: "is_scheduled_sending", label: "Schedule sending", hint: "If the document should be sent later", optional: true, sticky: true, default: false, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
+          { ngIf: "input.is_scheduled_sending=='true'", name: "scheduled_sending_time", label: "Date and time when document will be sent if scheduled", optional: true, sticky: true, type: "date_time", control_type: "date_time" },
           {
             name: "recipients",
             label: "Recipients",
+            optional: false,
             list_mode: "static",
             list_mode_toggle: false,
             item_label: "Recipient",
@@ -584,9 +746,10 @@
               { name: "require_view", label: "Require recipient to view", optional: true, type: "boolean", control_type: "checkbox", render_input: "boolean_conversion", parse_output: "boolean_conversion" },
             ],
           },
-          { ngIf: custom_fields.length() > 0, name: "custom_fields", type: "object", optional: true, sticky: custom_fields.length() > 0, properties: custom_fields },
-          { ngIf: pricing_tables.length() > 0, name: "custom_pricing_tables", type: "array", of: "object", optional: true, sticky: pricing_tables.length() > 0, properties: pricing_tables },
+          { ngIf: custom_fields.length() > 0, name: "custom_fields", label: "Custom Fields", type: "object", list_mode_toggle: false, support_pills: false, optional: true, sticky: custom_fields.length() > 0, properties: custom_fields },
+          { ngIf: pricing_tables.length() > 0, name: "custom_pricing_tables", label: "Pricing Tables", type: "object", list_mode_toggle: false, support_pills: false, optional: true, sticky: pricing_tables.length() > 0, properties: pricing_tables },
         ]
+        #error(pricing_tables.to_json)
         json_fields = [
           { name: "custom", label: "Custom JSON parameters", hint: "Specify custom parameters using JSON object", control_type: "text-area" },
         ]
@@ -612,6 +775,45 @@
       end,
     },
 
+    custom_pricing_table_input:{
+      fields: lambda do |_connection, config_fields|
+        [      
+          {
+            name: "table_id",
+            label: "Pricing table",
+            type: "integer",
+            control_type: "select",
+            sticky: true,
+            optional: false,
+            default: 0,
+            pick_list: get("documents/#{config_fields["document_id"]}/pricing-tables").
+              after_error_response(404) do |_code, _body, _headers, _message|
+                error("Document does not contain a pricing table")
+              end.
+              dig("pricing_tables").each_with_index.map do |t,i|
+                [(t.dig("name").to_s != "" ? t.dig("name") : "Table #{(i+1)}"), i]
+              end,
+          },
+          { 
+            name: "section_id", 
+            label: "Pricing group", 
+            hint: "Specify group number (starting from 1) or leave empty to use the first/only group in a table.", 
+            optional: true, 
+            sticky: true,
+            type: 'integer', control_type: 'integer',
+          },
+          { 
+            name: "row_number", 
+            label: "Product row number", 
+            hint: "Specify item row number (starting from 1) or leave empty to receive all column values for a row as a list. If you have multiple rows and don't specify you can access different row values by adding formula and [row-1] example <b>Name (step 2)[1]</b> for the Name value of second row.", 
+            optional: true, 
+            sticky: true,
+            type: 'integer', control_type: 'integer',
+          },
+        ]
+      end
+    },
+
     custom_action_input: {
       fields: lambda do |_connection, config_fields|
         verb = config_fields["verb"]
@@ -619,7 +821,7 @@
         data_props =
           input_schema.map do |field|
             if config_fields["request_type"] == "multipart" &&
-               field["binary_content"] == "true"
+              field["binary_content"] == "true"
               field["type"] = "object"
               field["properties"] = [
                 { name: "file_content", optional: false },
@@ -635,18 +837,18 @@
           end
         data_props = call("make_schema_builder_fields_sticky", data_props)
         input_data = if input_schema.present?
-            if input_schema.dig(0, "type") == "array" &&
-               input_schema.dig(0, "details", "fake_array")
-              {
-                name: "data",
-                type: "array",
-                of: "object",
-                properties: data_props.dig(0, "properties"),
-              }
-            else
-              { name: "data", type: "object", properties: data_props }
-            end
-          end
+                       if input_schema.dig(0, "type") == "array" &&
+                         input_schema.dig(0, "details", "fake_array")
+                         {
+                           name: "data",
+                           type: "array",
+                           of: "object",
+                           properties: data_props.dig(0, "properties"),
+                         }
+                       else
+                         { name: "data", type: "object", properties: data_props }
+                       end
+                     end
 
         [
           {
@@ -704,38 +906,38 @@
               sticky: true,
               type: "object",
               properties: if config_fields["request_type"] == "raw"
-                [{
-                  name: "data",
-                  sticky: true,
-                  control_type: "text-area",
-                  type: "string",
-                }]
-              else
-                [
-                  {
-                    name: "schema",
-                    sticky: input_schema.blank?,
-                    extends_schema: true,
-                    schema_neutral: true,
-                    control_type: "schema-designer",
-                    sample_data_type: "json_input",
-                    custom_properties: if config_fields["request_type"] == "multipart"
-                      [{
-                        name: "binary_content",
-                        label: "File attachment",
-                        default: false,
-                        optional: true,
-                        sticky: true,
-                        render_input: "boolean_conversion",
-                        parse_output: "boolean_conversion",
-                        control_type: "checkbox",
-                        type: "boolean",
-                      }]
-                    end,
-                  },
-                  input_data,
-                ].compact
-              end,
+                            [{
+                               name: "data",
+                               sticky: true,
+                               control_type: "text-area",
+                               type: "string",
+                             }]
+                          else
+                            [
+                              {
+                                name: "schema",
+                                sticky: input_schema.blank?,
+                                extends_schema: true,
+                                schema_neutral: true,
+                                control_type: "schema-designer",
+                                sample_data_type: "json_input",
+                                custom_properties: if config_fields["request_type"] == "multipart"
+                                                     [{
+                                                        name: "binary_content",
+                                                        label: "File attachment",
+                                                        default: false,
+                                                        optional: true,
+                                                        sticky: true,
+                                                        render_input: "boolean_conversion",
+                                                        parse_output: "boolean_conversion",
+                                                        control_type: "checkbox",
+                                                        type: "boolean",
+                                                      }]
+                                                   end,
+                              },
+                              input_data,
+                            ].compact
+                          end,
             }
           end,
           {
@@ -784,7 +986,7 @@
           elsif (output = config_fields["output"])
             output_schema = call("format_schema", parse_json(output))
             if output_schema.dig(0, "type") == "array" &&
-               output_schema.dig(0, "details", "fake_array")
+              output_schema.dig(0, "details", "fake_array")
               response_body[:type] = "array"
               response_body[:properties] = output_schema.dig(0, "properties")
             else
@@ -809,6 +1011,26 @@
         ].compact
       end,
     },
+    get_document_pricing_table_details_output: {
+      fields: lambda do |_connection, config_fields|
+        unless config_fields['document_id'].blank?
+          [{
+             "name" => 'table',
+             "type" => 'object',
+             'properties' =>
+               get("documents/#{config_fields["document_id"]}/pricing-tables").
+                dig('pricing_tables', 0, 'sections', 0, 'columns').map do |c|
+                 {
+                   "name" => c.dig('name').gsub(/\W/) { |spl_chr| "__#{spl_chr.encode_hex}__" },
+                   "label" => c.dig('display_name'),
+                   "type" => 'array',
+                   "of" => 'string'
+                 }
+               end
+           }]
+        end
+      end
+    }
   },
 
   actions: {
@@ -841,6 +1063,9 @@
         end
         if input["custom_fields"].present?
           input = call("format_custom_fields", input)
+        end
+        if input["custom_pricing_tables"].present?
+          input = call("format_custom_pricing_tables", input)
         end
         post("documents", input)
       end,
@@ -888,8 +1113,8 @@
       end,
       execute: lambda { |_connection, input|
         post("documents/#{input["id"]}/expiration",
-        expiration_date: input["expiration_date"],
-        send_notification: input["send_notification"])
+             expiration_date: input["expiration_date"],
+             send_notification: input["send_notification"])
       },
       sample_output: lambda { |_connection, _input|
         { "status": 1 }
@@ -908,7 +1133,7 @@
       end,
 
       execute: lambda do |_connection, input|
-        post("upload").
+        post("upload/attachment").
           request_format_multipart_form.
           payload(file: [input["file_data"], "application/pdf"],
                   file_name: input["file_name"])
@@ -1113,6 +1338,38 @@
       },
     },
 
+    get_document_pricing_tables: {
+      title: "Get document pricing tables",
+      subtitle: "Show all pricing tables for a specific document",
+      description: "Get <span class='provider'>pricing tables</span> for a <span class='provider'>document</span> in <span class='provider'>GetAccept</span>",
+      input_fields: lambda { |_object_definitions|
+        [
+          {
+            name: "document_id",
+            label: "Enter document id (or template id) to use as template for mapping the pricing table fields",
+            hint: "You must use the same pricing table structure in all documents using this workflow.",
+            optional: false
+          },
+          {
+            name: "id",
+            label: "Enter the document id from previous step or trigger to use in future workflow jobs",
+            hint: "A Document id from previous step",
+            optional: false
+          }
+        ]
+      },
+      output_fields: lambda { |object_definitions|
+        object_definitions["pricing_tables"]
+      },
+      execute: lambda { |_connection, input|
+        get("documents/#{input["id"]}/pricing-tables")
+      },
+      sample_output: lambda { |_connection, input|
+        latest = get("documents/latest")
+        get("documents/#{input["document_id"] ? input["document_id"] : latest["id"]}/pricing-tables")
+      },
+    },
+
     download_document: {
       title: "Download document",
       subtitle: "Get the binary file or a download url for a PDF version of a signed document",
@@ -1178,7 +1435,7 @@
         get("users/me")
       end,
     },
-    
+
     get_user_statistics: {
       title: "Get user statistics",
       subtitle: "Show statistics for specific user",
@@ -1248,7 +1505,7 @@
         post("contacts", input)
       },
     },
-    
+
     list_contacts: {
       title: "List contacts",
       subtitle: "Show a list of available contacts",
@@ -1309,7 +1566,7 @@
           optional: false,
           control_type: "select",
           pick_list: %w[get post put patch options delete]
-            .map { |verb| [verb.upcase, verb] },
+                       .map { |verb| [verb.upcase, verb] },
         },
       ],
 
@@ -1327,52 +1584,52 @@
         if input["request_type"] == "multipart"
           data = data.each_with_object({}) do |(key, val), hash|
             hash[key] = if val.is_a?(Hash)
-                [val[:file_content],
-                 val[:content_type],
-                 val[:original_filename]]
-              else
-                val
-              end
+                          [val[:file_content],
+                           val[:content_type],
+                           val[:original_filename]]
+                        else
+                          val
+                        end
           end
         end
         request_headers = input["request_headers"]
-          &.each_with_object({}) do |item, hash|
+                            &.each_with_object({}) do |item, hash|
           hash[item["key"]] = item["value"]
         end || {}
         request = case verb
-        when "get"
-          get(path, data)
-        when "post"
-          if input["request_type"] == "raw"
-            post(path).request_body(data)
-          else
-            post(path, data)
-          end
-        when "put"
-          if input["request_type"] == "raw"
-            put(path).request_body(data)
-          else
-            put(path, data)
-          end
-        when "patch"
-          if input["request_type"] == "raw"
-            patch(path).request_body(data)
-          else
-            patch(path, data)
-          end
-        when "options"
-          options(path, data)
-        when "delete"
-          delete(path, data)
-        end.headers(request_headers)
+                  when "get"
+                    get(path, data)
+                  when "post"
+                    if input["request_type"] == "raw"
+                      post(path).request_body(data)
+                    else
+                      post(path, data)
+                    end
+                  when "put"
+                    if input["request_type"] == "raw"
+                      put(path).request_body(data)
+                    else
+                      put(path, data)
+                    end
+                  when "patch"
+                    if input["request_type"] == "raw"
+                      patch(path).request_body(data)
+                    else
+                      patch(path, data)
+                    end
+                  when "options"
+                    options(path, data)
+                  when "delete"
+                    delete(path, data)
+                  end.headers(request_headers)
         request = case input["request_type"]
-          when "url_encoded_form"
-            request.request_format_www_form_urlencoded
-          when "multipart"
-            request.request_format_multipart_form
-          else
-            request
-          end
+                  when "url_encoded_form"
+                    request.request_format_www_form_urlencoded
+                  when "multipart"
+                    request.request_format_multipart_form
+                  else
+                    request
+                  end
         response =
           if input["response_type"] == "raw"
             request.response_format_raw
@@ -1381,7 +1638,7 @@
           end
             .after_error_response(/.*/) do |code, body, headers, message|
             error({ code: code, message: message, body: body, headers: headers }
-              .to_json)
+                    .to_json)
           end
 
         response.after_response do |_code, res_body, res_headers|
@@ -1396,6 +1653,71 @@
         object_definition["custom_action_output"]
       end,
     },
+    get_document_pricing_table_details: {
+      title: "Get document pricing table details",
+      subtitle: "Show specific pricing table with details for a specific document",
+      description: "Get <span class='provider'>pricing table details</span> for a <span class='provider'>document</span> in <span class='provider'>GetAccept</span>",
+      config_fields:
+        [
+          {
+            name: "document_id",
+            label: "Enter document id (or template id) to use as template for mapping the pricing table fields",
+            hint: "You must use the same pricing table structure in all documents using this workflow.",
+            optional: false
+          },
+          {
+            name: "id",
+            label: "Enter the document id from previous step or trigger to use in future workflow jobs",
+            hint: "A Document id from previous step",
+            optional: false
+          }
+        ],
+      input_fields: lambda do |object_definition|
+        object_definition["custom_pricing_table_input"]
+      end,
+      
+      execute: lambda do |_conn, input|
+        row_vals = {}
+        if input["id"].present?
+          if input["row_number"].present?
+            section = get("documents/#{input["id"]}/pricing-tables").
+              dig('pricing_tables', input["table_id"].to_i, 'sections', input["section_id"] ? input["section_id"].to_i-1 : 0)
+            if section.present?
+              columns = section.dig('columns')
+              section.dig('rows', input["row_number"].to_i-1, 'values').each do |c|
+                col_hash = columns.find { |h| h.dig("column_id") == c.dig('column_id') }
+                col_name = col_hash ? col_hash.dig("name") : ""
+                col_name = col_name.gsub(/\W/) { |spl_chr| "__#{spl_chr.encode_hex}__" }
+                row_vals[col_name] ||= []
+                row_vals[col_name] = c.dig('value')
+              end
+            else
+              error("Invalid pricing group #{input["section_id"]}")
+            end
+          else
+            section = get("documents/#{input["id"]}/pricing-tables").
+              dig('pricing_tables', input["table_id"].to_i, 'sections', input["section_id"] ? input["section_id"].to_i-1 : 0)
+              columns = section.dig('columns')
+              section.dig('rows').each_with_index do |r,i|
+                r.dig('values').each do |c|
+                  col_hash = columns.find { |h| h.dig("column_id") == c.dig('column_id') }
+                  col_name = col_hash ? col_hash.dig("name") : ""
+                  col_name = col_name.gsub(/\W/) { |spl_chr| "__#{spl_chr.encode_hex}__" }
+                  row_vals[col_name] ||= []
+                  row_vals[col_name] << c.dig('value')
+                end
+              end
+          end
+      end
+        {
+          'table' => row_vals,
+        }
+      end,
+
+      output_fields: lambda do |object_definitions|
+        object_definitions["get_document_pricing_table_details_output"]
+      end
+    }
   },
 
   triggers: {
@@ -1553,6 +1875,7 @@
       end
       folders
     end,
+    
     document_list: lambda do |_connection|
       [["- No document selected -", ""]] + get("documents").pluck("name", "id")
     end,
@@ -1705,11 +2028,11 @@
         if (name = field[:name])
           field[:label] = field[:label].presence || name.labelize
           field[:name] = name
-            .gsub(/\W/) { |spl_chr| "__#{spl_chr.encode_hex}__" }
+                           .gsub(/\W/) { |spl_chr| "__#{spl_chr.encode_hex}__" }
         elsif (name = field["name"])
           field["label"] = field["label"].presence || name.labelize
           field["name"] = name
-            .gsub(/\W/) { |spl_chr| "__#{spl_chr.encode_hex}__" }
+                            .gsub(/\W/) { |spl_chr| "__#{spl_chr.encode_hex}__" }
         end
 
         field
@@ -1743,17 +2066,74 @@
       end
       input
     end,
-    pricing_column_conversion: lambda do |input|
-      if input.is_a?(Array)
-      input[0]
+    format_custom_pricing_tables: lambda do |input|
+      if input["custom_pricing_tables"].present?
+        remapped_tables = []        
+        input["custom_pricing_tables"].each do |key,table| 
+          if key.include? "table"
+              table["sections"] = []
+              table.each do |skey,section|
+                  if skey.include? "section-"
+                      if section["rows"].present?
+                          section["rows"].each do |row|
+                              values = []
+                              next if row.nil? || row.empty?
+                              row.each do |column_id,value|
+                                  values << {
+                                    "column_id" => column_id,
+                                    "value" => value.gsub(/\bempty\b/, "")
+                                  }
+                                  row.delete(column_id)
+                              end
+                              row["values"] = values
+                              row["tax_flat_fee"] = true
+                              row["external_id"] = ""
+                              row["discount_flat_fee"] = false
+                            end
+                      else
+                        section["rows"] = []
+                      end
+                      
+                  table["sections"] << section
+                  table.delete(skey)
+                  end
+              end
+          end
+          if !table["display_name"].present?
+            table["display_name"] = null
+          end
+          remapped_tables << table
+        end     
+        input["custom_pricing_tables"] = remapped_tables
+      end
+      input
+    end,
+    column_value_conversion: lambda do |val|
+      if val.is_a?(Array)
+        # Hash[val.map { |h| [h[:column_id], h[:value]] }]
+        val.map do |key, value|
+          { key: key, value: value }
+        end
       else
-        input.map do |key, value|
-          {
-            "column_id" => key,
+        val
+      end
+    end,
+    key_value_conversion: lambda do |val|
+      # val in this case is the entire "data" object
+      val.map do |key, value|
+        {
+          key => {
             "value" => value
           }
-        end
+        }
+      end.inject(:merge)
+    end,
+    must_include_field: lambda do |val|
+      if val.nil? || val.empty?
+        ""
+      else
+        val.strip
       end
-    end,  
+    end
   },
 }
