@@ -95,6 +95,83 @@ paths:
       operationId: RefreshToken
       description: You can request a refreshed of the access token before the original token has expired.
       x-ms-visibility: internal
+  '/refresh/{entityId}':
+    get:
+      summary: Switch entity
+      tags:
+        - Authentication
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    description: New access token for the entity
+                  expires_in:
+                    type: integer
+                    format: int64
+      operationId: SwitchEntity
+      description: 'Change entity using the same refresh method with additional parameter for the entity. The response will include a new access token that should be used when accessing the new entity.'
+      parameters:
+        - in: path
+          name: entityId
+          required: true
+          schema:
+            type: string
+          description: Entity ID to switch to
+          x-ms-summary: Entity ID
+      x-ms-visibility: internal
+  /revoke:
+    get:
+      summary: Revoke access token
+      tags:
+        - Authentication
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: RevokeToken
+      description: Revoke an access token before it has expired.
+      x-ms-visibility: internal
+  /test:
+    get:
+      summary: Test authentication
+      tags:
+        - Authentication
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: TestAuthentication
+      description: Test authentication and get current entity and user ID.
+  /notifications:
+    get:
+      summary: List notifications
+      tags:
+        - Others
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: ListNotifications
+      description: List notification for current user
   /documents:
     get:
       summary: List documents
@@ -921,62 +998,27 @@ paths:
                   note: Just a random contact
                   company_name: Doe Inc.
                   company_number: '5678901'
-  '/users/{userId}':
-    get:
-      summary: Get user details
+  '/contacts/{contactId}':
+    delete:
+      summary: Delete contact
       tags:
-        - Users
+        - Contacts
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-              examples:
-                Example:
-                  value:
-                    user:
-                      id: abc456de
-                      first_name: John
-                      last_name: Doe
-                      email: john.doe@company.com
-                      phone: ''
-                      mobile: ''
-                      title: ''
-                      note: ''
-                      thumb_url: ''
-                      entity_id: def345ab
-                      entity_name: Demo Company Inc
-                      language: en
-                      timezone: '+01:00'
-                      app_mode: sales
-                      role: user
-                      disallow_create: false
-                      status: active
-                      team_id: ''
+        '204':
+          description: No Content
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-      operationId: GetUserDetails
-      description: |-
-        This call will return details of a single user.
-        Receive details and available entities of the current authenticated user using user-id *me*
+      operationId: DeleteContact
+      description: Delete a contact. Contacts who are connected to active or signed documents cannot be deleted.
       parameters:
-        - schema:
+        - in: path
+          schema:
             type: string
-          name: userId
-          description: User ID
-          x-ms-summary: User ID
-          x-ms-url-encoding: single
-          in: path
+          name: contactId
+          description: Contact ID
           required: true
-          x-ms-dynamic-values:
-            operationId: ListUsers
-            value-path: user_id
-            value-collection: users
-            value-title: name
   /templates:
     get:
       summary: List templates
@@ -1085,10 +1127,84 @@ paths:
                           type: boolean
                         editable:
                           type: boolean
+                        created_at:
+                          type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
       operationId: ListVideos
       description: Receive a list of available videos on the entity. You can add new videos in the mobile app or inside GetAccept.
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+          description: Start list from record x
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Number of records to list
+        - in: query
+          name: include_video_url
+          schema:
+            type: boolean
+          description: Include presigned url for video
+        - in: query
+          name: include_thumb_url
+          schema:
+            type: boolean
+          description: Include url for thumbnail
+  '/videos/{videoId}':
+    get:
+      summary: Get video
+      tags:
+        - Videos
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Video'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetVideo
+      description: Get a specific video based on video id.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: videoId
+          description: Video ID
+          required: true
+  '/video/job/{videoId}':
+    get:
+      summary: Get video job status
+      tags:
+        - Videos
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoJobStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetVideoJobStatus
+      description: Get current processing status of an uploaded video.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: videoId
+          description: Video ID
+          required: true
   '/documents/{documentId}':
     get:
       summary: Get document details
@@ -1122,6 +1238,87 @@ paths:
             operationId: ListDocuments
             value-path: id
             value-title: name
+        - in: query
+          name: with_attachments
+          schema:
+            type: boolean
+          description: Include document attachments
+        - in: query
+          name: with_pages
+          schema:
+            type: boolean
+          description: Include document pages
+        - in: query
+          name: with_stats
+          schema:
+            type: boolean
+          description: Include document statistics
+    put:
+      summary: Update document
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: UpdateDocument
+      description: Update different document properties during the lifecycle of the document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                external_id:
+                  type: string
+                  description: Change external ID of the document
+                external_client_id:
+                  type: string
+                  description: Creation source of the document
+                contract_start_date:
+                  type: string
+                  description: Start date of contract for contract management
+                contract_end_date:
+                  type: string
+                  description: End date of contract for contract management
+                tags:
+                  type: string
+                  description: Document tags (comma separated without space)
+                value:
+                  type: number
+                  description: Update the value parameter of the Document
+    delete:
+      summary: Delete document
+      tags:
+        - Documents
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: DeleteDocument
+      description: Delete a single document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
   '/documents/{documentId}/attachments':
     get:
       summary: Get document attachments
@@ -1456,6 +1653,865 @@ paths:
             operationId: ListDocuments
             value-path: id
             value-title: name
+        - in: query
+          name: resolveEditorFields
+          schema:
+            type: boolean
+          description: Resolve editor fields to their values
+          x-ms-summary: Resolve editor fields
+    put:
+      summary: Update document fields
+      tags:
+        - Documents
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: UpdateDocumentFields
+      description: Update fields in a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          x-ms-summary: Document ID
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                editor_fields:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Field ID
+                      name:
+                        type: string
+                        description: Field name
+                      value:
+                        type: string
+                        description: New field value
+    post:
+      summary: Create a field
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldResponse'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: CreateField
+      description: Creates a new field in a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page_id:
+                  type: string
+                  description: Unique page id
+                page_num:
+                  type: integer
+                  description: Actual page number in document (1-x)
+                field_type:
+                  type: string
+                  description: 'The type of field: text, merge, check, signature, initials, formatted'
+                field_top:
+                  type: number
+                  description: Top position of field relative to document (in points)
+                field_left:
+                  type: number
+                  description: Left position of field relative to document (in points)
+                field_width:
+                  type: number
+                  description: Width of field in points
+                field_height:
+                  type: number
+                  description: Height of field in points
+                field_label:
+                  type: string
+                  description: Label to place next to the field
+                field_value:
+                  type: string
+                  description: Pre-defined/Filled value
+                is_collectable:
+                  type: boolean
+                  description: If the field is to be filled out by sender/recipient
+                is_editable:
+                  type: boolean
+                  description: If the field can be edited by the sender
+                is_required:
+                  type: boolean
+                  description: If the field is required to be filled out
+                recipient_id:
+                  type: string
+                  description: Unique ID of the recipient to fill out this field
+              required:
+                - field_type
+                - field_top
+                - field_left
+                - field_width
+                - field_height
+  '/documents/{documentId}/status':
+    get:
+      summary: Get document status
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetDocumentStatus
+      description: Get the current status of a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          x-ms-summary: Document ID
+          required: true
+  '/documents/{documentId}/comments':
+    get:
+      summary: Get comments
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetComments
+      description: Get a list of chat comments for a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          x-ms-summary: Document ID
+          required: true
+    post:
+      summary: Create comment
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentResponse'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: CreateComment
+      description: Creates a new comment in a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  description: The comment text to be added to the document
+                position:
+                  type: string
+                  description: 'A json-string of the page and x-y-position coordinates where the comment should be placed. Example: { page: ''a8bafd97'', top: 230, left: 19 }'
+              required:
+                - text
+  '/documents/{documentId}/pages':
+    get:
+      summary: Get pages
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Page'
+                  page_count:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetPages
+      description: Get a list of pages for a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+  '/documents/{documentId}/events':
+    get:
+      summary: Get events
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetEvents
+      description: Get a list of document events for a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+  '/documents/{documentId}/log':
+    get:
+      summary: Get detailed log
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LogEntry'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetDetailedLog
+      description: Get a detailed log of events for a specific document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+  '/documents/{documentId}/preview':
+    post:
+      summary: Get document preview
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewResponse'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetDocumentPreview
+      description: Generates a preview of an existing document or template.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                type:
+                  type: string
+                value:
+                  type: number
+                external_id:
+                  type: string
+                recipients:
+                  type: array
+                  items:
+                    type: object
+                template_id:
+                  type: string
+                custom_fields:
+                  type: array
+                  items:
+                    type: object
+  '/documents/{documentId}/forward':
+    post:
+      summary: Forward document
+      tags:
+        - Documents
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: ForwardDocument
+      description: Forward a document to a new recipient.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                  description: First name of the new recipient
+                last_name:
+                  type: string
+                  description: Last name of the new recipient
+                email:
+                  type: string
+                  description: Email of the new recipient
+                mobile:
+                  type: string
+                  description: Mobile number of the new recipient
+                title:
+                  type: string
+                  description: Title of the recipient
+                company_name:
+                  type: string
+                  description: Name of the company
+                company_number:
+                  type: string
+                  description: Associated company number
+                transfer:
+                  type: boolean
+                  description: Transfer signature rights to forwarded recipient
+                recipient_id:
+                  type: string
+                  description: Only when transfer signature rights
+              required:
+                - first_name
+                - last_name
+                - email
+  '/documents/{documentId}/reminders':
+    post:
+      summary: Send reminder
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: SendReminder
+      description: Send a manual reminder for a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: 'Type of reminder to send: email, sms, video'
+                  enum:
+                    - email
+                    - sms
+                    - video
+                text:
+                  type: string
+                  description: The text content of the reminder
+                not_opened:
+                  type: boolean
+                  description: Send if recipients haven't opened the document
+                not_signed:
+                  type: boolean
+                  description: Send if recipients haven't signed the document
+                video_id:
+                  type: string
+                  description: Only when using video reminders
+              required:
+                - type
+                - text
+  '/documents/{documentId}/revisions':
+    post:
+      summary: Create revision
+      tags:
+        - Documents
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: CreateRevision
+      description: Create a new document revision.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Revision message
+                  default: ''
+                send_document:
+                  type: boolean
+                  description: Determine if the document should be sent to recipients
+                  default: false
+  '/documents/{documentId}/pricing-tables':
+    get:
+      summary: Get document pricing tables
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingTables'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetDocumentPricingTables
+      description: Get all pricing tables for a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+    put:
+      summary: Update document pricing tables
+      tags:
+        - Documents
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: UpdateDocumentPricingTables
+      description: Update pricing tables in a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pricing_tables:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PricingTable'
+  '/documents/{documentId}/recipients/{recipientId}':
+    delete:
+      summary: Recall signer
+      tags:
+        - Documents
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: RecallSigner
+      description: Recall a signer for a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+        - in: path
+          schema:
+            type: string
+          name: recipientId
+          description: Recipient ID
+          required: true
+  '/documents/{documentId}/custom-data':
+    get:
+      summary: Get document custom data properties
+      tags:
+        - 'Custom Data'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  custom_data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CustomDataProperty'
+                  total_count:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetDocumentCustomData
+      description: Get all custom data properties for a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+          description: Number of records to list
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+          description: Start list from record x
+    post:
+      summary: Add document custom data property
+      tags:
+        - 'Custom Data'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDataProperty'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: AddDocumentCustomDataProperty
+      description: Add a custom data property to a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                property:
+                  type: object
+                  properties:
+                    key:
+                      type: string
+                      description: Key of the custom data property
+                    value:
+                      type: string
+                      description: Value for the custom data property
+                    label:
+                      type: string
+                      description: Human-readable label
+                    value_type:
+                      type: string
+                      description: 'Type of value: string, number, boolean'
+                  required:
+                    - key
+                    - value
+                    - label
+                    - value_type
+              required:
+                - property
+  '/documents/{documentId}/custom-data/{customDataId}':
+    get:
+      summary: Get document custom data property
+      tags:
+        - 'Custom Data'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDataProperty'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetDocumentCustomDataProperty
+      description: Get a specific custom data property for a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+        - in: path
+          schema:
+            type: string
+          name: customDataId
+          description: Custom Data ID
+          required: true
+    put:
+      summary: Update document custom data property
+      tags:
+        - 'Custom Data'
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: UpdateDocumentCustomDataProperty
+      description: Update a custom data property for a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+        - in: path
+          schema:
+            type: string
+          name: customDataId
+          description: Custom Data ID
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                property:
+                  type: object
+                  properties:
+                    value:
+                      type: string
+                    label:
+                      type: string
+                    value_type:
+                      type: string
+    delete:
+      summary: Delete document custom data property
+      tags:
+        - 'Custom Data'
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: DeleteDocumentCustomDataProperty
+      description: Delete a custom data property from a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+        - in: path
+          schema:
+            type: string
+          name: customDataId
+          description: Custom Data ID
+          required: true
+  '/documents/external/{externalId}':
+    get:
+      summary: Get document by external ID
+      tags:
+        - Documents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetDocumentByExternalId
+      description: Get a document by the external id specified when document was created.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: externalId
+          description: External ID
+          required: true
+  '/documents/{documentId}/attachments/{documentAttachmentId}/upload':
+    post:
+      summary: Upload file to document attachment
+      tags:
+        - Documents
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: UploadFileToDocumentAttachment
+      description: Uploads a file for a specific attachment on a document.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: documentId
+          description: Document ID
+          required: true
+        - in: path
+          schema:
+            type: string
+          name: documentAttachmentId
+          description: Document Attachment ID
+          required: true
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
   '/templates/{templateId}/roles':
     get:
       summary: Get template roles
@@ -1572,6 +2628,775 @@ paths:
             value-path: id
             value-collection: templates
             value-title: name
+  '/templates/{templateId}/fields_roles':
+    get:
+      summary: Get template field roles
+      tags:
+        - Templates
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fields:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field_id:
+                          type: string
+                        role_name:
+                          type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: ListTemplateFieldRoles
+      description: Receive a list of fields and associated role for a specific template.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: templateId
+          description: Template ID
+          required: true
+  '/templates/{templateId}/custom-images':
+    get:
+      summary: Get template custom images
+      tags:
+        - Templates
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  custom_images:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: Name of the custom image
+                        id:
+                          type: string
+                          description: ID of the custom image
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetTemplateCustomImages
+      description: Get a list of custom images on a template.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: templateId
+          description: Template ID
+          required: true
+  /folders:
+    get:
+      summary: List folders
+      tags:
+        - Others
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  folders:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Folder'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: ListFolders
+      description: List and get details of existing folders in GetAccept.
+      parameters:
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum:
+              - archive
+              - template
+          description: 'Show folders of a specific type: archive or template'
+  '/folders/{folderId}':
+    get:
+      summary: Get folder details
+      tags:
+        - Others
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  folder:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      type:
+                        type: string
+                  subfolders:
+                    type: array
+                    items:
+                      type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetFolderDetails
+      description: Get subfolder and current path for a specific folder.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: folderId
+          description: Folder ID
+          required: true
+  /teams:
+    get:
+      summary: List teams
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  teams:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Team'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: ListTeams
+      description: List of current teams for the entity.
+  '/users/{userId}/statistics':
+    get:
+      summary: Get user statistics
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statistics:
+                    type: object
+                  daterange:
+                    type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetUserStatistics
+      description: Get statistics for a single user.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: userId
+          description: User ID
+          required: true
+  '/users/{userId}':
+    get:
+      summary: Get user details
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                Example:
+                  value:
+                    user:
+                      id: abc456de
+                      first_name: John
+                      last_name: Doe
+                      email: john.doe@company.com
+                      phone: ''
+                      mobile: ''
+                      title: ''
+                      note: ''
+                      thumb_url: ''
+                      entity_id: def345ab
+                      entity_name: Demo Company Inc
+                      language: en
+                      timezone: '+01:00'
+                      app_mode: sales
+                      role: user
+                      disallow_create: false
+                      status: active
+                      team_id: ''
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetUserDetails
+      description: |-
+        This call will return details of a single user.
+        Receive details and available entities of the current authenticated user using user-id *me*
+      parameters:
+        - schema:
+            type: string
+          name: userId
+          description: User ID
+          x-ms-summary: User ID
+          x-ms-url-encoding: single
+          in: path
+          required: true
+          x-ms-dynamic-values:
+            operationId: ListUsers
+            value-path: user_id
+            value-collection: users
+            value-title: name
+    delete:
+      summary: Delete user
+      tags:
+        - Users
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: DeleteUser
+      description: Delete a user.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: userId
+          description: User ID
+          required: true
+  /email/templates:
+    get:
+      summary: List email templates
+      tags:
+        - Templates
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      type:
+                        type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: ListEmailTemplates
+      description: Get a list of email templates on the entity.
+    post:
+      summary: Create email template
+      tags:
+        - Templates
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailTemplate'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: CreateEmailTemplate
+      description: Create a new email template.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Template name
+                code:
+                  type: string
+                  description: Template HTML code
+              required:
+                - name
+                - code
+  '/email/templates/{emailTemplateId}':
+    get:
+      summary: Get email template details
+      tags:
+        - Templates
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailTemplate'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetEmailTemplateDetails
+      description: Get detailed information about an email template.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: emailTemplateId
+          description: Email Template ID
+          required: true
+    put:
+      summary: Update email template
+      tags:
+        - Templates
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: UpdateEmailTemplate
+      description: Update an existing email template.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: emailTemplateId
+          description: Email Template ID
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Template name
+                code:
+                  type: string
+                  description: Template HTML code
+  /communication-templates:
+    get:
+      summary: Get communication templates
+      tags:
+        - 'Communication Templates'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  communication_templates:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CommunicationTemplate'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: GetCommunicationTemplates
+      description: Receive a list of available communication templates.
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+          description: Start list from record x
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+          description: Number of records to list
+        - in: query
+          name: statuses
+          schema:
+            type: string
+            enum:
+              - published
+              - draft
+          description: Filter list on status
+    post:
+      summary: Create communication template
+      tags:
+        - 'Communication Templates'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunicationTemplate'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: CreateCommunicationTemplate
+      description: Create a communication template.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Communication template name
+                language:
+                  type: string
+                  description: One language code in ISO 639 form
+                email_sendout_reminder_template:
+                  type: object
+                email_sendout_template:
+                  type: object
+                signed_sendout_template:
+                  type: object
+                conversation_sendout_template:
+                  type: object
+                status:
+                  type: string
+                  enum:
+                    - published
+                    - draft
+                tags:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - name
+                - language
+  '/communication-templates/{communicationTemplateId}':
+    get:
+      summary: Get communication template
+      tags:
+        - 'Communication Templates'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunicationTemplate'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: GetCommunicationTemplate
+      description: Receive a specific communication template.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: communicationTemplateId
+          description: Communication Template ID
+          required: true
+    put:
+      summary: Update communication template
+      tags:
+        - 'Communication Templates'
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: UpdateCommunicationTemplate
+      description: Updates a specific communication template.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: communicationTemplateId
+          description: Communication Template ID
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                language:
+                  type: string
+                email_sendout_reminder_template:
+                  type: object
+                email_sendout_template:
+                  type: object
+                signed_sendout_template:
+                  type: object
+                conversation_sendout_template:
+                  type: object
+                status:
+                  type: string
+                  enum:
+                    - published
+                    - draft
+                tags:
+                  type: array
+                  items:
+                    type: string
+  /custom-data/entity:
+    get:
+      summary: Get entity custom data properties
+      tags:
+        - 'Custom Data'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityCustomData'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: GetEntityCustomData
+      description: Get the custom data settings for the current entity.
+    post:
+      summary: Add entity custom data property
+      tags:
+        - 'Custom Data'
+      responses:
+        '200':
+          description: OK
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: AddEntityCustomDataProperty
+      description: Add a new custom data property to the current entity.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  description: Unique key for the custom data property
+                value_type:
+                  type: string
+                  description: 'Type of value: string, number, boolean'
+                  enum:
+                    - string
+                    - number
+                    - boolean
+                label:
+                  type: string
+                  description: Human-readable label
+              required:
+                - key
+                - value_type
+                - label
+  '/custom-data/entity/{propertyKey}':
+    delete:
+      summary: Delete entity custom data property
+      tags:
+        - 'Custom Data'
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      operationId: DeleteEntityCustomDataProperty
+      description: Delete a custom data property from the current entity.
+      parameters:
+        - in: path
+          schema:
+            type: string
+          name: propertyKey
+          description: Property Key
+          required: true
+  /upload/archive:
+    post:
+      summary: Upload to archive
+      tags:
+        - Archive
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: UploadToArchive
+      description: Upload already signed files to the document archive / contract management.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file_name:
+                  type: string
+                  description: Filename of the archived document
+                file_content:
+                  type: string
+                  description: Base64 encoded file content
+                file_ids:
+                  type: string
+                  description: Previously uploaded file IDs
+                file_url:
+                  type: string
+                  description: URL to file
+                name:
+                  type: string
+                  description: Name of the document
+                type:
+                  type: string
+                  description: 'Type of document: sales, hr, introduction, other'
+                value:
+                  type: number
+                  description: Monetary value of document
+                tags:
+                  type: string
+                  description: Document tags
+                sign_date:
+                  type: string
+                  description: Date and time when the document was signed
+                contract_start_date:
+                  type: string
+                  description: Start date of contract
+                contract_end_date:
+                  type: string
+                  description: End date of contract
+                company_name:
+                  type: string
+                  description: Associated company
+                company_number:
+                  type: string
+                  description: Associated company number
+                sender_id:
+                  type: string
+                  description: Sender user/owner ID
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+  /subscriptions/test:
+    post:
+      summary: Test subscription
+      tags:
+        - Subscriptions
+      responses:
+        '200':
+          description: OK
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: TestSubscription
+      description: Simulate or test a subscription / webhook event.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event:
+                  type: string
+                  description: The event to trigger
+                document_id:
+                  type: string
+                  description: The document id to trigger the event for
+                recipient_id:
+                  type: string
+                  description: The recipient to trigger the event for
+              required:
+                - event
+                - document_id
+  /subscriptions/errors:
+    get:
+      summary: Get subscription errors
+      tags:
+        - Subscriptions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    event:
+                      type: string
+                    status:
+                      type: string
+                    target_url:
+                      type: string
+                    result:
+                      type: string
+                    retry:
+                      type: string
+                    payload:
+                      type: string
+                    created_at:
+                      type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      operationId: GetSubscriptionErrors
+      description: Get the last errors for active subscriptions.
   /subscriptions:
     post:
       summary: Subscribe to document events
@@ -2006,6 +3831,62 @@ paths:
       description: |-
         Receive a list of available contact for the current entity.
         All contacts added as a recipient are saved as a contact and is available for later use on that entity.
+      parameters:
+        - in: query
+          name: filter
+          schema:
+            type: string
+            enum:
+              - active
+              - inactive
+              - signed
+          description: Filter list on status
+        - in: query
+          name: sort_by
+          schema:
+            type: string
+            enum:
+              - name
+              - email
+              - company_name
+              - document_count
+              - created
+          description: How to sort results
+        - in: query
+          name: sort_order
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+          description: Sort order of results
+        - in: query
+          name: showteam
+          schema:
+            type: boolean
+          description: Include documents from team members
+        - in: query
+          name: showall
+          schema:
+            type: boolean
+          description: Include all contacts from entity
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+          description: Start list from record x
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 100
+          description: Number of records to list
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search string to match first_name, last_name or email
     post:
       summary: Create contact
       tags:
@@ -3318,6 +5199,398 @@ components:
         event_type:
           type: string
           x-ms-summary: Event type
+    CommunicationTemplate:
+      title: Communication Template
+      type: object
+      description: Communication template details
+      properties:
+        id:
+          type: string
+          description: Communication template ID
+        entity_id:
+          type: string
+          description: Entity ID
+        name:
+          type: string
+          description: Template name
+        language:
+          type: string
+          description: Language code in ISO 639 form
+        email_sendout_reminder_template:
+          type: object
+          properties:
+            email_subject:
+              type: string
+            message:
+              type: string
+            footer:
+              type: string
+            sms_message:
+              type: string
+            automatic_message:
+              type: boolean
+            button_text:
+              type: string
+        email_sendout_template:
+          type: object
+          properties:
+            email_subject:
+              type: string
+            message:
+              type: string
+            footer:
+              type: string
+            sms_message:
+              type: string
+            automatic_message:
+              type: boolean
+            button_text:
+              type: string
+        signed_sendout_template:
+          type: object
+          properties:
+            email_subject:
+              type: string
+            message:
+              type: string
+            footer:
+              type: string
+            button_text:
+              type: string
+        conversation_sendout_template:
+          type: object
+          properties:
+            conversation_starter:
+              type: string
+            automatic_message:
+              type: boolean
+            reminder_message:
+              type: string
+            automatic_reminder_message:
+              type: boolean
+        created_by:
+          type: string
+        updated_by:
+          type: string
+        updated_at:
+          type: string
+        created_at:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum:
+            - published
+            - draft
+        type:
+          type: string
+    EmailTemplate:
+      title: Email Template
+      type: object
+      description: Email template details
+      properties:
+        id:
+          type: string
+          description: Template ID
+        name:
+          type: string
+          description: Template name
+        code:
+          type: string
+          description: Template HTML code
+        entity_id:
+          type: string
+          description: Entity ID
+    Folder:
+      title: Folder
+      type: object
+      description: Folder details
+      properties:
+        id:
+          type: string
+          description: Folder ID
+        type:
+          type: string
+          description: 'Folder type: archive or template'
+          enum:
+            - archive
+            - template
+        name:
+          type: string
+          description: Folder name
+    Team:
+      title: Team
+      type: object
+      description: Team details
+      properties:
+        team_id:
+          type: string
+          description: Team ID
+        name:
+          type: string
+          description: Team name
+        status:
+          type: string
+          description: Team status
+        team_user_count:
+          type: integer
+          description: Number of users in team
+    Video:
+      title: Video
+      type: object
+      description: Video details
+      properties:
+        video_id:
+          type: string
+          description: Video ID
+        video_type:
+          type: string
+          description: Video type
+        video_title:
+          type: string
+          description: Video title
+        video_url:
+          type: string
+          description: Video URL
+        thumb_url:
+          type: string
+          description: Thumbnail URL
+        saved:
+          type: boolean
+          description: If video is saved
+        published:
+          type: boolean
+          description: If video is published
+        editable:
+          type: boolean
+          description: If video is editable
+        created_at:
+          type: string
+          description: Creation date
+    VideoJobStatus:
+      title: Video Job Status
+      type: object
+      description: Video processing job status
+      properties:
+        Status:
+          type: string
+          description: Current processing status
+        video_url:
+          type: string
+          description: URL to processed video
+        thumb_url:
+          type: string
+          description: URL to video thumbnail
+    CustomDataProperty:
+      title: Custom Data Property
+      type: object
+      description: Custom data property details
+      properties:
+        id:
+          type: string
+          description: Property ID
+        document_id:
+          type: string
+          description: Document ID
+        property:
+          type: object
+          properties:
+            key:
+              type: string
+              description: Property key
+            label:
+              type: string
+              description: Human-readable label
+            value:
+              type: string
+              description: Property value
+            value_type:
+              type: string
+              description: 'Value type: string, number, boolean'
+    EntityCustomData:
+      title: Entity Custom Data
+      type: object
+      description: Entity custom data settings
+      properties:
+        entity_id:
+          type: string
+          description: Entity ID
+        allowed_properties:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+                description: Property key
+              value_type:
+                type: string
+                description: Value type
+              property_type:
+                type: string
+                description: Property type
+              label:
+                type: string
+                description: Property label
+    TestResponse:
+      title: Test Response
+      type: object
+      description: Authentication test response
+      properties:
+        entity_id:
+          type: string
+          description: Current entity ID
+        user_id:
+          type: string
+          description: Current user ID
+    StatusResponse:
+      title: Status Response
+      type: object
+      description: Document status response
+      properties:
+        status:
+          type: string
+          description: Current document status
+    CommentResponse:
+      title: Comment Response
+      type: object
+      description: Comment creation response
+      properties:
+        comment_id:
+          type: string
+          description: ID of the created comment
+    FieldResponse:
+      title: Field Response
+      type: object
+      description: Field creation response
+      properties:
+        field_id:
+          type: string
+          description: ID of the created field
+    PreviewResponse:
+      title: Preview Response
+      type: object
+      description: Document preview response
+      properties:
+        preview_url:
+          type: string
+          description: URL to preview PDF
+    Page:
+      title: Page
+      type: object
+      description: Document page details
+      properties:
+        page_id:
+          type: string
+        page_type:
+          type: integer
+        page_type_name:
+          type: string
+        page_width:
+          type: number
+        page_height:
+          type: number
+        page_num:
+          type: integer
+        page_time:
+          type: number
+        order_num:
+          type: integer
+        thumb_url:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        video_hash:
+          type: string
+        view_duration_seconds:
+          type: number
+        clicks:
+          type: integer
+    Event:
+      title: Event
+      type: object
+      description: Document event details
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        thumb_url:
+          type: string
+        gender:
+          type: string
+        company_name:
+          type: string
+        event_name:
+          type: string
+        document_name:
+          type: string
+        document_status:
+          type: string
+        event_meta_data:
+          type: string
+        created_at:
+          type: string
+        document_id:
+          type: string
+    LogEntry:
+      title: Log Entry
+      type: object
+      description: Detailed log entry
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        event_name:
+          type: string
+        event_meta_data:
+          type: string
+        geo_ip:
+          type: string
+        geo_city:
+          type: string
+        geo_country_name:
+          type: string
+        created_at:
+          type: string
+        document_id:
+          type: string
+    Comment:
+      title: Comment
+      type: object
+      description: Document comment
+      properties:
+        id:
+          type: string
+          description: Unique ID of the comment
+        self:
+          type: integer
+          description: If this comment is created by the current authenticated user
+        full_name:
+          type: string
+          description: Name of the person creating the comment
+        email:
+          type: string
+          description: Email of the person creating the comment
+        thumb_url:
+          type: string
+          description: Thumbnail of the person creating the comment
+        text:
+          type: string
+          description: The commented text
+        created_at:
+          type: string
+          description: The timestamp when the comment was created
   headers:
     X-Rate-Limit-Limit:
       description: The number of allowed requests in the current period
@@ -3387,6 +5660,18 @@ tags:
     description: You can upload videos and reuse it in many documents.
     externalDocs:
       url: 'https://app.getaccept.com/api/#video'
+  - name: Archive
+    description: You can upload already signed documents to the document archive to make them searchable and use in your contract management process.
+    externalDocs:
+      url: 'https://app.getaccept.com/api/#archive'
+  - name: 'Custom Data'
+    description: Custom Data enables you to define and use your own document properties as a complement to the default properties.
+    externalDocs:
+      url: 'https://app.getaccept.com/api/#custom-data'
+  - name: 'Communication Templates'
+    description: Communication templates allow you to customize email and SMS messages sent to recipients.
+    externalDocs:
+      url: 'https://app.getaccept.com/api/#communication-templates'
   - name: Others
     description: Additional endpoints used in various integrations.
 servers:
