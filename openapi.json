@@ -131,8 +131,347 @@
         "x-ms-visibility": "internal"
       }
     },
+    "/communication-templates": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Start list from record x",
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Number of records to list",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 20,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Filter list on status",
+            "in": "query",
+            "name": "statuses",
+            "schema": {
+              "enum": [
+                "published",
+                "draft"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "communication_templates": {
+                      "items": {
+                        "$ref": "#/components/schemas/CommunicationTemplate"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Communication Templates"
+        ],
+        "description": "Receive a list of available communication templates.",
+        "operationId": "GetCommunicationTemplates",
+        "summary": "Get communication templates"
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunicationTemplate"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Communication Templates"
+        ],
+        "description": "Create a communication template.",
+        "operationId": "CreateCommunicationTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "tags": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "conversation_sendout_template": {
+                    "type": "object"
+                  },
+                  "email_sendout_reminder_template": {
+                    "type": "object"
+                  },
+                  "email_sendout_template": {
+                    "type": "object"
+                  },
+                  "language": {
+                    "description": "One language code in ISO 639 form",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Communication template name",
+                    "type": "string"
+                  },
+                  "signed_sendout_template": {
+                    "type": "object"
+                  },
+                  "status": {
+                    "enum": [
+                      "published",
+                      "draft"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "language"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Create communication template"
+      }
+    },
+    "/communication-templates/{communicationTemplateId}": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Communication Template ID",
+            "in": "path",
+            "name": "communicationTemplateId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommunicationTemplate"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Communication Templates"
+        ],
+        "description": "Receive a specific communication template.",
+        "operationId": "GetCommunicationTemplate",
+        "summary": "Get communication template"
+      },
+      "put": {
+        "parameters": [
+          {
+            "description": "Communication Template ID",
+            "in": "path",
+            "name": "communicationTemplateId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Communication Templates"
+        ],
+        "description": "Updates a specific communication template.",
+        "operationId": "UpdateCommunicationTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "tags": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "conversation_sendout_template": {
+                    "type": "object"
+                  },
+                  "email_sendout_reminder_template": {
+                    "type": "object"
+                  },
+                  "email_sendout_template": {
+                    "type": "object"
+                  },
+                  "language": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "signed_sendout_template": {
+                    "type": "object"
+                  },
+                  "status": {
+                    "enum": [
+                      "published",
+                      "draft"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Update communication template"
+      }
+    },
     "/contacts": {
       "get": {
+        "parameters": [
+          {
+            "description": "Filter list on status",
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "enum": [
+                "active",
+                "inactive",
+                "signed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "How to sort results",
+            "in": "query",
+            "name": "sort_by",
+            "schema": {
+              "enum": [
+                "name",
+                "email",
+                "company_name",
+                "document_count",
+                "created"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Sort order of results",
+            "in": "query",
+            "name": "sort_order",
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Include documents from team members",
+            "in": "query",
+            "name": "showteam",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Include all contacts from entity",
+            "in": "query",
+            "name": "showall",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Start list from record x",
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Number of records to list",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Search string to match first_name, last_name or email",
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -267,6 +606,148 @@
         },
         "summary": "Create contact",
         "x-ms-visibility": "important"
+      }
+    },
+    "/contacts/{contactId}": {
+      "delete": {
+        "parameters": [
+          {
+            "description": "Contact ID",
+            "in": "path",
+            "name": "contactId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Contacts"
+        ],
+        "description": "Delete a contact. Contacts who are connected to active or signed documents cannot be deleted.",
+        "operationId": "DeleteContact",
+        "summary": "Delete contact"
+      }
+    },
+    "/custom-data/entity": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityCustomData"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Custom Data"
+        ],
+        "description": "Get the custom data settings for the current entity.",
+        "operationId": "GetEntityCustomData",
+        "summary": "Get entity custom data properties"
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Custom Data"
+        ],
+        "description": "Add a new custom data property to the current entity.",
+        "operationId": "AddEntityCustomDataProperty",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "key": {
+                    "description": "Unique key for the custom data property",
+                    "type": "string"
+                  },
+                  "label": {
+                    "description": "Human-readable label",
+                    "type": "string"
+                  },
+                  "value_type": {
+                    "description": "Type of value: string, number, boolean",
+                    "enum": [
+                      "string",
+                      "number",
+                      "boolean"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "key",
+                  "value_type",
+                  "label"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Add entity custom data property"
+      }
+    },
+    "/custom-data/entity/{propertyKey}": {
+      "delete": {
+        "parameters": [
+          {
+            "description": "Property Key",
+            "in": "path",
+            "name": "propertyKey",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Custom Data"
+        ],
+        "description": "Delete a custom data property from the current entity.",
+        "operationId": "DeleteEntityCustomDataProperty",
+        "summary": "Delete entity custom data property"
       }
     },
     "/documents": {
@@ -1217,7 +1698,76 @@
         "summary": "Create and send document or template"
       }
     },
+    "/documents/external/{externalId}": {
+      "get": {
+        "parameters": [
+          {
+            "description": "External ID",
+            "in": "path",
+            "name": "externalId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Document"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Get a document by the external id specified when document was created.",
+        "operationId": "GetDocumentByExternalId",
+        "summary": "Get document by external ID"
+      }
+    },
     "/documents/{documentId}": {
+      "delete": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Delete a single document.",
+        "operationId": "DeleteDocument",
+        "summary": "Delete document"
+      },
       "get": {
         "parameters": [
           {
@@ -1235,6 +1785,30 @@
             },
             "x-ms-summary": "Document ID",
             "x-ms-url-encoding": "single"
+          },
+          {
+            "description": "Include document attachments",
+            "in": "query",
+            "name": "with_attachments",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Include document pages",
+            "in": "query",
+            "name": "with_pages",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Include document statistics",
+            "in": "query",
+            "name": "with_stats",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -1264,6 +1838,74 @@
         "description": "Get document details by specifying a document id.",
         "operationId": "GetDocumentDetails",
         "summary": "Get document details"
+      },
+      "put": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Update different document properties during the lifecycle of the document.",
+        "operationId": "UpdateDocument",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "tags": {
+                    "description": "Document tags (comma separated without space)",
+                    "type": "string"
+                  },
+                  "contract_end_date": {
+                    "description": "End date of contract for contract management",
+                    "type": "string"
+                  },
+                  "contract_start_date": {
+                    "description": "Start date of contract for contract management",
+                    "type": "string"
+                  },
+                  "external_client_id": {
+                    "description": "Creation source of the document",
+                    "type": "string"
+                  },
+                  "external_id": {
+                    "description": "Change external ID of the document",
+                    "type": "string"
+                  },
+                  "value": {
+                    "description": "Update the value parameter of the Document",
+                    "type": "number"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "summary": "Update document"
       }
     },
     "/documents/{documentId}/attachments": {
@@ -1313,6 +1955,474 @@
         "description": "Get document attachments by specifying a document id.",
         "operationId": "GetDocumentAttachments",
         "summary": "Get document attachments"
+      }
+    },
+    "/documents/{documentId}/attachments/{documentAttachmentId}/upload": {
+      "post": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Document Attachment ID",
+            "in": "path",
+            "name": "documentAttachmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Uploads a file for a specific attachment on a document.",
+        "operationId": "UploadFileToDocumentAttachment",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Upload file to document attachment"
+      }
+    },
+    "/documents/{documentId}/comments": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-summary": "Document ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Comment"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Get a list of chat comments for a document.",
+        "operationId": "GetComments",
+        "summary": "Get comments"
+      },
+      "post": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Creates a new comment in a document.",
+        "operationId": "CreateComment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "position": {
+                    "description": "A json-string of the page and x-y-position coordinates where the comment should be placed. Example: { page: 'a8bafd97', top: 230, left: 19 }",
+                    "type": "string"
+                  },
+                  "text": {
+                    "description": "The comment text to be added to the document",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "text"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Create comment"
+      }
+    },
+    "/documents/{documentId}/custom-data": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of records to list",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 20,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Start list from record x",
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "custom_data": {
+                      "items": {
+                        "$ref": "#/components/schemas/CustomDataProperty"
+                      },
+                      "type": "array"
+                    },
+                    "total_count": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Custom Data"
+        ],
+        "description": "Get all custom data properties for a document.",
+        "operationId": "GetDocumentCustomData",
+        "summary": "Get document custom data properties"
+      },
+      "post": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomDataProperty"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Custom Data"
+        ],
+        "description": "Add a custom data property to a document.",
+        "operationId": "AddDocumentCustomDataProperty",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "property": {
+                    "properties": {
+                      "key": {
+                        "description": "Key of the custom data property",
+                        "type": "string"
+                      },
+                      "label": {
+                        "description": "Human-readable label",
+                        "type": "string"
+                      },
+                      "value": {
+                        "description": "Value for the custom data property",
+                        "type": "string"
+                      },
+                      "value_type": {
+                        "description": "Type of value: string, number, boolean",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "key",
+                      "value",
+                      "label",
+                      "value_type"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "property"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Add document custom data property"
+      }
+    },
+    "/documents/{documentId}/custom-data/{customDataId}": {
+      "delete": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Custom Data ID",
+            "in": "path",
+            "name": "customDataId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Custom Data"
+        ],
+        "description": "Delete a custom data property from a document.",
+        "operationId": "DeleteDocumentCustomDataProperty",
+        "summary": "Delete document custom data property"
+      },
+      "get": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Custom Data ID",
+            "in": "path",
+            "name": "customDataId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomDataProperty"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Custom Data"
+        ],
+        "description": "Get a specific custom data property for a document.",
+        "operationId": "GetDocumentCustomDataProperty",
+        "summary": "Get document custom data property"
+      },
+      "put": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Custom Data ID",
+            "in": "path",
+            "name": "customDataId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Custom Data"
+        ],
+        "description": "Update a custom data property for a document.",
+        "operationId": "UpdateDocumentCustomDataProperty",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "property": {
+                    "properties": {
+                      "label": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      },
+                      "value_type": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Update document custom data property"
       }
     },
     "/documents/{documentId}/download": {
@@ -1399,6 +2509,48 @@
         "operationId": "DownloadDocument",
         "summary": "Download document",
         "x-ms-visibility": "important"
+      }
+    },
+    "/documents/{documentId}/events": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Event"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Get a list of document events for a document.",
+        "operationId": "GetEvents",
+        "summary": "Get events"
       }
     },
     "/documents/{documentId}/expiration": {
@@ -1507,6 +2659,15 @@
             },
             "x-ms-summary": "Document ID",
             "x-ms-url-encoding": "single"
+          },
+          {
+            "description": "Resolve editor fields to their values",
+            "in": "query",
+            "name": "resolveEditorFields",
+            "schema": {
+              "type": "boolean"
+            },
+            "x-ms-summary": "Resolve editor fields"
           }
         ],
         "responses": {
@@ -1533,6 +2694,533 @@
         "description": "Get a list of fields for a document or template. Can be used both before and after a document has been signed.",
         "operationId": "ListDocumentFields",
         "summary": "Get document fields"
+      },
+      "post": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FieldResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Creates a new field in a document.",
+        "operationId": "CreateField",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "field_height": {
+                    "description": "Height of field in points",
+                    "type": "number"
+                  },
+                  "field_label": {
+                    "description": "Label to place next to the field",
+                    "type": "string"
+                  },
+                  "field_left": {
+                    "description": "Left position of field relative to document (in points)",
+                    "type": "number"
+                  },
+                  "field_top": {
+                    "description": "Top position of field relative to document (in points)",
+                    "type": "number"
+                  },
+                  "field_type": {
+                    "description": "The type of field: text, merge, check, signature, initials, formatted",
+                    "type": "string"
+                  },
+                  "field_value": {
+                    "description": "Pre-defined/Filled value",
+                    "type": "string"
+                  },
+                  "field_width": {
+                    "description": "Width of field in points",
+                    "type": "number"
+                  },
+                  "is_collectable": {
+                    "description": "If the field is to be filled out by sender/recipient",
+                    "type": "boolean"
+                  },
+                  "is_editable": {
+                    "description": "If the field can be edited by the sender",
+                    "type": "boolean"
+                  },
+                  "is_required": {
+                    "description": "If the field is required to be filled out",
+                    "type": "boolean"
+                  },
+                  "page_id": {
+                    "description": "Unique page id",
+                    "type": "string"
+                  },
+                  "page_num": {
+                    "description": "Actual page number in document (1-x)",
+                    "type": "integer"
+                  },
+                  "recipient_id": {
+                    "description": "Unique ID of the recipient to fill out this field",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "field_type",
+                  "field_top",
+                  "field_left",
+                  "field_width",
+                  "field_height"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Create a field"
+      },
+      "put": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-summary": "Document ID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Update fields in a document.",
+        "operationId": "UpdateDocumentFields",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "editor_fields": {
+                    "items": {
+                      "properties": {
+                        "id": {
+                          "description": "Field ID",
+                          "type": "string"
+                        },
+                        "name": {
+                          "description": "Field name",
+                          "type": "string"
+                        },
+                        "value": {
+                          "description": "New field value",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Update document fields"
+      }
+    },
+    "/documents/{documentId}/forward": {
+      "post": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Forward a document to a new recipient.",
+        "operationId": "ForwardDocument",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "company_name": {
+                    "description": "Name of the company",
+                    "type": "string"
+                  },
+                  "company_number": {
+                    "description": "Associated company number",
+                    "type": "string"
+                  },
+                  "email": {
+                    "description": "Email of the new recipient",
+                    "type": "string"
+                  },
+                  "first_name": {
+                    "description": "First name of the new recipient",
+                    "type": "string"
+                  },
+                  "last_name": {
+                    "description": "Last name of the new recipient",
+                    "type": "string"
+                  },
+                  "mobile": {
+                    "description": "Mobile number of the new recipient",
+                    "type": "string"
+                  },
+                  "recipient_id": {
+                    "description": "Only when transfer signature rights",
+                    "type": "string"
+                  },
+                  "title": {
+                    "description": "Title of the recipient",
+                    "type": "string"
+                  },
+                  "transfer": {
+                    "description": "Transfer signature rights to forwarded recipient",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "first_name",
+                  "last_name",
+                  "email"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Forward document"
+      }
+    },
+    "/documents/{documentId}/log": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LogEntry"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Get a detailed log of events for a specific document.",
+        "operationId": "GetDetailedLog",
+        "summary": "Get detailed log"
+      }
+    },
+    "/documents/{documentId}/pages": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "page_count": {
+                      "type": "integer"
+                    },
+                    "pages": {
+                      "items": {
+                        "$ref": "#/components/schemas/Page"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Get a list of pages for a document.",
+        "operationId": "GetPages",
+        "summary": "Get pages"
+      }
+    },
+    "/documents/{documentId}/preview": {
+      "post": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreviewResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Generates a preview of an existing document or template.",
+        "operationId": "GetDocumentPreview",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "custom_fields": {
+                    "items": {
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "external_id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "recipients": {
+                    "items": {
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "template_id": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "number"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "summary": "Get document preview"
+      }
+    },
+    "/documents/{documentId}/pricing-tables": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PricingTables"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Get all pricing tables for a document.",
+        "operationId": "GetDocumentPricingTables",
+        "summary": "Get document pricing tables"
+      },
+      "put": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Update pricing tables in a document.",
+        "operationId": "UpdateDocumentPricingTables",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "pricing_tables": {
+                    "items": {
+                      "$ref": "#/components/schemas/PricingTable"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Update document pricing tables"
       }
     },
     "/documents/{documentId}/recipients": {
@@ -1579,6 +3267,182 @@
         "description": "Get a list of recipients for a specific document.",
         "operationId": "ListRecipients",
         "summary": "Get document recipients"
+      }
+    },
+    "/documents/{documentId}/recipients/{recipientId}": {
+      "delete": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Recipient ID",
+            "in": "path",
+            "name": "recipientId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Recall a signer for a document.",
+        "operationId": "RecallSigner",
+        "summary": "Recall signer"
+      }
+    },
+    "/documents/{documentId}/reminders": {
+      "post": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Send a manual reminder for a document.",
+        "operationId": "SendReminder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "not_opened": {
+                    "description": "Send if recipients haven't opened the document",
+                    "type": "boolean"
+                  },
+                  "not_signed": {
+                    "description": "Send if recipients haven't signed the document",
+                    "type": "boolean"
+                  },
+                  "text": {
+                    "description": "The text content of the reminder",
+                    "type": "string"
+                  },
+                  "type": {
+                    "description": "Type of reminder to send: email, sms, video",
+                    "enum": [
+                      "email",
+                      "sms",
+                      "video"
+                    ],
+                    "type": "string"
+                  },
+                  "video_id": {
+                    "description": "Only when using video reminders",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type",
+                  "text"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Send reminder"
+      }
+    },
+    "/documents/{documentId}/revisions": {
+      "post": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Create a new document revision.",
+        "operationId": "CreateRevision",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "message": {
+                    "default": "",
+                    "description": "Revision message",
+                    "type": "string"
+                  },
+                  "send_document": {
+                    "default": false,
+                    "description": "Determine if the document should be sent to recipients",
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "summary": "Create revision"
       }
     },
     "/documents/{documentId}/seal": {
@@ -1734,6 +3598,366 @@
         "x-ms-visibility": "advanced"
       }
     },
+    "/documents/{documentId}/status": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Document ID",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-summary": "Document ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Documents"
+        ],
+        "description": "Get the current status of a document.",
+        "operationId": "GetDocumentStatus",
+        "summary": "Get document status"
+      }
+    },
+    "/email/templates": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "items": {
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Templates"
+        ],
+        "description": "Get a list of email templates on the entity.",
+        "operationId": "ListEmailTemplates",
+        "summary": "List email templates"
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailTemplate"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Templates"
+        ],
+        "description": "Create a new email template.",
+        "operationId": "CreateEmailTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "code": {
+                    "description": "Template HTML code",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Template name",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "code"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Create email template"
+      }
+    },
+    "/email/templates/{emailTemplateId}": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Email Template ID",
+            "in": "path",
+            "name": "emailTemplateId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailTemplate"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Templates"
+        ],
+        "description": "Get detailed information about an email template.",
+        "operationId": "GetEmailTemplateDetails",
+        "summary": "Get email template details"
+      },
+      "put": {
+        "parameters": [
+          {
+            "description": "Email Template ID",
+            "in": "path",
+            "name": "emailTemplateId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Templates"
+        ],
+        "description": "Update an existing email template.",
+        "operationId": "UpdateEmailTemplate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "code": {
+                    "description": "Template HTML code",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Template name",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Update email template"
+      }
+    },
+    "/folders": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Show folders of a specific type: archive or template",
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "enum": [
+                "archive",
+                "template"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "folders": {
+                      "items": {
+                        "$ref": "#/components/schemas/Folder"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Others"
+        ],
+        "description": "List and get details of existing folders in GetAccept.",
+        "operationId": "ListFolders",
+        "summary": "List folders"
+      }
+    },
+    "/folders/{folderId}": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Folder ID",
+            "in": "path",
+            "name": "folderId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "folder": {
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "subfolders": {
+                      "items": {
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Others"
+        ],
+        "description": "Get subfolder and current path for a specific folder.",
+        "operationId": "GetFolderDetails",
+        "summary": "Get folder details"
+      }
+    },
+    "/notifications": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Others"
+        ],
+        "description": "List notification for current user",
+        "operationId": "ListNotifications",
+        "summary": "List notifications"
+      }
+    },
     "/refresh": {
       "get": {
         "responses": {
@@ -1763,6 +3987,70 @@
         "description": "You can request a refreshed of the access token before the original token has expired.",
         "operationId": "RefreshToken",
         "summary": "Refresh an access token",
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/refresh/{entityId}": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Entity ID to switch to",
+            "in": "path",
+            "name": "entityId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-summary": "Entity ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "access_token": {
+                      "description": "New access token for the entity",
+                      "type": "string"
+                    },
+                    "expires_in": {
+                      "format": "int64",
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Authentication"
+        ],
+        "description": "Change entity using the same refresh method with additional parameter for the entity. The response will include a new access token that should be used when accessing the new entity.",
+        "operationId": "SwitchEntity",
+        "summary": "Switch entity",
+        "x-ms-visibility": "internal"
+      }
+    },
+    "/revoke": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Authentication"
+        ],
+        "description": "Revoke an access token before it has expired.",
+        "operationId": "RevokeToken",
+        "summary": "Revoke access token",
         "x-ms-visibility": "internal"
       }
     },
@@ -1908,6 +4196,57 @@
         "schema": {
           "$ref": "#/components/schemas/Webhook"
         }
+      }
+    },
+    "/subscriptions/errors": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "properties": {
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "event": {
+                        "type": "string"
+                      },
+                      "payload": {
+                        "type": "string"
+                      },
+                      "result": {
+                        "type": "string"
+                      },
+                      "retry": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "target_url": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Subscriptions"
+        ],
+        "description": "Get the last errors for active subscriptions.",
+        "operationId": "GetSubscriptionErrors",
+        "summary": "Get subscription errors"
       }
     },
     "/subscriptions/events": {
@@ -2241,6 +4580,55 @@
         }
       }
     },
+    "/subscriptions/test": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Subscriptions"
+        ],
+        "description": "Simulate or test a subscription / webhook event.",
+        "operationId": "TestSubscription",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "document_id": {
+                    "description": "The document id to trigger the event for",
+                    "type": "string"
+                  },
+                  "event": {
+                    "description": "The event to trigger",
+                    "type": "string"
+                  },
+                  "recipient_id": {
+                    "description": "The recipient to trigger the event for",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "event",
+                  "document_id"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Test subscription"
+      }
+    },
     "/subscriptions/{subscriptionId}": {
       "delete": {
         "parameters": [
@@ -2308,6 +4696,39 @@
         "operationId": "GetSubscriptionDetails",
         "summary": "Get subscription details",
         "x-ms-visibility": "internal"
+      }
+    },
+    "/teams": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "teams": {
+                      "items": {
+                        "$ref": "#/components/schemas/Team"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Users"
+        ],
+        "description": "List of current teams for the entity.",
+        "operationId": "ListTeams",
+        "summary": "List teams"
       }
     },
     "/templates": {
@@ -2421,6 +4842,63 @@
         "x-ms-visibility": "important"
       }
     },
+    "/templates/{templateId}/custom-images": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Template ID",
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "custom_images": {
+                      "items": {
+                        "properties": {
+                          "id": {
+                            "description": "ID of the custom image",
+                            "type": "string"
+                          },
+                          "name": {
+                            "description": "Name of the custom image",
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Templates"
+        ],
+        "description": "Get a list of custom images on a template.",
+        "operationId": "GetTemplateCustomImages",
+        "summary": "Get template custom images"
+      }
+    },
     "/templates/{templateId}/fields": {
       "get": {
         "parameters": [
@@ -2466,6 +4944,61 @@
         "description": "Receive a list of fields for a specific template.",
         "operationId": "ListFields",
         "summary": "Get template fields"
+      }
+    },
+    "/templates/{templateId}/fields_roles": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Template ID",
+            "in": "path",
+            "name": "templateId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "fields": {
+                      "items": {
+                        "properties": {
+                          "field_id": {
+                            "type": "string"
+                          },
+                          "role_name": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Templates"
+        ],
+        "description": "Receive a list of fields and associated role for a specific template.",
+        "operationId": "ListTemplateFieldRoles",
+        "summary": "Get template field roles"
       }
     },
     "/templates/{templateId}/pricing-tables": {
@@ -2593,6 +5126,31 @@
         "summary": "Get template roles"
       }
     },
+    "/test": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Authentication"
+        ],
+        "description": "Test authentication and get current entity and user ID.",
+        "operationId": "TestAuthentication",
+        "summary": "Test authentication"
+      }
+    },
     "/upload": {
       "post": {
         "responses": {
@@ -2672,6 +5230,113 @@
         },
         "summary": "Upload a document file",
         "x-ms-visibility": "important"
+      }
+    },
+    "/upload/archive": {
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Document"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Invalid"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        },
+        "tags": [
+          "Archive"
+        ],
+        "description": "Upload already signed files to the document archive / contract management.",
+        "operationId": "UploadToArchive",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "tags": {
+                    "description": "Document tags",
+                    "type": "string"
+                  },
+                  "company_name": {
+                    "description": "Associated company",
+                    "type": "string"
+                  },
+                  "company_number": {
+                    "description": "Associated company number",
+                    "type": "string"
+                  },
+                  "contract_end_date": {
+                    "description": "End date of contract",
+                    "type": "string"
+                  },
+                  "contract_start_date": {
+                    "description": "Start date of contract",
+                    "type": "string"
+                  },
+                  "file_content": {
+                    "description": "Base64 encoded file content",
+                    "type": "string"
+                  },
+                  "file_ids": {
+                    "description": "Previously uploaded file IDs",
+                    "type": "string"
+                  },
+                  "file_name": {
+                    "description": "Filename of the archived document",
+                    "type": "string"
+                  },
+                  "file_url": {
+                    "description": "URL to file",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "Name of the document",
+                    "type": "string"
+                  },
+                  "sender_id": {
+                    "description": "Sender user/owner ID",
+                    "type": "string"
+                  },
+                  "sign_date": {
+                    "description": "Date and time when the document was signed",
+                    "type": "string"
+                  },
+                  "type": {
+                    "description": "Type of document: sales, hr, introduction, other",
+                    "type": "string"
+                  },
+                  "value": {
+                    "description": "Monetary value of document",
+                    "type": "number"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Upload to archive"
       }
     },
     "/upload/attachment": {
@@ -2979,6 +5644,36 @@
       }
     },
     "/users/{userId}": {
+      "delete": {
+        "parameters": [
+          {
+            "description": "User ID",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Users"
+        ],
+        "description": "Delete a user.",
+        "operationId": "DeleteUser",
+        "summary": "Delete user"
+      },
       "get": {
         "parameters": [
           {
@@ -3051,8 +5746,129 @@
         "summary": "Get user details"
       }
     },
+    "/users/{userId}/statistics": {
+      "get": {
+        "parameters": [
+          {
+            "description": "User ID",
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "daterange": {
+                      "type": "object"
+                    },
+                    "statistics": {
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Users"
+        ],
+        "description": "Get statistics for a single user.",
+        "operationId": "GetUserStatistics",
+        "summary": "Get user statistics"
+      }
+    },
+    "/video/job/{videoId}": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Video ID",
+            "in": "path",
+            "name": "videoId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoJobStatus"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Videos"
+        ],
+        "description": "Get current processing status of an uploaded video.",
+        "operationId": "GetVideoJobStatus",
+        "summary": "Get video job status"
+      }
+    },
     "/videos": {
       "get": {
+        "parameters": [
+          {
+            "description": "Start list from record x",
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Number of records to list",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Include presigned url for video",
+            "in": "query",
+            "name": "include_video_url",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Include url for thumbnail",
+            "in": "query",
+            "name": "include_thumb_url",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -3062,6 +5878,9 @@
                     "videos": {
                       "items": {
                         "properties": {
+                          "created_at": {
+                            "type": "string"
+                          },
                           "editable": {
                             "type": "boolean"
                           },
@@ -3108,6 +5927,45 @@
         "description": "Receive a list of available videos on the entity. You can add new videos in the mobile app or inside GetAccept.",
         "operationId": "ListVideos",
         "summary": "List videos"
+      }
+    },
+    "/videos/{videoId}": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Video ID",
+            "in": "path",
+            "name": "videoId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Video"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "tags": [
+          "Videos"
+        ],
+        "description": "Get a specific video based on video id.",
+        "operationId": "GetVideo",
+        "summary": "Get video"
       }
     }
   },
@@ -3269,6 +6127,183 @@
         "type": "object",
         "x-ms-summary": "Attachments"
       },
+      "Comment": {
+        "description": "Document comment",
+        "properties": {
+          "created_at": {
+            "description": "The timestamp when the comment was created",
+            "type": "string"
+          },
+          "email": {
+            "description": "Email of the person creating the comment",
+            "type": "string"
+          },
+          "full_name": {
+            "description": "Name of the person creating the comment",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique ID of the comment",
+            "type": "string"
+          },
+          "self": {
+            "description": "If this comment is created by the current authenticated user",
+            "type": "integer"
+          },
+          "text": {
+            "description": "The commented text",
+            "type": "string"
+          },
+          "thumb_url": {
+            "description": "Thumbnail of the person creating the comment",
+            "type": "string"
+          }
+        },
+        "title": "Comment",
+        "type": "object"
+      },
+      "CommentResponse": {
+        "description": "Comment creation response",
+        "properties": {
+          "comment_id": {
+            "description": "ID of the created comment",
+            "type": "string"
+          }
+        },
+        "title": "Comment Response",
+        "type": "object"
+      },
+      "CommunicationTemplate": {
+        "description": "Communication template details",
+        "properties": {
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "conversation_sendout_template": {
+            "properties": {
+              "automatic_message": {
+                "type": "boolean"
+              },
+              "automatic_reminder_message": {
+                "type": "boolean"
+              },
+              "conversation_starter": {
+                "type": "string"
+              },
+              "reminder_message": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "email_sendout_reminder_template": {
+            "properties": {
+              "automatic_message": {
+                "type": "boolean"
+              },
+              "button_text": {
+                "type": "string"
+              },
+              "email_subject": {
+                "type": "string"
+              },
+              "footer": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "sms_message": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "email_sendout_template": {
+            "properties": {
+              "automatic_message": {
+                "type": "boolean"
+              },
+              "button_text": {
+                "type": "string"
+              },
+              "email_subject": {
+                "type": "string"
+              },
+              "footer": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "sms_message": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "entity_id": {
+            "description": "Entity ID",
+            "type": "string"
+          },
+          "id": {
+            "description": "Communication template ID",
+            "type": "string"
+          },
+          "language": {
+            "description": "Language code in ISO 639 form",
+            "type": "string"
+          },
+          "name": {
+            "description": "Template name",
+            "type": "string"
+          },
+          "signed_sendout_template": {
+            "properties": {
+              "button_text": {
+                "type": "string"
+              },
+              "email_subject": {
+                "type": "string"
+              },
+              "footer": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "published",
+              "draft"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "updated_by": {
+            "type": "string"
+          }
+        },
+        "title": "Communication Template",
+        "type": "object"
+      },
       "Contact": {
         "description": "Every unique e-mail address (or mobile number) is defined as a contact.",
         "properties": {
@@ -3374,6 +6409,42 @@
         "title": "Contacts",
         "type": "object",
         "x-ms-summary": "Contacts"
+      },
+      "CustomDataProperty": {
+        "description": "Custom data property details",
+        "properties": {
+          "document_id": {
+            "description": "Document ID",
+            "type": "string"
+          },
+          "id": {
+            "description": "Property ID",
+            "type": "string"
+          },
+          "property": {
+            "properties": {
+              "key": {
+                "description": "Property key",
+                "type": "string"
+              },
+              "label": {
+                "description": "Human-readable label",
+                "type": "string"
+              },
+              "value": {
+                "description": "Property value",
+                "type": "string"
+              },
+              "value_type": {
+                "description": "Value type: string, number, boolean",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "title": "Custom Data Property",
+        "type": "object"
       },
       "Document": {
         "description": "A document is one or multiple uploaded file(s) that is to be sent to one or many recipients created by a user.",
@@ -3771,6 +6842,64 @@
         "type": "object",
         "x-ms-summary": "Editor Field"
       },
+      "EmailTemplate": {
+        "description": "Email template details",
+        "properties": {
+          "code": {
+            "description": "Template HTML code",
+            "type": "string"
+          },
+          "entity_id": {
+            "description": "Entity ID",
+            "type": "string"
+          },
+          "id": {
+            "description": "Template ID",
+            "type": "string"
+          },
+          "name": {
+            "description": "Template name",
+            "type": "string"
+          }
+        },
+        "title": "Email Template",
+        "type": "object"
+      },
+      "EntityCustomData": {
+        "description": "Entity custom data settings",
+        "properties": {
+          "allowed_properties": {
+            "items": {
+              "properties": {
+                "key": {
+                  "description": "Property key",
+                  "type": "string"
+                },
+                "label": {
+                  "description": "Property label",
+                  "type": "string"
+                },
+                "property_type": {
+                  "description": "Property type",
+                  "type": "string"
+                },
+                "value_type": {
+                  "description": "Value type",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "entity_id": {
+            "description": "Entity ID",
+            "type": "string"
+          }
+        },
+        "title": "Entity Custom Data",
+        "type": "object"
+      },
       "Error": {
         "properties": {
           "description": {
@@ -3786,6 +6915,49 @@
         "title": "Error",
         "type": "object",
         "x-ms-summary": "Error"
+      },
+      "Event": {
+        "description": "Document event details",
+        "properties": {
+          "company_name": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "document_id": {
+            "type": "string"
+          },
+          "document_name": {
+            "type": "string"
+          },
+          "document_status": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "event_meta_data": {
+            "type": "string"
+          },
+          "event_name": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "thumb_url": {
+            "type": "string"
+          }
+        },
+        "title": "Event",
+        "type": "object"
       },
       "Field": {
         "description": "Field details",
@@ -3881,6 +7053,17 @@
         "type": "object",
         "x-ms-summary": "Field"
       },
+      "FieldResponse": {
+        "description": "Field creation response",
+        "properties": {
+          "field_id": {
+            "description": "ID of the created field",
+            "type": "string"
+          }
+        },
+        "title": "Field Response",
+        "type": "object"
+      },
       "Fields": {
         "description": "Field list",
         "properties": {
@@ -3900,6 +7083,126 @@
         "title": "Fields",
         "type": "object",
         "x-ms-summary": "Fields"
+      },
+      "Folder": {
+        "description": "Folder details",
+        "properties": {
+          "id": {
+            "description": "Folder ID",
+            "type": "string"
+          },
+          "name": {
+            "description": "Folder name",
+            "type": "string"
+          },
+          "type": {
+            "description": "Folder type: archive or template",
+            "enum": [
+              "archive",
+              "template"
+            ],
+            "type": "string"
+          }
+        },
+        "title": "Folder",
+        "type": "object"
+      },
+      "LogEntry": {
+        "description": "Detailed log entry",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "document_id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "event_meta_data": {
+            "type": "string"
+          },
+          "event_name": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "geo_city": {
+            "type": "string"
+          },
+          "geo_country_name": {
+            "type": "string"
+          },
+          "geo_ip": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          }
+        },
+        "title": "Log Entry",
+        "type": "object"
+      },
+      "Page": {
+        "description": "Document page details",
+        "properties": {
+          "clicks": {
+            "type": "integer"
+          },
+          "description": {
+            "type": "string"
+          },
+          "order_num": {
+            "type": "integer"
+          },
+          "page_height": {
+            "type": "number"
+          },
+          "page_id": {
+            "type": "string"
+          },
+          "page_num": {
+            "type": "integer"
+          },
+          "page_time": {
+            "type": "number"
+          },
+          "page_type": {
+            "type": "integer"
+          },
+          "page_type_name": {
+            "type": "string"
+          },
+          "page_width": {
+            "type": "number"
+          },
+          "thumb_url": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "video_hash": {
+            "type": "string"
+          },
+          "view_duration_seconds": {
+            "type": "number"
+          }
+        },
+        "title": "Page",
+        "type": "object"
+      },
+      "PreviewResponse": {
+        "description": "Document preview response",
+        "properties": {
+          "preview_url": {
+            "description": "URL to preview PDF",
+            "type": "string"
+          }
+        },
+        "title": "Preview Response",
+        "type": "object"
       },
       "PricingColumn": {
         "description": "Pricing Table Column",
@@ -4125,6 +7428,17 @@
         "type": "object",
         "x-ms-summary": "Recipients"
       },
+      "StatusResponse": {
+        "description": "Document status response",
+        "properties": {
+          "status": {
+            "description": "Current document status",
+            "type": "string"
+          }
+        },
+        "title": "Status Response",
+        "type": "object"
+      },
       "Subscription": {
         "description": "Subscription details",
         "properties": {
@@ -4193,6 +7507,44 @@
         "title": "Subscriptions",
         "type": "array",
         "x-ms-summary": "Subscriptions"
+      },
+      "Team": {
+        "description": "Team details",
+        "properties": {
+          "name": {
+            "description": "Team name",
+            "type": "string"
+          },
+          "status": {
+            "description": "Team status",
+            "type": "string"
+          },
+          "team_id": {
+            "description": "Team ID",
+            "type": "string"
+          },
+          "team_user_count": {
+            "description": "Number of users in team",
+            "type": "integer"
+          }
+        },
+        "title": "Team",
+        "type": "object"
+      },
+      "TestResponse": {
+        "description": "Authentication test response",
+        "properties": {
+          "entity_id": {
+            "description": "Current entity ID",
+            "type": "string"
+          },
+          "user_id": {
+            "description": "Current user ID",
+            "type": "string"
+          }
+        },
+        "title": "Test Response",
+        "type": "object"
       },
       "User": {
         "description": "A user is defined by it´s e-mail address and is connected to one or many entities.\n\n### User Roles\n\n#### Administrator:\n- View all documents\n- Edit all documents\n- Change entity settings, info and billing\n- Add new users to the entity\n- Assign entity roles\n\n#### Manager:\n- View team documents\n- Edit all documents\n- Add new users to the entity\n\n## Entity\nAn entity is the top node and all users and corresponding documents are connected to an entity. An entity is often the same as a company, a country or a department in a large organization.\n",
@@ -4348,6 +7700,68 @@
         "title": "Users",
         "type": "object",
         "x-ms-summary": "Users"
+      },
+      "Video": {
+        "description": "Video details",
+        "properties": {
+          "created_at": {
+            "description": "Creation date",
+            "type": "string"
+          },
+          "editable": {
+            "description": "If video is editable",
+            "type": "boolean"
+          },
+          "published": {
+            "description": "If video is published",
+            "type": "boolean"
+          },
+          "saved": {
+            "description": "If video is saved",
+            "type": "boolean"
+          },
+          "thumb_url": {
+            "description": "Thumbnail URL",
+            "type": "string"
+          },
+          "video_id": {
+            "description": "Video ID",
+            "type": "string"
+          },
+          "video_title": {
+            "description": "Video title",
+            "type": "string"
+          },
+          "video_type": {
+            "description": "Video type",
+            "type": "string"
+          },
+          "video_url": {
+            "description": "Video URL",
+            "type": "string"
+          }
+        },
+        "title": "Video",
+        "type": "object"
+      },
+      "VideoJobStatus": {
+        "description": "Video processing job status",
+        "properties": {
+          "Status": {
+            "description": "Current processing status",
+            "type": "string"
+          },
+          "thumb_url": {
+            "description": "URL to video thumbnail",
+            "type": "string"
+          },
+          "video_url": {
+            "description": "URL to processed video",
+            "type": "string"
+          }
+        },
+        "title": "Video Job Status",
+        "type": "object"
       },
       "Webhook": {
         "description": "Webhook payload",
@@ -4507,6 +7921,27 @@
       },
       "description": "You can upload videos and reuse it in many documents.",
       "name": "Videos"
+    },
+    {
+      "externalDocs": {
+        "url": "https://app.getaccept.com/api/#archive"
+      },
+      "description": "You can upload already signed documents to the document archive to make them searchable and use in your contract management process.",
+      "name": "Archive"
+    },
+    {
+      "externalDocs": {
+        "url": "https://app.getaccept.com/api/#custom-data"
+      },
+      "description": "Custom Data enables you to define and use your own document properties as a complement to the default properties.",
+      "name": "Custom Data"
+    },
+    {
+      "externalDocs": {
+        "url": "https://app.getaccept.com/api/#communication-templates"
+      },
+      "description": "Communication templates allow you to customize email and SMS messages sent to recipients.",
+      "name": "Communication Templates"
     },
     {
       "description": "Additional endpoints used in various integrations.",
