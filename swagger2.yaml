@@ -694,6 +694,42 @@ paths:
                   type: object
                 type: array
                 x-ms-summary: Attachment
+              custom_data:
+                description: >-
+                  A list of custom data to include with the document. If the
+                  property is already defined on the template, it will be
+                  overridden by the value provided here.
+                properties:
+                  properties:
+                    description: An array of objects containing custom data properties
+                    items:
+                      properties:
+                        key:
+                          description: Key of the custom data property
+                          type: string
+                          x-ms-summary: Key
+                        label:
+                          description: Label of the custom data property
+                          type: string
+                          x-ms-summary: Label
+                        value:
+                          description: Value of the custom data property
+                          type: string
+                          x-ms-summary: Value
+                        value_type:
+                          description: 'Type of the value: string, number, boolean'
+                          enum:
+                            - string
+                            - number
+                            - boolean
+                          type: string
+                          x-ms-summary: Value Type
+                      type: object
+                    type: array
+                    x-ms-summary: Properties
+                type: object
+                x-ms-summary: Custom Data
+                x-ms-visibility: advanced
               custom_fields:
                 description: Custom field
                 items:
@@ -972,6 +1008,13 @@ paths:
                 type: array
                 x-ms-summary: Pricing
                 x-ms-visibility: advanced
+              email_send_message:
+                description: >-
+                  Use this to specify a message to the recipient(s) when sending
+                  out the document
+                type: string
+                x-ms-summary: Email message
+                x-ms-visibility: advanced
               expiration_date:
                 description: Date and time when the document should expire
                 format: date-time
@@ -1109,6 +1152,11 @@ paths:
                       type: string
                       x-ms-summary: First name
                       x-ms-visibility: important
+                    fullname:
+                      description: Use to specify full name instead of first/last name
+                      type: string
+                      x-ms-summary: Full name
+                      x-ms-visibility: important
                     last_name:
                       description: Last name of recipient
                       type: string
@@ -1132,10 +1180,23 @@ paths:
                       x-ms-visibility: advanced
                       x-nullable: true
                     role:
-                      description: The kind of recipient in the document
+                      description: >
+                        The kind of recipient in the document. Available values:
+
+                        - signer: signer of the document
+
+                        - internalApprover: used for internal approval processes
+                        and will not appear in the signing certificate
+
+                        - externalApprover: used for external approval processes
+                        and will appear in the signing certificate, alongside
+                        other signers
+
+                        - cc: view only
                       enum:
                         - signer
-                        - approver
+                        - internalApprover
+                        - externalApprover
                         - cc
                       type: string
                       x-ms-summary: Recipient type
