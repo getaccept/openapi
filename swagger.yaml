@@ -483,14 +483,25 @@ paths:
                         description: Last name of recipient
                         x-ms-summary: Last name
                         x-ms-visibility: important
+                      fullname:
+                        type: string
+                        description: Use to specify full name instead of first/last name
+                        x-ms-summary: Full name
+                        x-ms-visibility: important
                       role:
                         type: string
-                        description: The kind of recipient in the document
+                        description: |
+                          The kind of recipient in the document. Available values:
+                          - signer: signer of the document
+                          - internalApprover: used for internal approval processes and will not appear in the signing certificate
+                          - externalApprover: used for external approval processes and will appear in the signing certificate, alongside other signers
+                          - cc: view only
                         x-ms-summary: Recipient type
                         x-ms-visibility: important
                         enum:
                           - signer
-                          - approver
+                          - internalApprover
+                          - externalApprover
                           - cc
                       role_name:
                         type: string
@@ -912,6 +923,44 @@ paths:
                   type: string
                   description: External system ID for identification
                   x-ms-summary: External ID
+                email_send_message:
+                  type: string
+                  description: Use this to specify a message to the recipient(s) when sending out the document
+                  x-ms-summary: Email message
+                  x-ms-visibility: advanced
+                custom_data:
+                  type: object
+                  description: A list of custom data to include with the document. If the property is already defined on the template, it will be overridden by the value provided here.
+                  x-ms-summary: Custom Data
+                  x-ms-visibility: advanced
+                  properties:
+                    properties:
+                      type: array
+                      description: An array of objects containing custom data properties
+                      x-ms-summary: Properties
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                            description: Key of the custom data property
+                            x-ms-summary: Key
+                          value:
+                            type: string
+                            description: Value of the custom data property
+                            x-ms-summary: Value
+                          label:
+                            type: string
+                            description: Label of the custom data property
+                            x-ms-summary: Label
+                          value_type:
+                            type: string
+                            description: 'Type of the value: string, number, boolean'
+                            x-ms-summary: Value Type
+                            enum:
+                              - string
+                              - number
+                              - boolean
       tags:
         - Documents
   /users:
