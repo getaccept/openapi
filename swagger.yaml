@@ -1465,6 +1465,16 @@ paths:
           name: direct
           description: Return the binary file directly
           x-ms-summary: Return the binary file directly
+        - schema:
+            type: string
+            nullable: true
+            enum:
+              - 'true'
+            example: 'true'
+          in: query
+          name: with_file_content
+          description: Return the file content as base64 encoded
+          x-ms-summary: Return file as base64
   '/documents/{documentId}/send':
     post:
       summary: Send existing document
