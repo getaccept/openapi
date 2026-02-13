@@ -2505,16 +2505,28 @@
             "in": "query",
             "name": "direct",
             "schema": {
-              "default": "true",
               "enum": [
-                "true",
-                "false"
+                "true"
               ],
               "example": "true",
               "nullable": true,
               "type": "string"
             },
             "x-ms-summary": "Return the binary file directly"
+          },
+          {
+            "description": "Return the file content as base64 encoded",
+            "in": "query",
+            "name": "with_file_content",
+            "schema": {
+              "enum": [
+                "true"
+              ],
+              "example": "true",
+              "nullable": true,
+              "type": "string"
+            },
+            "x-ms-summary": "Return file as base64"
           }
         ],
         "responses": {

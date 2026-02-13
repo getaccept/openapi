@@ -1945,15 +1945,20 @@ paths:
             value-title: name
           x-ms-summary: Document ID
           x-ms-url-encoding: single
-        - default: 'true'
-          description: Return the binary file directly
+        - description: Return the binary file directly
           enum:
             - 'true'
-            - 'false'
           in: query
           name: direct
           type: string
           x-ms-summary: Return the binary file directly
+        - description: Return the file content as base64 encoded
+          enum:
+            - 'true'
+          in: query
+          name: with_file_content
+          type: string
+          x-ms-summary: Return file as base64
       responses:
         '200':
           description: OK
