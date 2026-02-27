@@ -1416,8 +1416,13 @@ paths:
                 properties:
                   document_url:
                     type: string
+                    description: URL to download the document (accessible for 10 minutes)
                   file:
                     type: string
+                    description: File name
+                  file_content:
+                    type: string
+                    description: Base64 encoded file content (returned when with_file_content=true)
             application/pdf:
               schema:
                 type: string
@@ -1460,9 +1465,9 @@ paths:
               - 'true'
               - 'false'
             example: 'true'
-            default: 'true'
           in: query
           name: direct
+          required: false
           description: Return the binary file directly
           x-ms-summary: Return the binary file directly
         - schema:
@@ -1470,9 +1475,11 @@ paths:
             nullable: true
             enum:
               - 'true'
+              - 'false'
             example: 'true'
           in: query
           name: with_file_content
+          required: false
           description: Return the file content as base64 encoded
           x-ms-summary: Return file as base64
   '/documents/{documentId}/send':

@@ -2579,20 +2579,24 @@
           {
             "description": "Return the binary file directly",
             "enum": [
-              "true"
+              "true",
+              "false"
             ],
             "in": "query",
             "name": "direct",
+            "required": false,
             "type": "string",
             "x-ms-summary": "Return the binary file directly"
           },
           {
             "description": "Return the file content as base64 encoded",
             "enum": [
-              "true"
+              "true",
+              "false"
             ],
             "in": "query",
             "name": "with_file_content",
+            "required": false,
             "type": "string",
             "x-ms-summary": "Return file as base64"
           }
@@ -2608,9 +2612,15 @@
             "schema": {
               "properties": {
                 "document_url": {
+                  "description": "URL to download the document (accessible for 10 minutes)",
                   "type": "string"
                 },
                 "file": {
+                  "description": "File name",
+                  "type": "string"
+                },
+                "file_content": {
+                  "description": "Base64 encoded file content (returned when with_file_content=true)",
                   "type": "string"
                 }
               },

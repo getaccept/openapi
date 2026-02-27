@@ -2504,9 +2504,11 @@
             "description": "Return the binary file directly",
             "in": "query",
             "name": "direct",
+            "required": false,
             "schema": {
               "enum": [
-                "true"
+                "true",
+                "false"
               ],
               "example": "true",
               "nullable": true,
@@ -2518,9 +2520,11 @@
             "description": "Return the file content as base64 encoded",
             "in": "query",
             "name": "with_file_content",
+            "required": false,
             "schema": {
               "enum": [
-                "true"
+                "true",
+                "false"
               ],
               "example": "true",
               "nullable": true,
@@ -2536,9 +2540,15 @@
                 "schema": {
                   "properties": {
                     "document_url": {
+                      "description": "URL to download the document (accessible for 10 minutes)",
                       "type": "string"
                     },
                     "file": {
+                      "description": "File name",
+                      "type": "string"
+                    },
+                    "file_content": {
+                      "description": "Base64 encoded file content (returned when with_file_content=true)",
                       "type": "string"
                     }
                   },
