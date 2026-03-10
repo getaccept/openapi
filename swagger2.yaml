@@ -1783,7 +1783,6 @@ paths:
                     type: string
                   value:
                     description: Value for the custom data property
-                    type: string
                   value_type:
                     description: 'Type of value: string, number, boolean'
                     type: string
@@ -1902,8 +1901,7 @@ paths:
                 properties:
                   label:
                     type: string
-                  value:
-                    type: string
+                  value: {}
                   value_type:
                     type: string
                 type: object
@@ -4958,7 +4956,6 @@ definitions:
             type: string
           value:
             description: Property value
-            type: string
           value_type:
             description: 'Value type: string, number, boolean'
             type: string

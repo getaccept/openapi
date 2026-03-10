@@ -2298,7 +2298,17 @@
                       },
                       "value": {
                         "description": "Value for the custom data property",
-                        "type": "string"
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          }
+                        ]
                       },
                       "value_type": {
                         "description": "Type of value: string, number, boolean",
@@ -2463,7 +2473,17 @@
                         "type": "string"
                       },
                       "value": {
-                        "type": "string"
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          }
+                        ]
                       },
                       "value_type": {
                         "type": "string"
@@ -6511,7 +6531,17 @@
               },
               "value": {
                 "description": "Property value",
-                "type": "string"
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ]
               },
               "value_type": {
                 "description": "Value type: string, number, boolean",

@@ -2398,7 +2398,10 @@ paths:
                       type: string
                       description: Key of the custom data property
                     value:
-                      type: string
+                      oneOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
                       description: Value for the custom data property
                     label:
                       type: string
@@ -2483,7 +2486,10 @@ paths:
                   type: object
                   properties:
                     value:
-                      type: string
+                      oneOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
                     label:
                       type: string
                     value_type:
@@ -5471,7 +5477,10 @@ components:
               type: string
               description: Human-readable label
             value:
-              type: string
+              oneOf:
+                - type: string
+                - type: number
+                - type: boolean
               description: Property value
             value_type:
               type: string

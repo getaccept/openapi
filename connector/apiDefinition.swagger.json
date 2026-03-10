@@ -2333,8 +2333,7 @@
                       "type": "string"
                     },
                     "value": {
-                      "description": "Value for the custom data property",
-                      "type": "string"
+                      "description": "Value for the custom data property"
                     },
                     "value_type": {
                       "description": "Type of value: string, number, boolean",
@@ -2510,9 +2509,7 @@
                     "label": {
                       "type": "string"
                     },
-                    "value": {
-                      "type": "string"
-                    },
+                    "value": {},
                     "value_type": {
                       "type": "string"
                     }
@@ -6698,8 +6695,7 @@
               "type": "string"
             },
             "value": {
-              "description": "Property value",
-              "type": "string"
+              "description": "Property value"
             },
             "value_type": {
               "description": "Value type: string, number, boolean",
