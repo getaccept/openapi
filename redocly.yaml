@@ -1,0 +1,9 @@
+extends:
+  - recommended
+
+rules:
+  no-ambiguous-paths: warn
+  operation-4xx-response: warn
+  no-unused-components: warn
+  security-defined: warn
+  no-server-example.com: warn

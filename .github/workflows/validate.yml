@@ -1,0 +1,28 @@
+name: Validate OpenAPI Spec
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Validate OpenAPI spec
+        run: npm run validate
+
+      - name: Run conversions
+        run: npm run convert
+
+      - name: Check derived files are up-to-date
+        run: |
+          git diff --exit-code || (echo "Derived files are out of date. Run 'npm run convert' and commit the results." && exit 1)
