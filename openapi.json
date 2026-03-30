@@ -7502,6 +7502,15 @@
             "type": "string",
             "x-ms-visibility": "internal"
           },
+          "signing_methods": {
+            "description": "Signing methods used by the recipient",
+            "items": {
+              "$ref": "#/components/schemas/SigningMethod"
+            },
+            "type": "array",
+            "x-ms-summary": "Signing methods",
+            "x-ms-visibility": "advanced"
+          },
           "status": {
             "description": "Status of the recipient",
             "type": "string",
@@ -7535,6 +7544,36 @@
         "title": "Recipients",
         "type": "object",
         "x-ms-summary": "Recipients"
+      },
+      "SigningMethod": {
+        "description": "Details about a signing method used by the recipient",
+        "properties": {
+          "signed_at": {
+            "description": "ISO 8601 timestamp of when the signing occurred",
+            "type": "string"
+          },
+          "type": {
+            "description": "The type of signing method used",
+            "enum": [
+              "eid",
+              "biometric",
+              "sms",
+              "initials",
+              "signature"
+            ],
+            "type": "string"
+          },
+          "verified_name": {
+            "description": "Name verified from eID transaction",
+            "type": "string"
+          },
+          "verified_phone": {
+            "description": "Phone number used for SMS verification",
+            "type": "string"
+          }
+        },
+        "title": "SigningMethod",
+        "type": "object"
       },
       "StatusResponse": {
         "description": "Document status response",
