@@ -636,6 +636,29 @@ paths:
                     - true
                     - false
                   example: true
+                external_eid_signature:
+                  type: boolean
+                  description: If true, enables external EID signature for the document, allowing recipients to sign using an external Electronic ID provider. Incompatible with is_selfsign.
+                  x-ms-summary: External EID signature
+                  x-ms-visibility: advanced
+                  nullable: true
+                  enum:
+                    - true
+                    - false
+                  example: true
+                external_signature_settings:
+                  type: object
+                  description: Optional configuration for external EID signature. Only applicable when external_eid_signature is enabled. EID verification at signing is always required. When verify_recipient_ssn is enabled, the SSN from the EID provider is matched against the recipient's verify_eid_number.
+                  x-ms-summary: External signature settings
+                  x-ms-visibility: advanced
+                  properties:
+                    identification_stages:
+                      type: array
+                      description: Stages where additional EID identification is required. Available value is "View" (require EID verification before viewing the document). EID verification at signing is always required.
+                      items:
+                        type: string
+                        enum:
+                          - View
                 expiration_date:
                   type: string
                   description: Date and time when the document should expire

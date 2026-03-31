@@ -1021,10 +1021,45 @@ paths:
                 type: string
                 x-ms-summary: Expiration date
                 x-ms-visibility: advanced
+              external_eid_signature:
+                description: >-
+                  If true, enables external EID signature for the document,
+                  allowing recipients to sign using an external Electronic ID
+                  provider. Incompatible with is_selfsign.
+                enum:
+                  - true
+                  - false
+                example: true
+                type: boolean
+                x-ms-summary: External EID signature
+                x-ms-visibility: advanced
+                x-nullable: true
               external_id:
                 description: External system ID for identification
                 type: string
                 x-ms-summary: External ID
+              external_signature_settings:
+                description: >-
+                  Optional configuration for external EID signature. Only
+                  applicable when external_eid_signature is enabled. EID
+                  verification at signing is always required. When
+                  verify_recipient_ssn is enabled, the SSN from the EID provider
+                  is matched against the recipient's verify_eid_number.
+                properties:
+                  identification_stages:
+                    description: >-
+                      Stages where additional EID identification is required.
+                      Available value is "View" (require EID verification before
+                      viewing the document). EID verification at signing is
+                      always required.
+                    items:
+                      enum:
+                        - View
+                      type: string
+                    type: array
+                type: object
+                x-ms-summary: External signature settings
+                x-ms-visibility: advanced
               file_content:
                 description: Base64 encoded file content
                 type: string
