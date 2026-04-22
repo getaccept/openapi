@@ -626,6 +626,28 @@ paths:
                           - true
                           - false
                         example: true
+                      settings:
+                        type: object
+                        description: Per-recipient signature settings.
+                        x-ms-summary: Recipient settings
+                        x-ms-visibility: advanced
+                        properties:
+                          exclude_verified_eid_signature:
+                            type: boolean
+                            description: >-
+                              Only applies when the document has external_eid_signature enabled. If true, this
+                              recipient may sign with a handwritten signature instead of verifying with a
+                              verified EID. Note: the additional non-QES signatures do not degrade the security
+                              of the document's existing QES signatures, but are of a lower assurance level
+                              (advanced or SES). Someone inspecting the document may see that it contains non-QES
+                              signatures.
+                            x-ms-summary: Exclude verified EID signature
+                            x-ms-visibility: advanced
+                            nullable: true
+                            enum:
+                              - true
+                              - false
+                            example: true
                 is_signing_biometric:
                   type: boolean
                   description: Use handwritten signature
@@ -4964,6 +4986,22 @@ components:
           x-ms-visibility: advanced
           items:
             $ref: '#/components/schemas/SigningMethod'
+        settings:
+          type: object
+          description: Per-recipient signature settings.
+          x-ms-summary: Recipient settings
+          x-ms-visibility: advanced
+          properties:
+            exclude_verified_eid_signature:
+              type: boolean
+              description: >-
+                Only applies when the document has external_eid_signature enabled. If true, this recipient may
+                sign with a handwritten signature instead of verifying with a verified EID. Note: the additional
+                non-QES signatures do not degrade the security of the document's existing QES signatures, but are
+                of a lower assurance level (advanced or SES). Someone inspecting the document may see that it
+                contains non-QES signatures.
+              x-ms-summary: Exclude verified EID signature
+              x-ms-visibility: advanced
     SigningMethod:
       title: SigningMethod
       type: object
