@@ -1586,6 +1586,26 @@
                         "x-ms-summary": "Template role",
                         "x-ms-visibility": "important"
                       },
+                      "settings": {
+                        "description": "Per-recipient signature settings.",
+                        "properties": {
+                          "exclude_verified_eid_signature": {
+                            "description": "Only applies when the document has external_eid_signature enabled. If true, this recipient may sign with a handwritten signature instead of verifying with a verified EID. Note: the additional non-QES signatures do not degrade the security of the document's existing QES signatures, but are of a lower assurance level (advanced or SES). Someone inspecting the document may see that it contains non-QES signatures.",
+                            "enum": [
+                              true,
+                              false
+                            ],
+                            "example": true,
+                            "type": "boolean",
+                            "x-ms-summary": "Exclude verified EID signature",
+                            "x-ms-visibility": "advanced",
+                            "x-nullable": true
+                          }
+                        },
+                        "type": "object",
+                        "x-ms-summary": "Recipient settings",
+                        "x-ms-visibility": "advanced"
+                      },
                       "verify_eid": {
                         "description": "Verify using EID",
                         "enum": [
@@ -7685,6 +7705,20 @@
         "role": {
           "type": "string",
           "x-ms-visibility": "internal"
+        },
+        "settings": {
+          "description": "Per-recipient signature settings.",
+          "properties": {
+            "exclude_verified_eid_signature": {
+              "description": "Only applies when the document has external_eid_signature enabled. If true, this recipient may sign with a handwritten signature instead of verifying with a verified EID. Note: the additional non-QES signatures do not degrade the security of the document's existing QES signatures, but are of a lower assurance level (advanced or SES). Someone inspecting the document may see that it contains non-QES signatures.",
+              "type": "boolean",
+              "x-ms-summary": "Exclude verified EID signature",
+              "x-ms-visibility": "advanced"
+            }
+          },
+          "type": "object",
+          "x-ms-summary": "Recipient settings",
+          "x-ms-visibility": "advanced"
         },
         "signing_methods": {
           "description": "Signing methods used by the recipient",
